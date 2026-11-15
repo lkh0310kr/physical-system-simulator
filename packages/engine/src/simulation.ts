@@ -6,9 +6,12 @@
 import {
   type Behavior,
   type BuiltSystem,
+  bodySize,
   type CircuitElement,
   type CircuitReadings,
   type MechanicalReadings,
+  type Placement3D,
+  placementPosition,
   type Registry,
   type ResolvedValues,
   resolveBehaviorId,
@@ -19,6 +22,7 @@ import {
 } from "@physisim/core";
 import { createCircuitSolver, type NodeElement } from "./circuit-solver.ts";
 import { createScheduler, nextStepTime, toMicros, toSeconds } from "./clock.ts";
+import { createPlanarWorld, type PlanarWorld, physicsReady } from "./physics.ts";
 
 /** Instance의 Capability 바인딩 하나 = Behavior 하나의 실행 단위. */
 interface Unit {
@@ -41,6 +45,12 @@ export interface StepInfo {
 export interface SimulationOptions {
   /** 고정 스텝 [s]. 기본 1ms. */
   readonly dt?: number;
+  /**
+   * 3D 조립 배치 (Instance ID → 위치·회전). 주면 물리가 켜진다:
+   * `body.collision: "static"` 부품은 장애물 상자가 되고, `drive`를 내놓는 Behavior는 그 위를 달리는 몸체가 된다.
+   * 물리 초기화(`await initPhysics()`)가 끝나지 않았으면 물리 없이(Behavior 직접 적분) 돈다.
+   */
+  readonly assembly?: Readonly<Record<string, Placement3D>>;
 }
 
 export interface Simulation {
@@ -90,6 +100,43 @@ export function createSimulation(
       });
     }
   }
+  // ── 물리 (선택) ────────────────────────────────────────────
+  const rad = (d: number) => (d * Math.PI) / 180;
+  const physicsBodies: { unit: Unit; handle: number; origin: readonly [number, number] }[] = [];
+  let planarWorld: PlanarWorld | undefined;
+  if (options.assembly && physicsReady() && units.some((u) => u.behavior.drive)) {
+    const assembly = options.assembly;
+    const statics = system.instances.flatMap((inst) => {
+      const body = registry.getModel(inst.model)?.body;
+      const placed = assembly[inst.id];
+      if (!body || body.collision !== "static" || !placed) return [];
+      return [
+        {
+          position: placementPosition(placed),
+          size: bodySize(body),
+          rotationZ: rad(Number(placed.rotation?.[2] ?? 0)),
+        },
+      ];
+    });
+    planarWorld = createPlanarWorld(statics);
+    for (const u of units) {
+      if (!u.behavior.drive) continue;
+      const model = registry.getModel(
+        system.instances.find((i) => i.id === u.instance)?.model ?? "",
+      );
+      const placed = assembly[u.instance];
+      if (!model?.body || !placed) continue;
+      const position = placementPosition(placed);
+      const handle = planarWorld.addBody({
+        position,
+        size: bodySize(model.body),
+        rotationZ: rad(Number(placed.rotation?.[2] ?? 0)),
+        mass: (model.body.mass ?? 1000) / 1000,
+      });
+      physicsBodies.push({ unit: u, handle, origin: [position[0], position[1]] });
+    }
+  }
+
   const unitOf = (instance: string, capability: string) => {
     const u = units.find((x) => x.instance === instance && x.capability === capability);
     if (!u) throw new Error(`실행 단위 없음: ${instance} / ${capability}`);
@@ -319,6 +366,23 @@ export function createSimulation(
       const r = u.behavior.step(u.state, inputsOf(previous, u), ctxOf(u, stepDt));
       u.state = r.state;
       u.outputs = r.outputs;
+    }
+    if (planarWorld && physicsBodies.length > 0 && stepDt > 0) {
+      const commands = new Map<number, { speed: number; yawRate: number }>();
+      for (const b of physicsBodies) {
+        const c = b.unit.behavior.drive?.(b.unit.state, ctxOf(b.unit, stepDt));
+        if (c) commands.set(b.handle, c);
+      }
+      planarWorld.step(toSeconds(stepDt), commands);
+      for (const b of physicsBodies) {
+        const world = planarWorld.pose(b.handle);
+        const pose = { x: world.x - b.origin[0], y: world.y - b.origin[1], heading: world.heading };
+        const r = b.unit.behavior.onPose?.(b.unit.state, b.unit.outputs, pose);
+        if (r) {
+          b.unit.state = r.state;
+          b.unit.outputs = r.outputs;
+        }
+      }
     }
     last = now;
     if (listeners.size) {

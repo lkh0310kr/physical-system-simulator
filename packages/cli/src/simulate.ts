@@ -4,8 +4,17 @@ import { dirname, resolve } from "node:path";
 import { isSketch, startPrograms } from "@physisim/avr";
 import { compileSketch } from "@physisim/avr/compile";
 import { type Issue, type LoadedSystem, loadSystemProject, type Result } from "@physisim/core";
-import { createSimulation, recordTrace, type SerialLine, type Trace } from "@physisim/engine";
+import {
+  createSimulation,
+  initPhysics,
+  recordTrace,
+  type SerialLine,
+  type Trace,
+} from "@physisim/engine";
 import { createStandardRegistry } from "@physisim/models";
+
+// 물리(WASM)는 한 번 초기화해 두면 이후 시뮬레이션이 동기로 쓴다
+await initPhysics();
 
 export type Loaded = LoadedSystem;
 export type LoadResult = Result<Loaded>;
@@ -78,11 +87,10 @@ export function runLoaded(
   firmware: ReadonlyMap<string, string> = new Map(),
 ): RunResult {
   const started = performance.now();
-  const sim = createSimulation(
-    loaded.registry,
-    loaded.system,
-    options.dt ? { dt: options.dt } : {},
-  );
+  const sim = createSimulation(loaded.registry, loaded.system, {
+    ...(options.dt ? { dt: options.dt } : {}),
+    ...(loaded.doc.assembly ? { assembly: loaded.doc.assembly } : {}),
+  });
   const programs = startPrograms(sim, loaded, firmware);
   for (const p of options.presses ?? []) {
     sim.schedule(p.at, () => sim.dispatch(p.instance, "capability.switching", { type: "press" }));

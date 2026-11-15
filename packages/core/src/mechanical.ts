@@ -99,6 +99,8 @@ export const BodySchema = z.strictObject({
   mesh: z.string().min(1).optional(),
   /** 표시 색 (CSS 색). 없으면 분류별 기본색. */
   color: z.string().optional(),
+  /** `static`이면 물리 시뮬레이션에서 움직이지 않는 장애물(벽 등)로 취급한다. 움직이는 부품은 Behavior가 `drive`를 내놓으면 물리 몸체가 된다. */
+  collision: z.enum(["static"]).optional(),
   /** Port가 닿는 위치. 있으면 연결을 3D 케이블로 보여 준다. */
   pins: z.array(PinLocationSchema).optional(),
   /** 표시용 세부 형상. 있으면 박스 대신 이것들을 그린다 (박스는 계산에만 쓴다). */

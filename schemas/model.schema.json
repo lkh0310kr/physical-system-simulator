@@ -185,6 +185,10 @@
         "color": {
           "type": "string"
         },
+        "collision": {
+          "type": "string",
+          "enum": ["static"]
+        },
         "pins": {
           "type": "array",
           "items": {
