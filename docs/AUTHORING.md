@@ -53,7 +53,7 @@ function* loop() {
 }
 ```
 
-- API: `pinMode(pin, INPUT|OUTPUT)`, `digitalWrite(pin, HIGH|LOW)`, `digitalRead(pin)`, `delay(ms)`, `millis()`, `micros()`.
+- API: `pinMode(pin, INPUT|OUTPUT)`, `digitalWrite(pin, HIGH|LOW)`, `digitalRead(pin)`, `delay(ms)`, `millis()`, `micros()`, `Serial.begin(baud)`, `Serial.print(x)`, `Serial.println(x)`.
 - 핀 번호 n은 Port `D<n>`이다 (Arduino UNO: 0~13).
 - `delay` 없는 `loop`는 1ms마다 다시 호출된다.
 - 오류가 나면 프로그램만 멈추고 결과에 `프로그램 오류`로 표시된다.

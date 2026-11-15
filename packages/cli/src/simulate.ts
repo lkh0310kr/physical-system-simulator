@@ -2,7 +2,13 @@
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { type LoadedSystem, loadSystemProject, type Result } from "@physisim/core";
-import { createSimulation, loadProgram, recordTrace, type Trace } from "@physisim/engine";
+import {
+  createSimulation,
+  loadProgram,
+  recordTrace,
+  type SerialLine,
+  type Trace,
+} from "@physisim/engine";
 import { createStandardRegistry } from "@physisim/models";
 
 export type Loaded = LoadedSystem;
@@ -37,6 +43,8 @@ export interface RunResult {
   readonly trace: Trace;
   /** Instance ID → 프로그램 오류 메시지. */
   readonly programErrors: Readonly<Record<string, string>>;
+  /** Instance ID → 시리얼 출력 줄. */
+  readonly serial: Readonly<Record<string, readonly SerialLine[]>>;
   /** 실제 걸린 시간 [ms]. */
   readonly wallMs: number;
 }
@@ -57,5 +65,8 @@ export function runLoaded(loaded: Loaded, options: RunOptions): RunResult {
   const programErrors = Object.fromEntries(
     programs.flatMap(([id, p]) => (p.error ? [[id, p.error.message]] : [])),
   );
-  return { trace, programErrors, wallMs: performance.now() - started };
+  const serial = Object.fromEntries(
+    programs.filter(([, p]) => p.serial.length).map(([id, p]) => [id, p.serial]),
+  );
+  return { trace, programErrors, serial, wallMs: performance.now() - started };
 }
