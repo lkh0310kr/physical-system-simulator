@@ -24,6 +24,8 @@ export const SystemSchema = z
   .strictObject({
     name: z.string().min(1),
     description: z.string().optional(),
+    /** 표준 라이브러리에 더할 로컬 Model/Capability JSON 파일 (이 문서 기준 상대 경로, 파일당 정의 1개). */
+    library: z.array(z.string().min(1)).default([]),
     instances: z.array(InstanceDeclSchema).default([]),
     /** 두 Port를 잇는 선. 같은 Port에 여러 선이 닿으면 하나의 Net이 된다. */
     connections: z.array(z.tuple([PortRefSchema, PortRefSchema])).default([]),
