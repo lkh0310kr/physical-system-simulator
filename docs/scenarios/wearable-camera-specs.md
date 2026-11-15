@@ -69,9 +69,10 @@
 | 충전 전류 | 50 mA / 100 mA 두 값이 표에 있으나 제품 매핑 불명 | **미확인** |
 | USB-C·버튼·패드·카메라 렌즈 위치, 두께, 장착 구멍 | 문서에 수치 없음 | **미확인** — 아래 DXF/3D 파일 필요 |
 
-공식 치수 파일(내려받기 전, 사용자 허락 필요): `files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/res/` 아래
-`XIAO_ESP32S3_v1.1_Dimensioning.dxf`, `XIAO_ESP32S3_ExpBoard_v1.0_top.dxf`, `XIAO_ESP32S3_ExpBoard_v1.0_bot.dxf`,
-`seeed-studio-xiao-esp32s3-sense-3d_model.zip` (위 이름은 문서 요약에서 얻은 것이라 실제 링크 확인 필요).
+공식 치수 파일(2026-11-15 사용자 허락으로 받음, `datasheets/`에 두고 저장소에는 올리지 않음): 위 경로의 `XIAO_ESP32S3_v1.1_Dimensioning.dxf`(1.7 MB), `XIAO_ESP32S3_ExpBoard_v1.0_top.dxf`·`_bot.dxf`(160/139 kB), `seeed-studio-xiao-esp32s3-sense-3d_model.zip`(8.8 MB, STEP 5.7 MB + 사진 2장, 2023-05 제작, 단위 mm).
+- DXF는 단순 외곽선이 아니라 PCB 레이어 전체(폴리라인 수천 개)라서 외곽·구멍·커넥터 위치를 뽑으려면 레이어 분석이 필요하다.
+- STEP은 조립체(USB-C, U.FL, DF40 커넥터, MicroSD, 카메라 FPC 커넥터, PCB 등 부품별)이고 좌표가 부품별 로컬이라, 텍스트 점 범위만으로는 치수를 믿을 수 없다. 정확히 읽으려면 B-Rep 커널(OpenCascade 계열)이 필요하다.
+- 단, STEP의 카메라(`JUSHUO AFC01-S24FCA`)는 OV5640 모듈이 아니라 확장 보드 구형 부품일 수 있어 현행 출하품과 일치하는지 미확인.
 
 ## 미확인 (가정으로 남아 있음 — 실측 또는 추가 조사 필요)
 
