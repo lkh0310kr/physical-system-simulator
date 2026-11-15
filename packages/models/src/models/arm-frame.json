@@ -136,19 +136,17 @@
     "parts": [
       {
         "name": "base-plate",
-        "shape": "box",
-        "position": [0, 0, -145],
-        "size": [110, 110, 10],
+        "shape": "mesh",
+        "file": "arm/arm-base.glb",
         "material": "plastic",
-        "color": "#d8d4c8"
+        "color": "#e8863a"
       },
       {
         "name": "turret",
-        "shape": "box",
-        "position": [0, 0, -105],
-        "size": [44, 44, 70],
+        "shape": "mesh",
+        "file": "arm/arm-turret.glb",
         "material": "plastic",
-        "color": "#d8d4c8",
+        "color": "#e8863a",
         "motion": {
           "signal": "j1",
           "axis": "z",
@@ -174,11 +172,10 @@
       },
       {
         "name": "upper-arm",
-        "shape": "box",
-        "position": [0, 0, -20.0],
-        "size": [8, 12, 100],
+        "shape": "mesh",
+        "file": "arm/arm-upper-arm.glb",
         "material": "plastic",
-        "color": "#d8d4c8",
+        "color": "#e8863a",
         "motion": [
           {
             "signal": "j2",
@@ -222,11 +219,10 @@
       },
       {
         "name": "forearm",
-        "shape": "box",
-        "position": [0, 0, 80.0],
-        "size": [8, 10, 100],
+        "shape": "mesh",
+        "file": "arm/arm-forearm.glb",
         "material": "plastic",
-        "color": "#d8d4c8",
+        "color": "#e8863a",
         "motion": [
           {
             "signal": "j3",
@@ -284,11 +280,10 @@
       },
       {
         "name": "gripper-body",
-        "shape": "box",
-        "position": [24, 0, 130],
-        "size": [48, 12, 14],
+        "shape": "mesh",
+        "file": "arm/arm-wrist-bracket.glb",
         "material": "plastic",
-        "color": "#d8d4c8",
+        "color": "#e8863a",
         "motion": [
           {
             "signal": "j4",
@@ -322,59 +317,15 @@
       },
       {
         "name": "jaw-a",
-        "shape": "box",
-        "position": [52, 7.5, 130],
-        "size": [20, 3, 8],
+        "shape": "mesh",
+        "file": "arm/arm-finger.glb",
         "material": "plastic",
-        "color": "#e6e2d3",
+        "color": "#f2b26b",
         "motion": [
           {
             "signal": "grip",
             "axis": "y",
             "distance": -4
-          },
-          {
-            "signal": "j4",
-            "axis": "y",
-            "rotate": true,
-            "scale": 1,
-            "pivot": [0, 0, 130]
-          },
-          {
-            "signal": "j3",
-            "axis": "y",
-            "rotate": true,
-            "scale": 1,
-            "pivot": [0, 0, 30]
-          },
-          {
-            "signal": "j2",
-            "axis": "y",
-            "rotate": true,
-            "scale": 1,
-            "pivot": [0, 0, -70]
-          },
-          {
-            "signal": "j1",
-            "axis": "z",
-            "rotate": true,
-            "scale": 1,
-            "pivot": [0, 0, -150]
-          }
-        ]
-      },
-      {
-        "name": "jaw-b",
-        "shape": "box",
-        "position": [52, -7.5, 130],
-        "size": [20, 3, 8],
-        "material": "plastic",
-        "color": "#e6e2d3",
-        "motion": [
-          {
-            "signal": "grip",
-            "axis": "y",
-            "distance": 4
           },
           {
             "signal": "j4",

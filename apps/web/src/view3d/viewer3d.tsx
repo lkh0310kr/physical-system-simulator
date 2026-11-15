@@ -13,6 +13,7 @@ import {
   Float32BufferAttribute,
   type Group,
   Mesh,
+  MeshPhysicalMaterial,
   PCFShadowMap,
   Plane,
   PMREMGenerator,
@@ -144,7 +145,22 @@ function Shape({
     [part],
   );
   const glbSource = useGlb(part.kind === "mesh" ? part.url : undefined);
-  const glb = useMemo(() => glbSource?.clone(), [glbSource]);
+  const glb = useMemo(() => {
+    const g = glbSource?.clone();
+    if (g && part.kind === "mesh") {
+      // 파일의 재질 대신 Model의 재질·색을 쓴다 (밝은 배경에서 사라지지 않게)
+      const m = MATERIALS[part.material];
+      const material = new MeshPhysicalMaterial({
+        color: part.color ?? m.color,
+        roughness: m.roughness,
+        metalness: m.metalness,
+      });
+      g.traverse((o) => {
+        if (o instanceof Mesh) o.material = material;
+      });
+    }
+    return g;
+  }, [glbSource, part]);
   // 신호를 따라 움직이는 부품: 평행 이동(눌리는 플런저)과 축 회전(바퀴·관절). 회전 목록은 안쪽 관절부터.
   const signalValue = (signal: string) => Number(signals[`${id}.${signal}`] ?? 0);
   const shift: [number, number, number] = [0, 0, 0];
