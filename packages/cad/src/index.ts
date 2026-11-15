@@ -1,3 +1,4 @@
+export * from "./bom.ts";
 export * from "./build.ts";
 export * from "./case.ts";
 export * from "./geometry.ts";
