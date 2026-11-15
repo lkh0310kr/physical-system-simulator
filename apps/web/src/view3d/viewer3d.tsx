@@ -561,7 +561,7 @@ export function Viewer3D({
   const followPos = useMemo(
     () =>
       boxes
-        .filter((b) => typeof signals[`${b.id}.x`] === "number")
+        .filter((b) => typeof signals[`${b.id}.heading`] === "number")
         .map((b) => poses.get(b.id)?.position)[0],
     [boxes, signals, poses],
   );

@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.pickable",
+  "name": "Pickable Object",
+  "description": "그리퍼가 가까이서 닫히면 끝점을 따라오고, 열리면 떨어져 바닥에 놓이는 물체. 위치 신호(x, y, z)는 시작 위치 기준 변위다.",
+  "outputs": {
+    "x": { "type": "number", "unit": "m", "description": "시작 위치 기준 x 변위" },
+    "y": { "type": "number", "unit": "m" },
+    "z": { "type": "number", "unit": "m" },
+    "held": { "type": "boolean", "description": "지금 그리퍼에 잡혀 있는지" }
+  },
+  "defaultBehavior": "behavior.pickable"
+}

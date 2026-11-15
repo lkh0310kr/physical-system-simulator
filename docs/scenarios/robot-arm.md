@@ -39,9 +39,9 @@ PC / AI Agent ─ USB Serial ─ Arduino Uno ─ I2C ─ PCA9685 ─ PWM ─ J1.
 | 실물 | PhysiSim | 상태 |
 |---|---|---|
 | 서보 MG996R / SG90급 | `model.servo-mg996r`, `model.servo-sg92r` (속도·토크·크기는 제품 값) | MG996R 추가(아래 확인 값), SG92R 있음 |
-| 프레임·관절 | `model.arm-frame` (5 관절을 3D에서 움직이는 체인) | 진행 |
-| 역기구학 | `model.arm-ik` (목표 XYZ → 관절 각도, 도달 불가 표시) | 진행 |
-| 집기·옮기기 | `model.pick-place-sequencer` + `model.pickable-cube` (그리퍼가 닫히면 물체가 따라옴) | 진행 |
+| 프레임·관절 | `model.arm-frame` (5 관절을 3D에서 움직이는 체인) | 완료 (`examples/robot-arm.system.json`) |
+| 역기구학 | `model.arm-ik` (목표 XYZ → 관절 각도, 도달 불가 표시) | 완료 |
+| 집기·옮기기 | `model.pick-place-sequencer` + `model.cube-object` (그리퍼가 닫히면 물체가 따라옴, 단순 부착) | 완료 (`examples/robot-arm-pick-place.system.json`) |
 | PCA9685 | I2C 버스 시뮬레이션 없이 신호 블록으로 추상화 | 후속 결정 |
 | Arduino Uno 펌웨어 | Serial 명령 → 서보. avr8js에 I2C(TWI) 연결이 필요 | 후속 결정 |
 | PC/Agent | 파일 기반 Agent(스펙 §10.1) + `physisim` CLI, 이후 Serial 프로토콜 | 후속 |

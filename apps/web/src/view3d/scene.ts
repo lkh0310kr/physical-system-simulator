@@ -314,7 +314,7 @@ export interface AnimatedPose {
 }
 
 /**
- * 부품의 신호 `<id>.x`, `<id>.y`, `<id>.heading`(차체 같은 구동 부품의 출력)으로 자세를 계산한다.
+ * 부품의 신호 `<id>.x`, `<id>.y`, `<id>.z`, `<id>.heading`(차체·집힌 물체 같은 움직이는 부품의 출력, 시작 위치 기준 변위)으로 자세를 계산한다.
  * `parents`(assembly의 parent)로 연결된 부품은 부모와 같은 변위·회전을 받는다: 부모 위치를 중심으로 돌고 평행 이동한다.
  * 신호가 없으면 정적 배치 그대로다.
  */
@@ -330,9 +330,10 @@ export function animatedPoses(
     const x = num(`${id}.x`);
     const y = num(`${id}.y`);
     const h = num(`${id}.heading`);
-    return x === undefined && y === undefined && h === undefined
+    const z = num(`${id}.z`);
+    return x === undefined && y === undefined && h === undefined && z === undefined
       ? undefined
-      : { x: x ?? 0, y: y ?? 0, h: h ?? 0 };
+      : { x: x ?? 0, y: y ?? 0, z: z ?? 0, h: h ?? 0 };
   };
   const out = new Map<string, AnimatedPose>();
   for (const b of boxes) {
@@ -354,7 +355,7 @@ export function animatedPoses(
       position: [
         pivot[0] + dx * c - dy * sn + ps.x,
         pivot[1] + dx * sn + dy * c + ps.y,
-        b.position[2],
+        b.position[2] + ps.z,
       ],
       heading: ps.h,
     });

@@ -27,6 +27,8 @@ PHYSISIM_PROJECT=./my-project pnpm dev      # 다른 폴더 열기
 | `?system=tactile-led.system.json` | 12 mm 택트 스위치 플런저를 클릭해 누르면 접점이 닫혀 LED가 켜진다 |
 | `?system=robot-avoid.system.json` | 초음파 센서로 벽 앞에서 돌아 피하는 2륜 로봇 (카메라가 따라간다) |
 | `?system=line-follower.system.json` | PID 조향으로 바닥 사인 곡선을 따라가는 로봇 |
+| `?system=robot-arm-pick-place.system.json` | 4축+그리퍼 로봇팔이 큐브를 집어 옮긴다 (역기구학 → 서보 5개 → 3D 관절) |
+| `?system=robot-arm.system.json` | 팔이 두 목표 지점을 오간다 (IK, 서보 속도 한계) |
 | `?system=motor-pid.system.json` | PID 모터 속도 제어 (`스코프`로 파형 보기) |
 
 ## CLI

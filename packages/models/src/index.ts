@@ -18,6 +18,8 @@ import { hBridge } from "./behaviors/h-bridge.ts";
 import { led as ledBehavior } from "./behaviors/led.ts";
 import { lineSensor } from "./behaviors/line-sensor.ts";
 import { photoresistor } from "./behaviors/photoresistor.ts";
+import { pickPlace } from "./behaviors/pick-place.ts";
+import { pickable } from "./behaviors/pickable.ts";
 import { pid } from "./behaviors/pid.ts";
 import { potentiometer } from "./behaviors/potentiometer.ts";
 import { powerSupply } from "./behaviors/power-supply.ts";
@@ -42,6 +44,8 @@ import lightEmission from "./capabilities/light-emission.json" with { type: "jso
 import lineSensing from "./capabilities/line-sensing.json" with { type: "json" };
 import measurement from "./capabilities/measurement.json" with { type: "json" };
 import photoresistance from "./capabilities/photoresistance.json" with { type: "json" };
+import pickPlaceCapability from "./capabilities/pick-place.json" with { type: "json" };
+import pickableCapability from "./capabilities/pickable.json" with { type: "json" };
 import pidCapability from "./capabilities/pid.json" with { type: "json" };
 import potentiometry from "./capabilities/potentiometry.json" with { type: "json" };
 import powerSupplyCapability from "./capabilities/power-supply.json" with { type: "json" };
@@ -56,6 +60,7 @@ import armFrameModel from "./models/arm-frame.json" with { type: "json" };
 import armIkModel from "./models/arm-ik.json" with { type: "json" };
 import atmega328p from "./models/atmega328p.json" with { type: "json" };
 import avoiderController from "./models/avoider-controller.json" with { type: "json" };
+import cubeObject from "./models/cube-object.json" with { type: "json" };
 import dcSupply from "./models/dc-supply.json" with { type: "json" };
 import esp32C6Chip from "./models/esp32-c6-qfn32.json" with { type: "json" };
 import esp32P4Camera from "./models/esp32-p4-c6-camera-node.json" with { type: "json" };
@@ -72,6 +77,7 @@ import multimeter from "./models/multimeter.json" with { type: "json" };
 import ov2640Sensor from "./models/ov2640-sensor.json" with { type: "json" };
 import ov5640Sensor from "./models/ov5640-sensor.json" with { type: "json" };
 import photoresistorModel from "./models/photoresistor.json" with { type: "json" };
+import pickPlaceSequencer from "./models/pick-place-sequencer.json" with { type: "json" };
 import pidModel from "./models/pid-controller.json" with { type: "json" };
 import potentiometerModel from "./models/potentiometer.json" with { type: "json" };
 import pushbutton from "./models/pushbutton.json" with { type: "json" };
@@ -120,6 +126,8 @@ export const standardLibrary: LibraryInput = {
     hBridge,
     lineSensor,
     photoresistor,
+    pickPlace,
+    pickable,
     pid,
     servo,
     signalSource,
@@ -143,6 +151,8 @@ export const standardLibrary: LibraryInput = {
     hBridgeCapability,
     lineSensing,
     photoresistance,
+    pickPlaceCapability,
+    pickableCapability,
     pidCapability,
     servoCapability,
     signalSourceCapability,
@@ -179,6 +189,8 @@ export const standardLibrary: LibraryInput = {
     avoiderController,
     armFrameModel,
     armIkModel,
+    pickPlaceSequencer,
+    cubeObject,
     pidModel,
     photoresistorModel,
     lineSensorModel,

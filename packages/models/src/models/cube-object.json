@@ -1,0 +1,97 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.cube-object",
+  "name": "Pickable cube",
+  "category": "mechanical/object",
+  "description": "그리퍼가 가까이서 닫으면 끝점을 따라오고, 열면 바닥으로 떨어지는 정육면체. 접촉 물리 없이 단순 부착으로 처리한다(파지력·미끄러짐은 모델링하지 않음).",
+  "propertySchema": {
+    "size": {
+      "type": "number",
+      "default": 0.03,
+      "description": "한 변 길이 [m]",
+      "unit": "m"
+    },
+    "startX": {
+      "type": "number",
+      "default": 0.15,
+      "description": "시작 x [m] (3D 조립 위치와 맞출 것)",
+      "unit": "m"
+    },
+    "startY": {
+      "type": "number",
+      "default": 0.07,
+      "description": "시작 y [m]",
+      "unit": "m"
+    },
+    "reach": {
+      "type": "number",
+      "default": 0.02,
+      "description": "그리퍼가 이 거리 안에 있어야 잡는다 [m]",
+      "unit": "m"
+    },
+    "closeAt": {
+      "type": "number",
+      "default": 0.8,
+      "description": "이 정도 이상 닫히면 잡는다 (0~1)"
+    },
+    "openAt": {
+      "type": "number",
+      "default": 0.5,
+      "description": "이 아래로 열리면 놓는다 (0~1)"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "tipX",
+      "domain": "signal",
+      "direction": "in"
+    },
+    {
+      "name": "tipY",
+      "domain": "signal",
+      "direction": "in"
+    },
+    {
+      "name": "tipZ",
+      "domain": "signal",
+      "direction": "in"
+    },
+    {
+      "name": "grip",
+      "domain": "signal",
+      "direction": "in",
+      "description": "그리퍼 닫힘 0~1"
+    },
+    {
+      "name": "x",
+      "domain": "signal",
+      "direction": "out",
+      "description": "시작 기준 x 변위"
+    },
+    {
+      "name": "y",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "z",
+      "domain": "signal",
+      "direction": "out"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.pickable"
+    }
+  ],
+  "metadata": {
+    "fidelity": "approximate",
+    "assumptions": ["단순 부착(접촉 물리 없음)", "잡는 거리·닫힘 기준은 예시 값"]
+  },
+  "body": {
+    "size": [30, 30, 30],
+    "mass": 20,
+    "color": "#d9534f"
+  }
+}

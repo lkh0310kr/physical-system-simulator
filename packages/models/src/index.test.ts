@@ -31,6 +31,8 @@ describe("standard library", () => {
       "model.avoider-controller",
       "model.arm-frame",
       "model.arm-ik",
+      "model.pick-place-sequencer",
+      "model.cube-object",
       "model.pid-controller",
       "model.photoresistor",
       "model.line-sensor",

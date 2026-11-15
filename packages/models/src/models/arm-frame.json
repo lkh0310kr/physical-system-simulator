@@ -72,6 +72,30 @@
       "domain": "signal",
       "direction": "in",
       "description": "그리퍼"
+    },
+    {
+      "name": "tipX",
+      "domain": "signal",
+      "direction": "out",
+      "description": "끝 x [m]"
+    },
+    {
+      "name": "tipY",
+      "domain": "signal",
+      "direction": "out",
+      "description": "끝 y [m]"
+    },
+    {
+      "name": "tipZ",
+      "domain": "signal",
+      "direction": "out",
+      "description": "끝 z [m]"
+    },
+    {
+      "name": "grip",
+      "domain": "signal",
+      "direction": "out",
+      "description": "그리퍼 닫힘 0~1"
     }
   ],
   "capabilities": [
