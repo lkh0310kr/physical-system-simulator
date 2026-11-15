@@ -39,6 +39,30 @@ export interface Program {
 
 export const MAX_SERIAL_LINES = 1000;
 
+/**
+ * 시리얼 출력 기록: 줄바꿈마다 줄을 닫고, 다음 글자가 오면 그 시각으로 새 줄을 연다 (최근 MAX_SERIAL_LINES줄).
+ * JS 런타임과 펌웨어 실행기가 함께 쓴다.
+ */
+export function createSerialLog(clock: { readonly time: number }) {
+  const lines: SerialLine[] = [];
+  let lineOpen = false;
+  const write = (text: string) => {
+    const parts = text.split("\n");
+    parts.forEach((part, i) => {
+      const endsLine = i < parts.length - 1;
+      if (!lineOpen && (part || endsLine)) {
+        lines.push({ time: clock.time, text: "" });
+        if (lines.length > MAX_SERIAL_LINES) lines.shift();
+        lineOpen = true;
+      }
+      const last = lines[lines.length - 1];
+      if (last && part) lines[lines.length - 1] = { ...last, text: last.text + part };
+      if (endsLine) lineOpen = false;
+    });
+  };
+  return { lines: lines as readonly SerialLine[], write };
+}
+
 interface Delay {
   readonly delayMs: number;
 }
@@ -71,23 +95,7 @@ export function loadProgram(
   const capability = options.capability ?? "capability.gpio";
   const loopInterval = options.loopInterval ?? 0.001;
   let error: Error | undefined;
-  const serial: { time: number; text: string }[] = [];
-  let lineOpen = false;
-  /** 시리얼 쓰기: 줄바꿈마다 줄을 닫고, 다음 글자가 오면 그 시각으로 새 줄을 연다. */
-  const write = (text: string) => {
-    const parts = text.split("\n");
-    parts.forEach((part, i) => {
-      const endsLine = i < parts.length - 1;
-      if (!lineOpen && (part || endsLine)) {
-        serial.push({ time: sim.time, text: "" });
-        if (serial.length > MAX_SERIAL_LINES) serial.shift();
-        lineOpen = true;
-      }
-      const last = serial[serial.length - 1];
-      if (last && part) last.text += part;
-      if (endsLine) lineOpen = false;
-    });
-  };
+  const { lines: serial, write } = createSerialLog(sim);
 
   const pins = () =>
     (sim.state(instance, capability) as { pins?: Record<string, { pin: number; level: boolean }> })
