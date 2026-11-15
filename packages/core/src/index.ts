@@ -7,4 +7,5 @@ export * from "./ids.ts";
 export * from "./issues.ts";
 export * from "./model.ts";
 export * from "./property.ts";
+export * from "./registry.ts";
 export * from "./units.ts";
