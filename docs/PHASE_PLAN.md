@@ -33,7 +33,7 @@
 - [ ] P0-T6 커밋 훅 (lint-staged / commitlint 등) — 경량으로
 
 🔶 결정 게이트
-- G0-1 빌드 도구 — Node 22 LTS는 확정
+- ~~G0-1 빌드 도구~~ → tsc만 사용, Node 22 LTS 확정
 - ~~G0-2 공개 여부·라이선스~~ → Public, MIT 확정
 
 **완료 기준**: 깨끗한 클론에서 `pnpm i && pnpm lint && pnpm typecheck && pnpm test` 통과, CI green.

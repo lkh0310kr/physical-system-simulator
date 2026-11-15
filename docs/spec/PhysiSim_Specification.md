@@ -472,6 +472,7 @@ AI Agent는 필요한 Model을 검색하고 Instance를 생성하며 연결 관�
 | 저장소 / 툴체인 | pnpm 모노레포 | 확정 (v0.5) |
 | 런타임 | Node.js 22 LTS | 확정 (v0.5) |
 | 공개 범위 / 라이선스 | Public GitHub 저장소, MIT | 확정 (v0.5) |
+| 빌드 도구 | tsc만 사용 (npm 배포 시 tsdown 재검토) | 확정 (v0.5) |
 | Instance 구조 | 미결정 | 대기 |
 | Behavior 인터페이스 | 미결정 | 대기 |
 | Composition 구조 | 미결정 | 대기 |
@@ -566,6 +567,7 @@ interface ModelCapabilityBinding {
 | 라이선스 | MIT | Public 저장소 |
 | 런타임 Schema | Zod v4 | `z.toJSONSchema()`로 Agent tool schema 생성 |
 | 저장소 | pnpm workspaces 모노레포 | packages/*, apps/* |
+| 빌드 | tsc (project references) | 번들러 없음. npm 배포 시 tsdown 재검토 |
 | 테스트 | Vitest | |
 | Lint / Format | Biome | |
 | 개발 전략 | Headless 코어 우선 | 코어(테스트·CLI) → Agent → 2D 에디터 → 3D·물리 |
