@@ -34,6 +34,6 @@ describe("describeModel", () => {
     if (!uno) throw new Error("fixture");
     const text = describeModel(registry, uno);
     expect(text).toContain("GND.1(GND)");
-    expect(text).toContain("capability.gpio (pinCount=20, logicLevel=5) → behavior.digital-io");
+    expect(text).toContain("capability.gpio (pinCount=14, logicLevel=5) → behavior.digital-io");
   });
 });

@@ -135,7 +135,7 @@
     {
       "capability": "capability.gpio",
       "config": {
-        "pinCount": 20,
+        "pinCount": 14,
         "logicLevel": 5
       }
     }

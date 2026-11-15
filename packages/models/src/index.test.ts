@@ -98,3 +98,13 @@ describe("behavior.led", () => {
     expect(brightness(-0.01)).toBe(0);
   });
 });
+
+describe("Arduino UNO GPIO", () => {
+  it("has a port for every digital pin the GPIO capability exposes", () => {
+    const registry = createStandardRegistry();
+    const uno = registry.getModel("model.arduino-uno");
+    const count = Number(uno?.capabilities[0]?.config.pinCount);
+    const ports = new Set(uno?.ports.map((p) => p.name));
+    for (let pin = 0; pin < count; pin++) expect(ports.has(`D${pin}`), `D${pin}`).toBe(true);
+  });
+});
