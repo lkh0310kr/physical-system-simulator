@@ -268,7 +268,7 @@
 ## Phase 9 — Model Editor & 생태계
 
 - [ ] P9-T1 Model Editor UI (Property Schema·Capability 바인딩 편집)
-- [ ] P9-T2 BOM / 부품 리스트 내보내기
+- [x] P9-T2 BOM / 부품 리스트 내보내기 (`physisim case`의 CSV·텍스트, 웹 3D 케이스 뷰의 BOM 다운로드)
 - [ ] P9-T3 Model 패키지 가져오기·내보내기, 버전 관리
 - [ ] P9-T4 System 공유 링크
 
