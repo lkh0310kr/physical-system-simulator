@@ -127,3 +127,7 @@
 
 사용 허락: 사용자가 2026-11-15에 확인(라이선스 문제 없음으로 판단). 원본 STEP·PDF는 계속 저장소에 올리지 않는다(`datasheets/`). 변환본에는 출처를 `metadata.source`에 남긴다. 색은 STEP에 들어 있는 값 그대로이고 PBR 재질 값은 렌더 추정이다.
 | `apps/web/public/meshes/lipo-adafruit-1317.glb` | [adafruit/Adafruit_CAD_Parts](https://github.com/adafruit/Adafruit_CAD_Parts) `1317 150mAh Lipo Battery.step` (저장소 라이선스 MIT) | 같은 도구, `--map Y,-X,Z`. 외곽 26.02×19.75×3.8 mm가 제품 페이지 치수와 일치 |
+| `apps/web/public/meshes/servo-mg996r.glb` | GitHub 제3자 STEP `MG996R.step` (N3MI-DG/Filler3 `CQ-SRC/imports/`; blackfyre/spooder 등에 다른 판본). 귀 포함 54 mm·폭 19.8 mm가 데이터시트와 일치. 라이선스 미확인 — 사용자가 2026-11-16에 "라이선스 상관없음"으로 허락 | `tools/step-to-glb.py`, 혼 고정 포함 |
+| `apps/web/public/meshes/servo-sg92r.glb` | GitHub 제3자 STEP `SG92R.step` (Azuma413/6dof_arm_cad 등, 같은 파일). 라이선스 미확인(위와 같은 허락) | 같은 도구 `--map X,Y,Z` |
+| `apps/web/public/meshes/arduino-uno-metro328.glb` | [adafruit/Adafruit_CAD_Parts](https://github.com/adafruit/Adafruit_CAD_Parts) `2488 Adafruit Metro 328.step` (MIT). Uno R3 규격 호환 보드의 대용 — 실제 Uno와 커넥터 모양이 다를 수 있음 | 같은 도구 `--map X,Y,Z` |
+| `apps/web/public/meshes/pca9685-adafruit-815.glb` | Adafruit_CAD_Parts `815 Servo Driver 16 Channel.step` (MIT). 아직 Model에 연결하지 않음 | 같은 도구 `--map X,Y,Z` |
