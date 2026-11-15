@@ -45,6 +45,10 @@ interface Props {
   readonly onSelect?: (s: Selection | undefined) => void;
   readonly onMove?: (id: string, x: number, y: number) => void;
   readonly onConnect?: (a: string, b: string) => void;
+  /** 시뮬레이션 중 스위치 부품을 누르거나 뗐다. */
+  readonly onPress?: (id: string, event: "press" | "release") => void;
+  /** 시뮬레이션이 돌고 있는지. 돌고 있으면 스위치 클릭은 편집이 아니라 조작이다. */
+  readonly running?: boolean;
   /** 화면 가운데의 월드 좌표를 읽을 수 있게 채워 준다 (부품 추가 위치). */
   readonly centerRef?: MutableRefObject<() => { x: number; y: number }>;
 }
@@ -114,7 +118,8 @@ function fit(scene: Scene, width: number, height: number): View {
 type Drag =
   | { kind: "pan"; sx: number; sy: number; view: View }
   | { kind: "part"; id: string; sx: number; sy: number; ox: number; oy: number; moved: boolean }
-  | { kind: "wire"; from: string; start: [number, number] };
+  | { kind: "wire"; from: string; start: [number, number] }
+  | { kind: "press"; id: string };
 
 export function Canvas({
   loaded,
@@ -124,6 +129,8 @@ export function Canvas({
   onSelect,
   onMove,
   onConnect,
+  onPress,
+  running,
   centerRef,
 }: Props) {
   const svg = useRef<SVGSVGElement>(null);
@@ -189,6 +196,17 @@ export function Canvas({
         drag.current = { kind: "wire", from: pin, start };
         setPending({ start, end: start });
       }
+    } else if (
+      partEl &&
+      running &&
+      onPress &&
+      partEl.querySelector(".switch .hit") &&
+      target.closest(".switch")
+    ) {
+      // 실행 중 스위치 클릭 = 누르기. 편집(이동·선택)과 겹치지 않게 접점 영역만 조작으로 취급한다.
+      const id = partEl.getAttribute("data-id") ?? "";
+      drag.current = { kind: "press", id };
+      onPress(id, "press");
     } else if (partEl) {
       const id = partEl.getAttribute("data-id") ?? "";
       const p = scene.parts.find((x) => x.id === id);
@@ -221,12 +239,14 @@ export function Canvas({
       const dy = (e.clientY - d.sy) / v.k;
       if (Math.abs(dx) + Math.abs(dy) > 2) d.moved = true;
       if (d.moved) setDragPos({ id: d.id, x: snap(d.ox + dx), y: snap(d.oy + dy) });
-    } else setPending({ start: d.start, end: toWorld(e.clientX, e.clientY) });
+    } else if (d.kind === "wire")
+      setPending({ start: d.start, end: toWorld(e.clientX, e.clientY) });
   };
 
   const onPointerUp = (e: PointerEvent) => {
     const d = drag.current;
     drag.current = undefined;
+    if (d?.kind === "press") onPress?.(d.id, "release");
     if (d?.kind === "part" && d.moved && dragPos) onMove?.(d.id, dragPos.x, dragPos.y);
     if (d?.kind === "wire") {
       // 포인터 캡처 중이므로 놓은 위치의 요소를 직접 찾는다.
@@ -238,6 +258,7 @@ export function Canvas({
     setTimeout(() => setDragPos(undefined), 0);
   };
 
+  const closed = (id: string) => live?.signals[`${id}.closed`] === true;
   const activity = (id: string) => {
     const b = live?.signals[`${id}.brightness`];
     return typeof b === "number" ? b : 0;
@@ -247,7 +268,7 @@ export function Canvas({
   return (
     <svg
       ref={svg}
-      className={`canvas${pending ? " wiring" : ""}`}
+      className={`canvas${pending ? " wiring" : ""}${running ? " running" : ""}`}
       onWheel={onWheel}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -294,6 +315,7 @@ export function Canvas({
             key={p.id}
             {...p}
             activity={activity(p.id)}
+            closed={closed(p.id)}
             selected={selection?.kind === "part" && selection.id === p.id}
           />
         ))}

@@ -10,6 +10,13 @@ export type ToWorker =
       /** Instance ID → 컴파일된 펌웨어 (`.ino` 프로그램). */
       readonly firmware: Readonly<Record<string, string>>;
     }
+  /** 부품에 사람이 건 입력 (버튼 누름 등). Capability의 `onEvent`로 전달된다. */
+  | {
+      readonly type: "input";
+      readonly instance: string;
+      readonly capability: string;
+      readonly event: "press" | "release";
+    }
   | { readonly type: "play" }
   | { readonly type: "pause" }
   | { readonly type: "reset" };

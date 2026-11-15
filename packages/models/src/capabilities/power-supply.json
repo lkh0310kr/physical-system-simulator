@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.power-supply",
+  "name": "Power Supply",
+  "description": "Port를 고정 전압으로 구동하는 전원 레일 (보드의 5V·3.3V 핀, 배터리 등).",
+  "parameters": {
+    "rails": {
+      "type": "string",
+      "description": "구동할 레일 목록: \"Port=전압\"을 쉼표로 (예: \"5V=5,3.3V=3.3\"). 전압은 V."
+    },
+    "outputResistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 0,
+      "default": 0.1,
+      "description": "레일의 내부 저항. 작을수록 이상적인 전압원."
+    }
+  },
+  "defaultBehavior": "behavior.power-supply"
+}

@@ -14,6 +14,9 @@ describe("standard library", () => {
     expect(registry.models().map((m) => m.id)).toEqual([
       "model.led",
       "model.resistor",
+      "model.pushbutton",
+      "model.toggle-switch",
+      "model.potentiometer",
       "model.atmega328p",
       "model.arduino-uno",
     ]);
@@ -30,7 +33,13 @@ describe("standard library", () => {
 });
 
 describe("behavior.digital-io", () => {
-  const config = { pinCount: 20, logicLevel: 5, pinPrefix: "D", outputResistance: 25 };
+  const config = {
+    pinCount: 20,
+    logicLevel: 5,
+    pinPrefix: "D",
+    outputResistance: 25,
+    pullupResistance: 20000,
+  };
   const ctx = (voltage = 0) => ({
     time: 0,
     dt: 0.001,
@@ -49,7 +58,9 @@ describe("behavior.digital-io", () => {
   );
 
   it("maps pin numbers to ports with the configured prefix", () => {
-    expect(output13.pins).toEqual({ D13: { pin: 13, mode: "output", level: true } });
+    expect(output13.pins).toEqual({
+      D13: { pin: 13, mode: "output", level: true, pullup: false },
+    });
   });
 
   it("drives output pins at the logic level through the output resistance", () => {
@@ -62,6 +73,27 @@ describe("behavior.digital-io", () => {
     const input = send({ pins: {} }, { type: "pinMode", payload: { pin: 2, mode: "input" } });
     expect(digitalIo.step(input, {}, ctx(3)).outputs).toEqual({ D2: true });
     expect(digitalIo.step(input, {}, ctx(2)).outputs).toEqual({ D2: false });
+  });
+
+  it("pulls an input pin up to the logic level only when the pull-up is enabled", () => {
+    const withPullup = send(
+      { pins: {} },
+      { type: "pinMode", payload: { pin: 2, mode: "input", pullup: true } },
+    );
+    expect(digitalIo.circuit?.(withPullup, ctx())).toEqual([
+      { kind: "drive", id: "D2.pullup", port: "D2", voltage: 5, resistance: 20000 },
+    ]);
+    const plain = send({ pins: {} }, { type: "pinMode", payload: { pin: 2, mode: "input" } });
+    expect(digitalIo.circuit?.(plain, ctx())).toEqual([]);
+  });
+
+  it("drops the pull-up when the pin becomes an output", () => {
+    const pulled = send(
+      { pins: {} },
+      { type: "pinMode", payload: { pin: 2, mode: "input", pullup: true } },
+    );
+    const out = send(pulled, { type: "pinMode", payload: { pin: 2, mode: "output" } });
+    expect(digitalIo.circuit?.(out, ctx())?.map((e) => e.id)).toEqual(["D2"]);
   });
 
   it("rejects pins outside the board", () => {

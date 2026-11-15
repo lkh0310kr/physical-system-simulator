@@ -1,0 +1,55 @@
+{
+  "$schema": "../schemas/system.schema.json",
+  "name": "Button → LED",
+  "description": "D2에 버튼(내부 풀업), 누르는 동안 D13 LED 점등.",
+  "instances": [
+    {
+      "id": "uno",
+      "model": "model.arduino-uno",
+      "program": "button.ino"
+    },
+    {
+      "id": "r1",
+      "model": "model.resistor",
+      "properties": {
+        "resistance": "220Ω"
+      }
+    },
+    {
+      "id": "led1",
+      "model": "model.led"
+    },
+    {
+      "id": "btn",
+      "model": "model.pushbutton"
+    }
+  ],
+  "connections": [
+    ["uno:D13", "r1:1"],
+    ["r1:2", "led1:A"],
+    ["led1:C", "uno:GND.1"],
+    ["uno:D2", "btn:1"],
+    ["btn:2", "uno:GND.2"]
+  ],
+  "layout": {
+    "instances": {
+      "uno": {
+        "x": 0,
+        "y": 0
+      },
+      "r1": {
+        "x": 250,
+        "y": -120,
+        "rotate": 270
+      },
+      "led1": {
+        "x": 330,
+        "y": -180
+      },
+      "btn": {
+        "x": 90,
+        "y": -180
+      }
+    }
+  }
+}

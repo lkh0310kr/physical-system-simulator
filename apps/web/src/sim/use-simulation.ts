@@ -50,6 +50,9 @@ export function useSimulation(
   return {
     frame,
     error,
+    /** 부품을 누르거나 뗀다 (버튼·토글 스위치). */
+    input: (instance: string, event: "press" | "release") =>
+      send({ type: "input", instance, capability: "capability.switching", event }),
     play: () => send({ type: "play" }),
     pause: () => send({ type: "pause" }),
     reset: () => send({ type: "reset" }),

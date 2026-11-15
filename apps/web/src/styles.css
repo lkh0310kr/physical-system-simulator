@@ -583,3 +583,28 @@ button.icon {
   color: var(--danger);
   font-size: 12px;
 }
+
+/* 스위치 */
+.part .switch .contact {
+  fill: var(--part);
+  stroke: var(--line);
+  stroke-width: 1.2;
+}
+
+.part .switch .blade {
+  stroke: var(--line);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.part .switch.closed .blade {
+  stroke: var(--accent);
+}
+
+.part .switch .hit {
+  fill: transparent;
+}
+
+.running .part .switch {
+  cursor: pointer;
+}

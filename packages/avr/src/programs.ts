@@ -43,13 +43,19 @@ export function startPrograms(
           [inst.id, { error: new Error(`컴파일되지 않은 스케치: ${inst.program}`), serial: [] }],
         ];
       const gpio = gpioConfig(loaded, inst.id);
-      const options = gpio && {
-        pinCount: gpio.pinCount,
-        // 입력 핀은 회로 전압으로 읽는다: HIGH 판정은 GPIO Behavior와 같은 logicLevel/2.
-        readPin: (pin: number) =>
-          sim.voltage(`${inst.id}:${gpio.prefix}${pin}`) > gpio.logicLevel / 2,
-      };
-      return [[inst.id, loadFirmware(sim, inst.id, hex, options ?? {})]];
+      return [
+        [
+          inst.id,
+          loadFirmware(
+            sim,
+            inst.id,
+            hex,
+            gpio
+              ? { pinCount: gpio.pinCount, pinPrefix: gpio.prefix, logicLevel: gpio.logicLevel }
+              : {},
+          ),
+        ],
+      ];
     }
     const source = loaded.programs.get(inst.id);
     return source === undefined ? [] : [[inst.id, loadProgram(sim, inst.id, source)]];
