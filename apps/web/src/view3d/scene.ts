@@ -150,6 +150,9 @@ export function activityOf(id: string, signals: Readonly<Record<string, unknown>
 /** 3D 케이블 하나: 연결(connection)의 두 끝이 모두 핀 위치를 가질 때만 만든다. 좌표는 월드 [m]. */
 export interface SceneCable {
   readonly id: string;
+  /** 양 끝 부품 Instance ID (분해 보기에서 끝점을 부품과 함께 옮기려고). */
+  readonly fromId: string;
+  readonly toId: string;
   readonly from: Vec3;
   readonly to: Vec3;
   /** 접지 선이면 검정, 아니면 빨강 계열로 그린다. */
@@ -209,6 +212,8 @@ export function buildCables(loaded: LoadedSystem, boxes: readonly SceneBox[]): S
     return [
       {
         id: `${a}~${b}`,
+        fromId: a.split(":")[0] ?? "",
+        toId: b.split(":")[0] ?? "",
         from: pa.world,
         to: pb.world,
         ground: pa.ground || pb.ground,
@@ -219,4 +224,21 @@ export function buildCables(loaded: LoadedSystem, boxes: readonly SceneBox[]): S
       },
     ];
   });
+}
+
+/**
+ * 분해 보기에서 부품마다 띄우는 높이 [m]: 아래(z)에 있는 부품부터 차례로 `step`씩 더 올린다.
+ * 같은 높이의 부품은 같은 단. `amount`는 0~1.
+ */
+export function explodeLifts(
+  boxes: readonly SceneBox[],
+  amount: number,
+  step = 0.008,
+): Map<string, number> {
+  const levels = [...new Set(boxes.map((b) => Math.round(b.position[2] * 1e6)))].sort(
+    (a, b) => a - b,
+  );
+  return new Map(
+    boxes.map((b) => [b.id, levels.indexOf(Math.round(b.position[2] * 1e6)) * step * amount]),
+  );
 }

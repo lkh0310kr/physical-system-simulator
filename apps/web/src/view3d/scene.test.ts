@@ -1,7 +1,14 @@
 import { loadSystemProject } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
 import { describe, expect, it } from "vitest";
-import { activityOf, buildCables, buildScene3d, PLACEHOLDER_SIZE, sceneBounds } from "./scene.ts";
+import {
+  activityOf,
+  buildCables,
+  buildScene3d,
+  explodeLifts,
+  PLACEHOLDER_SIZE,
+  sceneBounds,
+} from "./scene.ts";
 
 const load = (assembly?: unknown) => {
   const r = loadSystemProject(
@@ -162,5 +169,29 @@ describe("buildCables", () => {
     expect(
       buildCables({ ...loaded, doc: { ...loaded.doc, connections: [["bat:+", "btn:1"]] } }, boxes),
     ).toEqual([]);
+  });
+});
+
+describe("explodeLifts", () => {
+  it("lifts parts stack by stack from the lowest, and does nothing at amount 0", () => {
+    const loaded = loadSystemProject(
+      {
+        name: "t",
+        instances: [
+          { id: "bat", model: "model.lipo-adafruit-1317" },
+          { id: "node", model: "model.xiao-esp32s3-sense" },
+        ],
+        connections: [],
+        assembly: { bat: { position: [0, 0, -8.89] }, node: { position: [0, 0, 0] } },
+      },
+      () => undefined,
+      createStandardRegistry,
+    );
+    if (!loaded.ok) throw new Error("load");
+    const boxes = buildScene3d(loaded.value);
+    expect([...explodeLifts(boxes, 0).values()]).toEqual([0, 0]);
+    const l = explodeLifts(boxes, 1, 0.01);
+    expect(l.get("bat")).toBe(0);
+    expect(l.get("node")).toBeCloseTo(0.01);
   });
 });

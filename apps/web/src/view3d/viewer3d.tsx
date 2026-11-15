@@ -28,6 +28,7 @@ import {
   activityOf,
   buildCables,
   buildScene3d,
+  explodeLifts,
   type SceneBox,
   type SceneCable,
   type ScenePart,
@@ -238,11 +239,11 @@ function Part({
 function LabelProjector({
   boxes,
   labels,
-  lift,
+  lifts,
 }: {
   boxes: readonly SceneBox[];
   labels: RefObject<(HTMLElement | null)[]>;
-  lift: number;
+  lifts: ReadonlyMap<string, number>;
 }) {
   const { camera, gl } = useThree();
   const v = useMemo(() => new Vector3(), []);
@@ -252,7 +253,11 @@ function LabelProjector({
     boxes.forEach((b, i) => {
       const el = labels.current?.[i];
       if (!el) return;
-      v.set(b.position[0], b.position[1], b.position[2] + b.size[2] / 2 + lift).project(camera);
+      v.set(
+        b.position[0],
+        b.position[1],
+        b.position[2] + b.size[2] / 2 + (lifts.get(b.id) ?? 0),
+      ).project(camera);
       const visible = v.z < 1;
       el.style.display = visible ? "block" : "none";
       el.style.transform = `translate(${((v.x + 1) / 2) * w}px, ${((1 - v.y) / 2) * h}px) translate(-50%, -140%)`;
@@ -262,7 +267,15 @@ function LabelProjector({
 }
 
 /** 전선: 두 핀을 잇는 곡선. 각 끝은 먼저 부품 박스 바깥까지 옆으로 빠져나온 뒤 이어져, 부품을 파고들지 않는다. */
-function Cable({ cable }: { cable: SceneCable }) {
+function Cable({
+  cable,
+  fromLift,
+  toLift,
+}: {
+  cable: SceneCable;
+  fromLift: number;
+  toLift: number;
+}) {
   const geometry = useMemo(() => {
     const margin = 0.0015;
     /** 핀에서 부품 중심 반대쪽(수평)으로 박스 밖까지 나간 점. 수평 성분이 없으면 위로. */
@@ -279,15 +292,22 @@ function Cable({ cable }: { cable: SceneCable }) {
       );
       return new Vector3((c[0] ?? 0) + ux * (t + margin), (c[1] ?? 0) + uy * (t + margin), p[2]);
     };
-    const a = new Vector3(...cable.from);
-    const b = new Vector3(...cable.to);
-    const a1 = exit(cable.from, cable.fromCenter, cable.fromHalf);
-    const b1 = exit(cable.to, cable.toCenter, cable.toHalf);
+    const up = (p: readonly number[], l: number): [number, number, number] => [
+      p[0] ?? 0,
+      p[1] ?? 0,
+      (p[2] ?? 0) + l,
+    ];
+    const from = up(cable.from, fromLift);
+    const to = up(cable.to, toLift);
+    const a = new Vector3(...from);
+    const b = new Vector3(...to);
+    const a1 = exit(from, up(cable.fromCenter, fromLift), cable.fromHalf);
+    const b1 = exit(to, up(cable.toCenter, toLift), cable.toHalf);
     const mid = a1.clone().add(b1).multiplyScalar(0.5);
     mid.z -= 0.0015;
     const curve = new CatmullRomCurve3([a, a1, mid, b1, b], false, "catmullrom", 0.5);
     return new TubeGeometry(curve, 64, 0.0004, 8, false);
-  }, [cable]);
+  }, [cable, fromLift, toLift]);
   return (
     <mesh geometry={geometry} castShadow>
       <meshStandardMaterial color={cable.ground ? "#16181c" : "#c0392b"} roughness={0.6} />
@@ -370,6 +390,8 @@ export function Viewer3D({
   // 케이스를 보는 동안은 치수 없는 자리표시를 숨긴다 — 케이스에 들어가지 않는 가정 크기가 섞여 보이지 않게
   const cablesAll = useMemo(() => buildCables(loaded, buildScene3d(loaded)), [loaded]);
   const boxes = useMemo(() => (showCase ? all.filter((b) => b.real) : all), [all, showCase]);
+  const lifts = useMemo(() => explodeLifts(boxes, explode), [boxes, explode]);
+  const lidLift = Math.max(0, ...lifts.values()) + 0.008 * explode;
   const bounds = useMemo(() => sceneBounds(boxes), [boxes]);
   const center: [number, number, number] = bounds
     ? [
@@ -433,9 +455,9 @@ export function Viewer3D({
           position={[center[0], center[1], floor]}
         />
         <Orbit radius={radius} target={target} />
-        <LabelProjector boxes={boxes} labels={labels} lift={showCase ? explode * 0.01 : 0} />
+        <LabelProjector boxes={boxes} labels={labels} lifts={lifts} />
         {boxes.map((b) => (
-          <group key={b.id} position={[0, 0, showCase ? explode * 0.01 : 0]}>
+          <group key={b.id} position={[0, 0, lifts.get(b.id) ?? 0]}>
             <Part
               key={b.id}
               box={b}
@@ -448,10 +470,15 @@ export function Viewer3D({
           </group>
         ))}
         {cablesAll.map((c) => (
-          <Cable key={c.id} cable={c} />
+          <Cable
+            key={c.id}
+            cable={c}
+            fromLift={lifts.get(c.fromId) ?? 0}
+            toLift={lifts.get(c.toId) ?? 0}
+          />
         ))}
         {data && <CaseSolid mesh={data.base} color="#9aa5b4" clip={clip} />}
-        {data && <CaseSolid mesh={data.lid} color="#b8c1cd" clip={clip} lift={explode * 0.022} />}
+        {data && <CaseSolid mesh={data.lid} color="#b8c1cd" clip={clip} lift={lidLift} />}
       </Canvas>
       {boxes.map((b, i) => (
         <span
@@ -473,7 +500,7 @@ export function Viewer3D({
           >
             케이스
           </button>
-          {showCase && (
+          {
             <input
               type="range"
               className="explode"
@@ -484,7 +511,7 @@ export function Viewer3D({
               value={explode}
               onChange={(e) => setExplode(Number(e.target.value))}
             />
-          )}
+          }
           {showCase && (
             <button
               type="button"
