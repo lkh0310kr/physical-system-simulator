@@ -1,7 +1,7 @@
 /** 3D 뷰어: 조립된 부품을 three.js로 그린다. 장면 데이터는 `scene.ts`의 순수 함수가 만든다. */
 import type { LoadedSystem } from "@physisim/core";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo, useState } from "react";
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import {
   ACESFilmicToneMapping,
   BoxGeometry,
@@ -174,6 +174,33 @@ function Part({
 }
 
 /** 이미지 기반 조명: 방 모양 장면을 PMREM으로 만들어 금속 반사와 부드러운 채움광을 낸다 (외부 파일·의존성 없음). */
+/** 부품 이름표: 부품 위쪽 점을 화면 좌표로 투영해 DOM 라벨을 움직인다 (장면 안에 글자를 그리지 않는다). */
+function LabelProjector({
+  boxes,
+  labels,
+  lift,
+}: {
+  boxes: readonly SceneBox[];
+  labels: RefObject<(HTMLElement | null)[]>;
+  lift: number;
+}) {
+  const { camera, gl } = useThree();
+  const v = useMemo(() => new Vector3(), []);
+  useFrame(() => {
+    const w = gl.domElement.clientWidth;
+    const h = gl.domElement.clientHeight;
+    boxes.forEach((b, i) => {
+      const el = labels.current?.[i];
+      if (!el) return;
+      v.set(b.position[0], b.position[1], b.position[2] + b.size[2] / 2 + lift).project(camera);
+      const visible = v.z < 1;
+      el.style.display = visible ? "block" : "none";
+      el.style.transform = `translate(${((v.x + 1) / 2) * w}px, ${((1 - v.y) / 2) * h}px) translate(-50%, -140%)`;
+    });
+  });
+  return null;
+}
+
 function Environment() {
   const { gl, scene } = useThree();
   useEffect(() => {
@@ -243,6 +270,7 @@ export function Viewer3D({
   const [section, setSection] = useState(false);
   /** 분해 보기 0~1: 뚜껑과 부품을 위로 벌려 안쪽 구성을 보여 준다. */
   const [explode, setExplode] = useState(0);
+  const labels = useRef<(HTMLElement | null)[]>([]);
   const caseState = useCase(systemPath, showCase, loaded);
   const all = useMemo(() => buildScene3d(loaded), [loaded]);
   // 케이스를 보는 동안은 치수 없는 자리표시를 숨긴다 — 케이스에 들어가지 않는 가정 크기가 섞여 보이지 않게
@@ -310,6 +338,7 @@ export function Viewer3D({
           position={[center[0], center[1], floor]}
         />
         <Orbit radius={radius} target={target} />
+        <LabelProjector boxes={boxes} labels={labels} lift={showCase ? explode * 0.01 : 0} />
         {boxes.map((b) => (
           <group key={b.id} position={[0, 0, showCase ? explode * 0.01 : 0]}>
             <Part
@@ -326,6 +355,17 @@ export function Viewer3D({
         {data && <CaseSolid mesh={data.base} color="#9aa5b4" clip={clip} />}
         {data && <CaseSolid mesh={data.lid} color="#b8c1cd" clip={clip} lift={explode * 0.022} />}
       </Canvas>
+      {boxes.map((b, i) => (
+        <span
+          key={b.id}
+          className="part-label"
+          ref={(el) => {
+            labels.current[i] = el;
+          }}
+        >
+          {b.real ? b.id : `${b.id} · 가정 크기`}
+        </span>
+      ))}
       <div className="float case-bar">
         <span className="seg">
           <button

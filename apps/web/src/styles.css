@@ -672,3 +672,19 @@ button.icon {
   width: 90px;
   accent-color: var(--accent);
 }
+
+/* 3D 부품 이름표 */
+.part-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  display: none;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 11px;
+  pointer-events: none;
+  white-space: nowrap;
+}
