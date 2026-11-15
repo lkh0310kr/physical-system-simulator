@@ -1,0 +1,369 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.arm-frame",
+  "name": "4-axis robot arm frame (with gripper)",
+  "category": "mechanical/arm",
+  "description": "베이스 회전·어깨·팔꿈치·손목·그리퍼의 5 관절 팔 프레임. 서보 각도 신호 j1~j5를 받아 3D에서 관절이 움직이고, 순기구학으로 그리퍼 끝 위치(tipX/Y/Z)를 낸다. 링크 길이와 모양은 일반적인 4축 아크릴 팔 규모의 **가정**이다(실제 프레임 치수 확인 필요).",
+  "propertySchema": {
+    "baseHeight": {
+      "type": "number",
+      "unit": "m",
+      "min": 0,
+      "default": 0.08,
+      "description": "바닥에서 어깨 축까지 높이. 프레임 가정(아크릴 4축 팔 규모)"
+    },
+    "link1": {
+      "type": "number",
+      "unit": "m",
+      "min": 0.01,
+      "default": 0.1,
+      "description": "위팔 길이. 가정"
+    },
+    "link2": {
+      "type": "number",
+      "unit": "m",
+      "min": 0.01,
+      "default": 0.1,
+      "description": "아래팔 길이. 가정"
+    },
+    "gripperLength": {
+      "type": "number",
+      "unit": "m",
+      "min": 0,
+      "default": 0.06,
+      "description": "손목 축에서 집는 점까지. 가정"
+    },
+    "gripClosedAngle": {
+      "type": "number",
+      "unit": "rad",
+      "min": 0.1,
+      "default": 1,
+      "description": "그리퍼 서보가 이 각도일 때 완전히 닫힘으로 본다. 가정"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "j1",
+      "domain": "signal",
+      "direction": "in",
+      "description": "베이스 서보 각도 [rad]"
+    },
+    {
+      "name": "j2",
+      "domain": "signal",
+      "direction": "in",
+      "description": "어깨"
+    },
+    {
+      "name": "j3",
+      "domain": "signal",
+      "direction": "in",
+      "description": "팔꿈치"
+    },
+    {
+      "name": "j4",
+      "domain": "signal",
+      "direction": "in",
+      "description": "손목"
+    },
+    {
+      "name": "j5",
+      "domain": "signal",
+      "direction": "in",
+      "description": "그리퍼"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.arm-frame"
+    }
+  ],
+  "metadata": {
+    "fidelity": "approximate",
+    "assumptions": [
+      "링크 길이 100/100 mm, 어깨 높이 80 mm, 그리퍼 60 mm",
+      "서보 몸체·링크 모양은 표시용",
+      "손목 서보를 90° 돌려 단 구조(명령 0이면 그리퍼 수평)",
+      "관절 간 간섭·자체 충돌은 검사하지 않음"
+    ]
+  },
+  "body": {
+    "size": [260, 260, 300],
+    "mass": 400,
+    "parts": [
+      {
+        "name": "base-plate",
+        "shape": "box",
+        "position": [0, 0, -145],
+        "size": [110, 110, 10],
+        "material": "plastic",
+        "color": "#d8d4c8"
+      },
+      {
+        "name": "turret",
+        "shape": "box",
+        "position": [0, 0, -105],
+        "size": [44, 44, 70],
+        "material": "plastic",
+        "color": "#d8d4c8",
+        "motion": {
+          "signal": "j1",
+          "axis": "z",
+          "rotate": true,
+          "scale": 1,
+          "pivot": [0, 0, -150]
+        }
+      },
+      {
+        "name": "shoulder-servo",
+        "shape": "box",
+        "position": [0, 0, -70],
+        "size": [20, 41, 36],
+        "material": "plastic",
+        "color": "#1c1f24",
+        "motion": {
+          "signal": "j1",
+          "axis": "z",
+          "rotate": true,
+          "scale": 1,
+          "pivot": [0, 0, -150]
+        }
+      },
+      {
+        "name": "upper-arm",
+        "shape": "box",
+        "position": [0, 0, -20.0],
+        "size": [8, 12, 100],
+        "material": "plastic",
+        "color": "#d8d4c8",
+        "motion": [
+          {
+            "signal": "j2",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, -70]
+          },
+          {
+            "signal": "j1",
+            "axis": "z",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, -150]
+          }
+        ]
+      },
+      {
+        "name": "elbow-servo",
+        "shape": "box",
+        "position": [0, 0, 30],
+        "size": [20, 41, 36],
+        "material": "plastic",
+        "color": "#1c1f24",
+        "motion": [
+          {
+            "signal": "j2",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, -70]
+          },
+          {
+            "signal": "j1",
+            "axis": "z",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, -150]
+          }
+        ]
+      },
+      {
+        "name": "forearm",
+        "shape": "box",
+        "position": [0, 0, 80.0],
+        "size": [8, 10, 100],
+        "material": "plastic",
+        "color": "#d8d4c8",
+        "motion": [
+          {
+            "signal": "j3",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, 30]
+          },
+          {
+            "signal": "j2",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, -70]
+          },
+          {
+            "signal": "j1",
+            "axis": "z",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, -150]
+          }
+        ]
+      },
+      {
+        "name": "wrist-servo",
+        "shape": "box",
+        "position": [0, 0, 130],
+        "size": [11, 23, 29],
+        "material": "plastic",
+        "color": "#2b5fb0",
+        "motion": [
+          {
+            "signal": "j3",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, 30]
+          },
+          {
+            "signal": "j2",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, -70]
+          },
+          {
+            "signal": "j1",
+            "axis": "z",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, -150]
+          }
+        ]
+      },
+      {
+        "name": "gripper-body",
+        "shape": "box",
+        "position": [24, 0, 130],
+        "size": [48, 12, 14],
+        "material": "plastic",
+        "color": "#d8d4c8",
+        "motion": [
+          {
+            "signal": "j4",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, 130]
+          },
+          {
+            "signal": "j3",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, 30]
+          },
+          {
+            "signal": "j2",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, -70]
+          },
+          {
+            "signal": "j1",
+            "axis": "z",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, -150]
+          }
+        ]
+      },
+      {
+        "name": "jaw-a",
+        "shape": "box",
+        "position": [52, 7.5, 130],
+        "size": [20, 3, 8],
+        "material": "plastic",
+        "color": "#e6e2d3",
+        "motion": [
+          {
+            "signal": "grip",
+            "axis": "y",
+            "distance": -4
+          },
+          {
+            "signal": "j4",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, 130]
+          },
+          {
+            "signal": "j3",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, 30]
+          },
+          {
+            "signal": "j2",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, -70]
+          },
+          {
+            "signal": "j1",
+            "axis": "z",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, -150]
+          }
+        ]
+      },
+      {
+        "name": "jaw-b",
+        "shape": "box",
+        "position": [52, -7.5, 130],
+        "size": [20, 3, 8],
+        "material": "plastic",
+        "color": "#e6e2d3",
+        "motion": [
+          {
+            "signal": "grip",
+            "axis": "y",
+            "distance": 4
+          },
+          {
+            "signal": "j4",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, 130]
+          },
+          {
+            "signal": "j3",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, 30]
+          },
+          {
+            "signal": "j2",
+            "axis": "y",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, -70]
+          },
+          {
+            "signal": "j1",
+            "axis": "z",
+            "rotate": true,
+            "scale": 1,
+            "pivot": [0, 0, -150]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.servo-mg996r",
+  "name": "High-torque servo MG996R (Tower Pro)",
+  "category": "electromechanical/servo",
+  "description": "고토크 서보(로봇팔 어깨·팔꿈치용). 명령 각도를 따라 돌고 속도는 데이터시트 값(60°당 0.17초 @4.8 V)을 넘지 않는다. 정지 토크 9.4 kgf·cm(4.8 V)는 `stallTorque`로 두고, 부하 토크가 이를 넘으면 움직이지 못한다.",
+  "propertySchema": {
+    "range": {
+      "type": "number",
+      "min": 0.1,
+      "default": 3.14159,
+      "description": "총 가동 각도 [rad] (중앙 ±90°로 가정 — 제품 페이지에 없음)"
+    },
+    "speed": {
+      "type": "number",
+      "min": 0.01,
+      "default": 6.15999,
+      "description": "최대 속도 [rad/s]: 데이터시트 0.17 s/60° (4.8 V) = 약 353°/s. 일부 판매처는 0.19 s/60°로 적어 출처 간 불일치"
+    },
+    "minSupply": {
+      "type": "number",
+      "unit": "V",
+      "default": 4.8,
+      "description": "동작 전압 하한 4.8 V (데이터시트 4.8~7.2 V)"
+    },
+    "idleCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 10,
+      "description": "정지 전류 — 데이터시트에 없는 가정"
+    },
+    "movingCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 500,
+      "description": "이동 중 전류 — 가정 (정지 전류는 약 2.5 A로 알려졌으나 이 판의 데이터시트에서 확인하지 못함)"
+    },
+    "stallTorque": {
+      "type": "number",
+      "min": 0,
+      "default": 0.9217,
+      "description": "정지 토크 [N·m]: 9.4 kgf·cm (4.8 V) = 0.9217 N·m (11 kgf·cm @6 V). 부하 토크 한계 모델에 쓴다"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "VCC",
+      "domain": "electrical",
+      "description": "3~6 V"
+    },
+    {
+      "name": "GND",
+      "domain": "electrical",
+      "ground": true
+    },
+    {
+      "name": "command",
+      "domain": "signal",
+      "direction": "in",
+      "description": "목표 각도 [rad]"
+    },
+    {
+      "name": "angle",
+      "domain": "signal",
+      "direction": "out",
+      "description": "출력축 각도 [rad]"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.servo"
+    }
+  ],
+  "metadata": {
+    "fidelity": "approximate",
+    "source": "MG996R Tower Pro 데이터시트 사본 (courses.ece.cornell.edu .../MG996R_Tower-Pro.pdf) 및 유통사 다수: 정지 토크 9.4 kgf·cm(4.8 V)/11(6 V), 속도 0.17 s/60°(4.8 V)/0.14(6 V), 55 g, 40.7×19.7×42.9 mm. 일부 판매처는 4.8 V 속도를 0.19 s/60°, 클론은 13 kg·cm·62 g으로 적어 불일치",
+    "assumptions": [
+      "총 가동 각도 180°(제품 변형에 따라 120°~360°)",
+      "전류(정지·이동)",
+      "부하에 따른 속도 저하는 모델링하지 않음(정지 토크는 속성으로만)",
+      "혼·축 위치는 표시용"
+    ]
+  },
+  "body": {
+    "size": [40.7, 19.7, 42.9],
+    "mass": 55,
+    "parts": [
+      {
+        "name": "housing",
+        "shape": "box",
+        "position": [0, 0, -4],
+        "size": [40.7, 19.7, 36],
+        "material": "plastic",
+        "color": "#1c1f24"
+      },
+      {
+        "name": "shaft",
+        "shape": "cylinder",
+        "position": [11, 0, 17.5],
+        "diameter": 6,
+        "length": 8,
+        "axis": "z",
+        "material": "metal",
+        "color": "#c3c9d1"
+      },
+      {
+        "name": "horn",
+        "shape": "box",
+        "position": [26, 0, 21],
+        "size": [30, 5, 2],
+        "material": "plastic",
+        "color": "#e6e2d3",
+        "motion": {
+          "signal": "angle",
+          "axis": "z",
+          "rotate": true,
+          "scale": 1,
+          "pivot": [11, 0, 21]
+        }
+      }
+    ]
+  }
+}

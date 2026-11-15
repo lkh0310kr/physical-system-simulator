@@ -1,0 +1,99 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.arm-ik",
+  "name": "Arm inverse kinematics (block)",
+  "category": "control/block",
+  "description": "목표 끝 위치(targetX/Y/Z, m)를 베이스·어깨·팔꿈치·손목 각도 명령으로 바꾸는 역기구학 블록. 링크 길이는 프레임 Model과 같아야 한다.",
+  "propertySchema": {
+    "baseHeight": {
+      "type": "number",
+      "unit": "m",
+      "min": 0,
+      "default": 0.08,
+      "description": "바닥에서 어깨 축까지 높이. 프레임 가정(아크릴 4축 팔 규모)"
+    },
+    "link1": {
+      "type": "number",
+      "unit": "m",
+      "min": 0.01,
+      "default": 0.1,
+      "description": "위팔 길이. 가정"
+    },
+    "link2": {
+      "type": "number",
+      "unit": "m",
+      "min": 0.01,
+      "default": 0.1,
+      "description": "아래팔 길이. 가정"
+    },
+    "gripperLength": {
+      "type": "number",
+      "unit": "m",
+      "min": 0,
+      "default": 0.06,
+      "description": "손목 축에서 집는 점까지. 가정"
+    },
+    "jointLimit": {
+      "type": "number",
+      "min": 0.1,
+      "default": 1.5708,
+      "description": "관절 한계 ±[rad] = 서보 가동 범위 180°의 절반"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "targetX",
+      "domain": "signal",
+      "direction": "in"
+    },
+    {
+      "name": "targetY",
+      "domain": "signal",
+      "direction": "in"
+    },
+    {
+      "name": "targetZ",
+      "domain": "signal",
+      "direction": "in"
+    },
+    {
+      "name": "base",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "shoulder",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "elbow",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "wrist",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "reachable",
+      "domain": "signal",
+      "direction": "out"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.arm-ik"
+    }
+  ],
+  "metadata": {
+    "fidelity": "ideal",
+    "assumptions": [
+      "링크 길이는 프레임 가정과 같아야 함",
+      "그리퍼는 항상 수직 아래",
+      "팔꿈치 해는 한 가지(아래팔이 앞으로 굽는 쪽)"
+    ]
+  }
+}

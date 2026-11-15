@@ -1,0 +1,41 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.arm-frame",
+  "name": "Robot Arm Frame",
+  "description": "서보 각도 신호를 받아 팔 관절 자세를 3D로 보이고, 순기구학으로 그리퍼 끝 위치를 계산한다.",
+  "outputs": {
+    "j1": {
+      "type": "number",
+      "description": "베이스 각도 [rad]"
+    },
+    "j2": {
+      "type": "number",
+      "description": "어깨 각도 [rad]"
+    },
+    "j3": {
+      "type": "number",
+      "description": "팔꿈치 각도 [rad]"
+    },
+    "j4": {
+      "type": "number",
+      "description": "손목 각도 [rad]"
+    },
+    "grip": {
+      "type": "number",
+      "description": "그리퍼 닫힘 0~1"
+    },
+    "tipX": {
+      "type": "number",
+      "description": "끝 x [m]"
+    },
+    "tipY": {
+      "type": "number",
+      "description": "끝 y [m]"
+    },
+    "tipZ": {
+      "type": "number",
+      "description": "끝 z [m]"
+    }
+  },
+  "defaultBehavior": "behavior.arm-frame"
+}

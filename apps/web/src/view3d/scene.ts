@@ -42,7 +42,7 @@ export type ScenePart =
       readonly size: Vec3;
       readonly material: MaterialKind;
       readonly color: string | undefined;
-      readonly motion: SceneMotion | undefined;
+      readonly motions: readonly SceneMotion[];
     }
   | {
       readonly kind: "cylinder";
@@ -53,7 +53,7 @@ export type ScenePart =
       readonly axis: "x" | "y" | "z";
       readonly material: MaterialKind;
       readonly color: string | undefined;
-      readonly motion: SceneMotion | undefined;
+      readonly motions: readonly SceneMotion[];
     };
 
 export interface SceneBox {
@@ -100,6 +100,13 @@ const motionOf = (
   return { kind: "translate", signal: m.signal, axis: m.axis, distance: toMeters(m.distance) };
 };
 
+type MotionInput = Parameters<typeof motionOf>[0];
+const motionsOf = (m: MotionInput | NonNullable<MotionInput>[] | undefined): SceneMotion[] =>
+  (Array.isArray(m) ? m : [m]).flatMap((x) => {
+    const v = motionOf(x);
+    return v ? [v] : [];
+  });
+
 const v3 = (v: readonly [number | string, number | string, number | string]): Vec3 => [
   toMeters(v[0]),
   toMeters(v[1]),
@@ -143,7 +150,7 @@ export function buildScene3d(loaded: LoadedSystem): SceneBox[] {
                 size: v3(p.size),
                 material: p.material,
                 color: p.color,
-                motion: motionOf(p.motion),
+                motions: motionsOf(p.motion),
               }
             : {
                 kind: "cylinder",
@@ -154,7 +161,7 @@ export function buildScene3d(loaded: LoadedSystem): SceneBox[] {
                 axis: p.axis,
                 material: p.material,
                 color: p.color,
-                motion: motionOf(p.motion),
+                motions: motionsOf(p.motion),
               },
       ),
     };

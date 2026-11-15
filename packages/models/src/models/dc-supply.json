@@ -1,0 +1,51 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.dc-supply",
+  "name": "External DC supply (generic)",
+  "category": "electrical/power",
+  "description": "서보·모터용 외부 직류 전원(5~6 V 어댑터 등). 일반 모델이며 특정 제품이 아니다. 서보는 Arduino 5 V 핀이 아니라 이런 별도 전원으로 구동하고 GND를 공통으로 묶는다.",
+  "propertySchema": {
+    "voltage": {
+      "type": "number",
+      "unit": "V",
+      "min": 0,
+      "default": 6,
+      "description": "출력 전압. 서보 정격(MG996R 4.8~7.2 V) 안으로 고른다"
+    },
+    "internalResistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 0.001,
+      "default": 0.05,
+      "description": "내부 저항. 가정"
+    },
+    "maxCurrent": {
+      "type": "number",
+      "unit": "A",
+      "min": 0,
+      "default": 3,
+      "description": "정격 전류 — 서보 합계 전류가 이를 넘으면 전원이 모자란 것으로 본다(현재는 표시만). 가정"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "+",
+      "domain": "electrical"
+    },
+    {
+      "name": "-",
+      "domain": "electrical",
+      "ground": true
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.dc-source"
+    }
+  ],
+  "metadata": {
+    "fidelity": "ideal",
+    "assumptions": ["전압 고정, 전류 한계는 모델링하지 않음"]
+  }
+}

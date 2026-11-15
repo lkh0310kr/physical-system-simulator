@@ -5,10 +5,13 @@ import {
   loadLibrary,
   type Registry,
 } from "@physisim/core";
+import { armFrame } from "./behaviors/arm-frame.ts";
+import { armIk } from "./behaviors/arm-ik.ts";
 import { avoider } from "./behaviors/avoider.ts";
 import { battery } from "./behaviors/battery.ts";
 import { cameraNode } from "./behaviors/camera-node.ts";
 import { dcMotor } from "./behaviors/dc-motor.ts";
+import { dcSource } from "./behaviors/dc-source.ts";
 import { digitalIo } from "./behaviors/digital-io.ts";
 import { driveBase } from "./behaviors/drive-base.ts";
 import { hBridge } from "./behaviors/h-bridge.ts";
@@ -25,10 +28,13 @@ import { steeringMixer } from "./behaviors/steering-mixer.ts";
 import { switchBehavior } from "./behaviors/switch.ts";
 import { ultrasonic } from "./behaviors/ultrasonic.ts";
 import { voltmeter } from "./behaviors/voltmeter.ts";
+import armFrameCapability from "./capabilities/arm-frame.json" with { type: "json" };
+import armIkCapability from "./capabilities/arm-ik.json" with { type: "json" };
 import avoiderCapability from "./capabilities/avoider.json" with { type: "json" };
 import batteryCapability from "./capabilities/battery.json" with { type: "json" };
 import cameraNodeCapability from "./capabilities/camera-node.json" with { type: "json" };
 import dcMotorCapability from "./capabilities/dc-motor.json" with { type: "json" };
+import dcSourceCapability from "./capabilities/dc-source.json" with { type: "json" };
 import driveBaseCapability from "./capabilities/drive-base.json" with { type: "json" };
 import gpio from "./capabilities/gpio.json" with { type: "json" };
 import hBridgeCapability from "./capabilities/h-bridge.json" with { type: "json" };
@@ -46,8 +52,11 @@ import signalSourceCapability from "./capabilities/signal-source.json" with { ty
 import steeringMix from "./capabilities/steering-mix.json" with { type: "json" };
 import switching from "./capabilities/switching.json" with { type: "json" };
 import arduinoUno from "./models/arduino-uno.json" with { type: "json" };
+import armFrameModel from "./models/arm-frame.json" with { type: "json" };
+import armIkModel from "./models/arm-ik.json" with { type: "json" };
 import atmega328p from "./models/atmega328p.json" with { type: "json" };
 import avoiderController from "./models/avoider-controller.json" with { type: "json" };
+import dcSupply from "./models/dc-supply.json" with { type: "json" };
 import esp32C6Chip from "./models/esp32-c6-qfn32.json" with { type: "json" };
 import esp32P4Camera from "./models/esp32-p4-c6-camera-node.json" with { type: "json" };
 import esp32P4Chip from "./models/esp32-p4-qfn104.json" with { type: "json" };
@@ -68,6 +77,7 @@ import potentiometerModel from "./models/potentiometer.json" with { type: "json"
 import pushbutton from "./models/pushbutton.json" with { type: "json" };
 import resistor from "./models/resistor.json" with { type: "json" };
 import robotChassis from "./models/robot-chassis-2wd.json" with { type: "json" };
+import servoMg996r from "./models/servo-mg996r.json" with { type: "json" };
 import servoModel from "./models/servo-sg92r.json" with { type: "json" };
 import signalGenerator from "./models/signal-generator.json" with { type: "json" };
 import steeringMixerModel from "./models/steering-mixer.json" with { type: "json" };
@@ -100,10 +110,13 @@ export {
 /** 표준 라이브러리 정의 묶음. */
 export const standardLibrary: LibraryInput = {
   behaviors: [
+    armFrame,
+    armIk,
     avoider,
     battery,
     cameraNode,
     dcMotor,
+    dcSource,
     hBridge,
     lineSensor,
     photoresistor,
@@ -122,6 +135,8 @@ export const standardLibrary: LibraryInput = {
     powerSupply,
   ],
   capabilities: [
+    armFrameCapability,
+    armIkCapability,
     avoiderCapability,
     batteryCapability,
     cameraNodeCapability,
@@ -134,6 +149,7 @@ export const standardLibrary: LibraryInput = {
     steeringMix,
     ranging,
     dcMotorCapability,
+    dcSourceCapability,
     driveBaseCapability,
     gpio,
     lightEmission,
@@ -156,15 +172,19 @@ export const standardLibrary: LibraryInput = {
     ov5640Sensor,
     xiaoSense,
     ttMotor,
+    dcSupply,
     robotChassis,
     ultrasonicModel,
     hBridgeModel,
     avoiderController,
+    armFrameModel,
+    armIkModel,
     pidModel,
     photoresistorModel,
     lineSensorModel,
     steeringMixerModel,
     servoModel,
+    servoMg996r,
     signalGenerator,
     lineFloor,
     wallModel,
