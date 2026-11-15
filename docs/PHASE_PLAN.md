@@ -151,7 +151,7 @@
 **6a — Arduino 실펌웨어 (사용자 결정으로 먼저 진행)**
 
 - [x] P6-T0a `@physisim/avr`: avr8js로 ATmega328P 펌웨어 실행, 포트 ↔ GPIO 이벤트, USART ↔ 시리얼
-- [ ] P6-T0b 스케치 컴파일 (arduino-cli, 캐시, 오류를 파일·줄 위치로)
+- [x] P6-T0b 스케치 컴파일 (arduino-cli, 캐시, 오류를 파일·줄 위치로)
 - [ ] P6-T0c CLI·dev 서버·웹에서 `.ino` 프로그램 실행·편집
 - [ ] P6-T0d 예제를 `blink.ino`로, 미리 컴파일한 hex로 CI E2E, 작성 가이드 갱신
 
