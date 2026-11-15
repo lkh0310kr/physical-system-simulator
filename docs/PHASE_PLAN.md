@@ -93,7 +93,7 @@
 - [x] P3-T5 MCU 프로그램 런타임 (JS, `pinMode/digitalWrite/digitalRead/delay/millis`)
 - [x] P3-T6 결과 기록 (시계열 trace, 이벤트 로그) + JSON 출력
 - [x] P3-T7 CLI: `physisim validate|run <system.json> --duration 2s`
-- [ ] P3-T8 E2E: Blink 예제에서 LED 밝기가 1Hz로 토글되는지 테스트
+- [x] P3-T8 E2E: Blink 예제에서 LED 밝기가 1Hz로 토글되는지 테스트
 
 🔶 결정 게이트
 - ~~G3-1 시간 모델~~ → 혼합

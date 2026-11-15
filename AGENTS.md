@@ -145,6 +145,7 @@ pnpm lint        # Biome
 pnpm typecheck   # tsc
 pnpm test        # Vitest
 pnpm build
+pnpm physisim run examples/blink-led.system.json   # CLI 실행
 ```
 
 ## 8. 코딩 컨벤션
