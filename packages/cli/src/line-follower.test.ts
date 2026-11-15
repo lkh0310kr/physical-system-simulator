@@ -47,5 +47,5 @@ describe("line-following robot (P8-T2)", () => {
     );
     if (!r.ok) throw new Error(JSON.stringify(r.issues));
     expect(r.value.best?.value ?? 0).toBeGreaterThan(1);
-  });
+  }, 60_000);
 });

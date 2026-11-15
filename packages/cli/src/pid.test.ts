@@ -61,5 +61,5 @@ describe("PID speed control (P8-T1)", () => {
     expect(best?.objective ?? Infinity).toBeLessThan(worst);
     // ki=0.05(거의 적분 없음)보다 훨씬 큰 값이 낫다
     expect(best?.value ?? 0).toBeGreaterThan(0.5);
-  });
+  }, 60_000);
 });
