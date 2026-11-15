@@ -44,19 +44,19 @@
 
 **목표**: 스펙 §4~§6, §14를 코드로 — Model·Property Schema·Capability·Behavior 참조를 데이터로 정의하고 검증한다.
 
-- [ ] P1-T1 물리량·단위 표현 (Quantity, 단위 변환·차원 검사)
-- [ ] P1-T2 Property Schema + 값 검증 (타입·단위·min/max)
-- [ ] P1-T3 Capability 정의 스키마 (inputs/outputs/parameters, `defaultBehavior`)
-- [ ] P1-T4 Model 스키마 (Identity/Properties/Components/Capabilities/Metadata) + Capability 바인딩 + Behavior 해석(override → default → 오류)
-- [ ] P1-T5 Registry (Model/Capability/Behavior 등록·조회·참조 무결성 검사, Components 순환 검출)
-- [ ] P1-T6 JSON 로더 + 사람이 읽을 수 있는 검증 오류 메시지
-- [ ] P1-T7 JSON Schema 내보내기 (`z.toJSONSchema`) — Agent·에디터용
-- [ ] P1-T8 `@physisim/models` 시작: `capability.gpio`, `model.led`, `model.resistor`, `model.arduino-uno` (+ `model.atmega328p` Component)
+- [x] P1-T1 물리량·단위 표현 (Quantity, 단위 변환·차원 검사)
+- [x] P1-T2 Property Schema + 값 검증 (타입·단위·min/max)
+- [x] P1-T3 Capability 정의 스키마 (inputs/outputs/parameters, `defaultBehavior`)
+- [x] P1-T4 Model 스키마 (Identity/Properties/Components/Capabilities/Metadata) + Capability 바인딩 + Behavior 해석(override → default → 오류)
+- [x] P1-T5 Registry (Model/Capability/Behavior 등록·조회·참조 무결성 검사, Components 순환 검출)
+- [x] P1-T6 JSON 로더 + 사람이 읽을 수 있는 검증 오류 메시지
+- [x] P1-T7 JSON Schema 내보내기 (`z.toJSONSchema`) — Agent·에디터용
+- [x] P1-T8 `@physisim/models` 시작: `capability.gpio`, `model.led`, `model.resistor`, `model.arduino-uno` (+ `model.atmega328p` Component)
 
 🔶 결정 게이트
-- G1-1 단위 시스템: 자체 경량 구현 vs js-quantities / mathjs
-- G1-2 Behavior 실행 시그니처: 순수 함수 `step(state, inputs, dt)` vs 이벤트 핸들러 객체 vs 혼합 (스펙 §14.4)
-- G1-3 Capability 바인딩 하나에 Behavior 여러 개 허용 여부 (스펙 §14.4)
+- ~~G1-1 단위 시스템~~ → 자체 경량 구현
+- ~~G1-2 Behavior 실행 시그니처~~ → 순수 함수 `step` + 선택적 이벤트 훅
+- ~~G1-3 바인딩당 Behavior 수~~ → 1개
 
 **완료 기준**: 표준 Model 4종이 검증 통과, 잘못된 Model은 명확한 오류. 테스트가 해석 규칙을 문장으로 설명.
 

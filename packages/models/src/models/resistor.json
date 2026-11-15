@@ -1,0 +1,11 @@
+{
+  "id": "model.resistor",
+  "name": "Resistor",
+  "category": "electrical/passive",
+  "propertySchema": {
+    "resistance": { "type": "number", "unit": "Ω", "min": 0 },
+    "powerRating": { "type": "number", "unit": "W", "min": 0, "default": 0.25 }
+  },
+  "properties": { "resistance": 220 },
+  "metadata": { "fidelity": "ideal" }
+}
