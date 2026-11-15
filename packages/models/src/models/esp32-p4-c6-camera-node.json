@@ -1,0 +1,146 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.esp32-p4-c6-camera-node",
+  "name": "ESP32-P4 + C6 Camera Node (Case B)",
+  "category": "electronics/camera-node",
+  "description": "전용 카메라 SoC형의 동작 모델: ESP32-P4(하드웨어 ISP·JPEG·MIPI CSI) + ESP32-C6(Wi-Fi 6) + OV5640. 전류는 데이터시트 표 값, 하드웨어 인코딩 중 CPU는 유휴라는 가정을 쓴다 (assumptions 참조).",
+  "propertySchema": {
+    "sleepCurrent": {
+      "type": "number",
+      "unit": "uA",
+      "min": 0,
+      "default": 19,
+      "description": "딥슬립: ESP32-P4 12 µA (Table 5-8) + ESP32-C6 7 µA (Table 5-11) = 19 µA"
+    },
+    "bootTime": {
+      "type": "number",
+      "unit": "ms",
+      "min": 0,
+      "default": 150,
+      "description": "깨어나 부팅하는 시간"
+    },
+    "bootCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 69,
+      "description": "부팅: P4 400 MHz 듀얼코어 while(1) 69 mA (Table 5-7). 부팅 시간은 미확인 가정"
+    },
+    "captureTime": {
+      "type": "number",
+      "unit": "ms",
+      "min": 0,
+      "default": 250,
+      "description": "센서 초기화 + 촬영 + JPEG 인코딩"
+    },
+    "captureCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 161,
+      "description": "촬영: P4 200 MHz WAITI 21 mA + OV5640 JPEG 5MP 140 mA. ISP·JPEG는 하드웨어라 CPU 유휴로 가정(미확인)"
+    },
+    "connectTime": {
+      "type": "number",
+      "unit": "ms",
+      "min": 0,
+      "default": 600,
+      "description": "Wi-Fi 연결 (고정 IP·빠른 재연결 가정)"
+    },
+    "connectCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 99,
+      "description": "연결: C6 Wi-Fi RX 78 mA + P4 유휴 21 mA"
+    },
+    "imageBytes": {
+      "type": "integer",
+      "min": 1,
+      "default": 90000,
+      "description": "JPEG 한 장 [byte]. 미확인 가정 (UXGA 약 90 kB)"
+    },
+    "throughput": {
+      "type": "integer",
+      "min": 1,
+      "default": 2500000,
+      "description": "실효 전송 속도 [byte/s]. 2.5 MB/s = ESP-IDF 실험실 iperf TCP TX 20 Mbit/s (실제 HTTP 업로드는 더 느림)"
+    },
+    "transmitCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 301,
+      "description": "전송: C6 Wi-Fi TX 280 mA (802.11n HT20 MCS7 @18.5 dBm) + P4 유휴 21 mA"
+    },
+    "supplyVoltage": {
+      "type": "number",
+      "unit": "V",
+      "default": 3.3,
+      "description": "내부 레귤레이터 출력 전압"
+    },
+    "batteryNominal": {
+      "type": "number",
+      "unit": "V",
+      "default": 3.7,
+      "description": "배터리 공칭 전압 (전류 환산용)"
+    },
+    "regulatorEfficiency": {
+      "type": "number",
+      "min": 0.1,
+      "max": 1,
+      "default": 0.9,
+      "description": "전원관리 효율 (배터리 전류 = 부하 전류 × Vout / (Vbat × 효율))"
+    },
+    "wakeThreshold": {
+      "type": "number",
+      "unit": "V",
+      "default": 1,
+      "description": "이 전압 아래면 버튼이 눌린 것으로 본다"
+    }
+  },
+  "properties": {
+    "sleepCurrent": "19uA",
+    "bootCurrent": "69mA",
+    "captureTime": "150ms",
+    "captureCurrent": "161mA",
+    "connectCurrent": "99mA",
+    "transmitCurrent": "301mA",
+    "imageBytes": 450000
+  },
+  "ports": [
+    {
+      "name": "VCC",
+      "domain": "electrical",
+      "description": "배터리 +"
+    },
+    {
+      "name": "GND",
+      "domain": "electrical",
+      "ground": true
+    },
+    {
+      "name": "WAKE",
+      "domain": "electrical",
+      "description": "깨우기 버튼 (내부 풀업, 버튼은 GND로)"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.camera-node"
+    }
+  ],
+  "metadata": {
+    "fidelity": "approximate",
+    "source": "docs/scenarios/wearable-camera-specs.md — ESP32-P4 Datasheet v0.7 Table 5-7/5-8, ESP32-C6 Datasheet v1.6 Table 5-7/5-11, OV5640 Datasheet Table 8-3",
+    "assumptions": [
+      "bootTime",
+      "captureTime(하드웨어 ISP로 A보다 짧다는 가정)",
+      "connectTime",
+      "P4 CPU 유휴(WAITI)로 촬영·전송",
+      "imageBytes",
+      "throughput(SDIO 구간 포함)",
+      "센서 전원 완전 차단"
+    ]
+  }
+}

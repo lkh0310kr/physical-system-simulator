@@ -124,6 +124,15 @@
   ],
   "metadata": {
     "fidelity": "approximate",
-    "source": "docs/scenarios/wearable-camera-specs.md — ESP32-S3 Datasheet v2.2 Table 5-7/5-9/5-10, OV2640 Datasheet, OV5640 Datasheet Table 8-3. 미확인 항목은 같은 문서 표 참조"
+    "source": "docs/scenarios/wearable-camera-specs.md — ESP32-S3 Datasheet v2.2 Table 5-7/5-9/5-10, OV2640 Datasheet, OV5640 Datasheet Table 8-3. 미확인 항목은 같은 문서 표 참조",
+    "assumptions": [
+      "bootTime",
+      "captureTime",
+      "connectTime",
+      "connectCurrent(RX 하한)",
+      "imageBytes",
+      "throughput(실험실 iperf)",
+      "센서 전원 완전 차단"
+    ]
   }
 }

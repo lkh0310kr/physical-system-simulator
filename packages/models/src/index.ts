@@ -23,6 +23,7 @@ import resistance from "./capabilities/resistance.json" with { type: "json" };
 import switching from "./capabilities/switching.json" with { type: "json" };
 import arduinoUno from "./models/arduino-uno.json" with { type: "json" };
 import atmega328p from "./models/atmega328p.json" with { type: "json" };
+import esp32P4Camera from "./models/esp32-p4-c6-camera-node.json" with { type: "json" };
 import esp32Camera from "./models/esp32-s3-camera-node.json" with { type: "json" };
 import led from "./models/led.json" with { type: "json" };
 import liIonCell from "./models/li-ion-cell.json" with { type: "json" };
@@ -69,6 +70,7 @@ export const standardLibrary: LibraryInput = {
   models: [
     led,
     esp32Camera,
+    esp32P4Camera,
     liIonCell,
     resistor,
     pushbutton,

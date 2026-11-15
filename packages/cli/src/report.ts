@@ -2,6 +2,7 @@
  * 카메라 노드 시나리오 분석 (M4): 시뮬레이션 trace에서 촬영 1회당 지연·에너지와 배터리 수명을 뽑는다.
  * 노드는 `<node>.phase`·`<node>.sent`·`<node>.current`, 배터리는 `<battery>.charge`·`<battery>.energy`를 출력해야 한다.
  */
+import { type LoadedSystem, resolveProperties } from "@physisim/core";
 import type { Trace } from "@physisim/engine";
 import type { Press } from "./simulate.ts";
 
@@ -123,4 +124,13 @@ export function formatReport(
     );
   }
   return lines.join("\n");
+}
+
+/** 배터리 Instance의 용량 [mAh] (Model 값 + Instance override). 없으면 0. */
+export function capacityMah(loaded: LoadedSystem, batteryId: string): number {
+  const inst = loaded.doc.instances.find((i) => i.id === batteryId);
+  const model = loaded.registry.getModel(inst?.model ?? "");
+  if (!inst || !model) return 0;
+  const r = resolveProperties(model.propertySchema, { ...model.properties, ...inst.properties });
+  return r.ok ? Number(r.value.capacity ?? 0) / 3.6 : 0;
 }
