@@ -49,7 +49,8 @@
 | 프로젝트 | 라이선스 | 내용 | 차용 포인트 |
 |---|---|---|---|
 | **Wokwi `diagram.json`** 포맷 | (포맷) | `parts[{type,id,top,left,attrs}]`, `connections[[from,to,color,routing]]` (`led1:A` 같은 `부품:핀` 표기) | System 문서 포맷 설계의 1차 참고 → Phase 2 |
-| **avr8js** (wokwi) | MIT | 브라우저 AVR(ATmega328P) 명령어 에뮬레이터 | 실제 펌웨어 실행 옵션 → Phase 6 결정 게이트 |
+| **avr8js** (wokwi) | MIT | 브라우저 AVR(ATmega328P) 명령어 에뮬레이터 | **도입 (v0.11)** — `@physisim/avr`에서 .ino 펌웨어 실행 |
+| **arduino-cli** | GPL-3 (외부 도구) | Arduino 공식 CLI 컴파일러 | **도입 (v0.11)** — 명령으로 호출만 함, 저장소에 포함·링크하지 않음 |
 | **rp2040js** (wokwi) | MIT | RP2040 에뮬레이터 | 동일 |
 | **wokwi-elements** | MIT | LED, 버튼, 보드 등 Web Components 부품 그래픽 | 2D 에디터 부품 렌더링 → Phase 5 |
 | **Velxio** | (확인 필요) | Wokwi 대안. avr8js + rp2040js + ngspice-WASM(eecircuit-engine) 조합 | 디지털 MCU + 아날로그 SPICE 결합 구조 참고 |
