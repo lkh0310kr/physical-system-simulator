@@ -20,6 +20,8 @@ export interface ProjectState {
   /** 파일에 적힌 그대로의 문서 JSON (편집은 이것을 고쳐 저장한다). */
   readonly docJson: unknown;
   readonly loaded: LoadedSystem | undefined;
+  /** 문서가 참조하는 파일 내용 (문서 기준 상대 경로 → 내용). 시뮬레이션 Worker에 넘긴다. */
+  readonly refs: Readonly<Record<string, string>>;
   readonly issues: readonly Issue[];
   /** 마지막으로 불러온 시각 — 다시 불러올 때마다 바뀐다. */
   readonly revision: number;
@@ -31,39 +33,41 @@ const EMPTY: ProjectState = {
   path: undefined,
   docJson: undefined,
   loaded: undefined,
+  refs: {},
   issues: [],
   revision: 0,
 };
 
-async function load(path: string): Promise<Pick<ProjectState, "docJson" | "loaded" | "issues">> {
+type Loaded = Pick<ProjectState, "docJson" | "loaded" | "refs" | "issues">;
+
+async function load(path: string): Promise<Loaded> {
+  const failed = (message: string): Loaded => ({
+    docJson: undefined,
+    loaded: undefined,
+    refs: {},
+    issues: [{ path, message }],
+  });
   const text = await readFile(path);
-  if (text === undefined)
-    return {
-      docJson: undefined,
-      loaded: undefined,
-      issues: [{ path, message: "파일을 읽을 수 없다" }],
-    };
+  if (text === undefined) return failed("파일을 읽을 수 없다");
   let json: unknown;
   try {
     json = JSON.parse(text);
   } catch (e) {
-    return {
-      docJson: undefined,
-      loaded: undefined,
-      issues: [{ path, message: (e as Error).message }],
-    };
+    return failed((e as Error).message);
   }
   const parsed = SystemSchema.safeParse(json);
-  const refs = parsed.success ? referencedFiles(parsed.data) : [];
-  const contents = new Map(
-    await Promise.all(
-      refs.map(async (r) => [r, await readFile(joinPath(dirOf(path), r))] as const),
-    ),
+  const paths = parsed.success ? referencedFiles(parsed.data) : [];
+  const refs: Record<string, string> = {};
+  await Promise.all(
+    paths.map(async (rel) => {
+      const content = await readFile(joinPath(dirOf(path), rel));
+      if (content !== undefined) refs[rel] = content;
+    }),
   );
-  const r = loadSystemProject(json, (rel) => contents.get(rel), createStandardRegistry);
+  const r = loadSystemProject(json, (rel) => refs[rel], createStandardRegistry);
   return r.ok
-    ? { docJson: json, loaded: r.value, issues: [] }
-    : { docJson: json, loaded: undefined, issues: r.issues };
+    ? { docJson: json, loaded: r.value, refs, issues: [] }
+    : { docJson: json, loaded: undefined, refs, issues: r.issues };
 }
 
 export function useProject() {

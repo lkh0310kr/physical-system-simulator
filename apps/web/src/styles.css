@@ -269,3 +269,32 @@ select.bare {
   stroke-width: 1.5;
   stroke-dasharray: 4 4;
 }
+
+.transport {
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.round.primary {
+  width: 44px;
+  height: 44px;
+}
+
+.round.primary.active {
+  color: var(--accent);
+  box-shadow:
+    var(--shadow),
+    0 0 0 4px var(--accent-glow);
+}
+
+.time {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  min-width: 84px;
+  justify-content: center;
+}
+
+.issues {
+  color: var(--danger);
+}
