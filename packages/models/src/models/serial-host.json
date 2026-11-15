@@ -1,0 +1,89 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.serial-host",
+  "name": "PC / Agent serial host (script player)",
+  "category": "control/host",
+  "description": "PC(또는 AI Agent) 쪽 모델: 스크립트(MOVE x y z · GRIP OPEN/CLOSE · WAIT · DWELL · 원시 명령)를 역기구학으로 컴파일해 Serial 줄로 하나씩 보낸다. `physisim arm lines`가 같은 컴파일러로 실제 하드웨어용 줄을 만든다.",
+  "propertySchema": {
+    "baseHeight": {
+      "type": "number",
+      "unit": "m",
+      "default": 0.08
+    },
+    "link1": {
+      "type": "number",
+      "unit": "m",
+      "default": 0.1
+    },
+    "link2": {
+      "type": "number",
+      "unit": "m",
+      "default": 0.1
+    },
+    "gripperLength": {
+      "type": "number",
+      "unit": "m",
+      "default": 0.06
+    },
+    "shoulderOffset": {
+      "type": "number",
+      "unit": "rad",
+      "default": 0.08727
+    },
+    "elbowOffset": {
+      "type": "number",
+      "unit": "rad",
+      "default": 1.0472
+    },
+    "wristOffset": {
+      "type": "number",
+      "unit": "rad",
+      "default": -1.5708
+    },
+    "holdoff": {
+      "type": "number",
+      "unit": "s",
+      "min": 0,
+      "default": 0.01,
+      "description": "줄을 보낸 뒤 WAIT를 판단하기 전에 컨트롤러가 반응할 시간"
+    },
+    "script": {
+      "type": "string",
+      "default": "",
+      "description": "한 줄에 명령 하나. `#` 뒤는 주석. 예: MOVE 0.15 0.07 0.05"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "moving",
+      "domain": "signal",
+      "direction": "in",
+      "description": "컨트롤러가 이동 중인지"
+    },
+    {
+      "name": "reply",
+      "domain": "signal",
+      "direction": "in",
+      "description": "컨트롤러 응답"
+    },
+    {
+      "name": "line",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "lineId",
+      "domain": "signal",
+      "direction": "out"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.serial-host"
+    }
+  ],
+  "metadata": {
+    "fidelity": "ideal"
+  }
+}

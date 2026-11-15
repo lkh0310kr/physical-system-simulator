@@ -29,6 +29,8 @@ describe("standard library", () => {
       "model.ultrasonic-rcwl-1601",
       "model.h-bridge",
       "model.avoider-controller",
+      "model.arm-controller-uno",
+      "model.serial-host",
       "model.arm-frame",
       "model.arm-ik",
       "model.pick-place-sequencer",

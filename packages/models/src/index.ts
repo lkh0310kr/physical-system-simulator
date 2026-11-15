@@ -5,6 +5,7 @@ import {
   loadLibrary,
   type Registry,
 } from "@physisim/core";
+import { armController } from "./behaviors/arm-controller.ts";
 import { armFrame } from "./behaviors/arm-frame.ts";
 import { armIk } from "./behaviors/arm-ik.ts";
 import { avoider } from "./behaviors/avoider.ts";
@@ -24,12 +25,14 @@ import { pid } from "./behaviors/pid.ts";
 import { potentiometer } from "./behaviors/potentiometer.ts";
 import { powerSupply } from "./behaviors/power-supply.ts";
 import { resistor as resistorBehavior } from "./behaviors/resistor.ts";
+import { serialHost } from "./behaviors/serial-host.ts";
 import { servo } from "./behaviors/servo.ts";
 import { signalSource } from "./behaviors/signal-source.ts";
 import { steeringMixer } from "./behaviors/steering-mixer.ts";
 import { switchBehavior } from "./behaviors/switch.ts";
 import { ultrasonic } from "./behaviors/ultrasonic.ts";
 import { voltmeter } from "./behaviors/voltmeter.ts";
+import armControllerCapability from "./capabilities/arm-controller.json" with { type: "json" };
 import armFrameCapability from "./capabilities/arm-frame.json" with { type: "json" };
 import armIkCapability from "./capabilities/arm-ik.json" with { type: "json" };
 import avoiderCapability from "./capabilities/avoider.json" with { type: "json" };
@@ -51,11 +54,13 @@ import potentiometry from "./capabilities/potentiometry.json" with { type: "json
 import powerSupplyCapability from "./capabilities/power-supply.json" with { type: "json" };
 import ranging from "./capabilities/ranging.json" with { type: "json" };
 import resistance from "./capabilities/resistance.json" with { type: "json" };
+import serialHostCapability from "./capabilities/serial-host.json" with { type: "json" };
 import servoCapability from "./capabilities/servo.json" with { type: "json" };
 import signalSourceCapability from "./capabilities/signal-source.json" with { type: "json" };
 import steeringMix from "./capabilities/steering-mix.json" with { type: "json" };
 import switching from "./capabilities/switching.json" with { type: "json" };
 import arduinoUno from "./models/arduino-uno.json" with { type: "json" };
+import armControllerModel from "./models/arm-controller-uno.json" with { type: "json" };
 import armFrameModel from "./models/arm-frame.json" with { type: "json" };
 import armIkModel from "./models/arm-ik.json" with { type: "json" };
 import atmega328p from "./models/atmega328p.json" with { type: "json" };
@@ -83,6 +88,7 @@ import potentiometerModel from "./models/potentiometer.json" with { type: "json"
 import pushbutton from "./models/pushbutton.json" with { type: "json" };
 import resistor from "./models/resistor.json" with { type: "json" };
 import robotChassis from "./models/robot-chassis-2wd.json" with { type: "json" };
+import serialHostModel from "./models/serial-host.json" with { type: "json" };
 import servoMg996r from "./models/servo-mg996r.json" with { type: "json" };
 import servoModel from "./models/servo-sg92r.json" with { type: "json" };
 import signalGenerator from "./models/signal-generator.json" with { type: "json" };
@@ -116,8 +122,10 @@ export {
 /** 표준 라이브러리 정의 묶음. */
 export const standardLibrary: LibraryInput = {
   behaviors: [
+    armController,
     armFrame,
     armIk,
+    serialHost,
     avoider,
     battery,
     cameraNode,
@@ -143,8 +151,10 @@ export const standardLibrary: LibraryInput = {
     powerSupply,
   ],
   capabilities: [
+    armControllerCapability,
     armFrameCapability,
     armIkCapability,
+    serialHostCapability,
     avoiderCapability,
     batteryCapability,
     cameraNodeCapability,
@@ -187,6 +197,8 @@ export const standardLibrary: LibraryInput = {
     ultrasonicModel,
     hBridgeModel,
     avoiderController,
+    armControllerModel,
+    serialHostModel,
     armFrameModel,
     armIkModel,
     pickPlaceSequencer,
