@@ -5,6 +5,7 @@ export * from "./behavior.ts";
 export * from "./capability.ts";
 export * from "./ids.ts";
 export * from "./issues.ts";
+export * from "./json-schema.ts";
 export * from "./loader.ts";
 export * from "./model.ts";
 export * from "./property.ts";
