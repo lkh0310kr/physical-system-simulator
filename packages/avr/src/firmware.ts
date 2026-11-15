@@ -27,6 +27,9 @@ import {
 import { parseIntelHex } from "./hex.ts";
 import { ATMEGA328P_ARDUINO_PINS, type PinMap, type PortName } from "./pins.ts";
 
+/** 이 주기(초)보다 짧게 반복되는 출력을 PWM으로 본다 (50 Hz 이상). Arduino analogWrite는 약 490·980 Hz. */
+export const PWM_MAX_PERIOD = 0.02;
+
 export interface FirmwareOptions {
   /** CPU 클럭 [Hz]. 기본 16 MHz (Arduino UNO). */
   readonly clockHz?: number;
@@ -91,8 +94,11 @@ export function loadFirmware(
   }
 
   /** 마지막으로 GPIO에 알린 핀 상태. 리셋 직후(입력·LOW)는 알리지 않는다 — 실제로 바뀐 핀만 보인다. */
-  const known = new Map<number, { output: boolean; level: boolean; pullup: boolean }>();
-  const initial = { output: false, level: false, pullup: false };
+  const known = new Map<
+    number,
+    { output: boolean; level: boolean; pullup: boolean; duty: number | undefined }
+  >();
+  const initial = { output: false, level: false, pullup: false, duty: undefined };
   const dispatch = (type: string, payload: unknown) => {
     try {
       sim.dispatch(instance, capability, { type, payload });
@@ -100,6 +106,44 @@ export function loadFirmware(
       error = e as Error;
     }
   };
+
+  /**
+   * PWM 측정: 핀의 상승·하강 시각(사이클)으로 마지막 완전한 주기의 듀티를 구한다.
+   * 주기가 PWM_MAX_PERIOD 이하이고 최근에도 에지가 있으면 PWM, 아니면 일반 디지털 출력이다
+   * (Blink처럼 느린 토글을 PWM으로 오인하지 않는다).
+   */
+  const maxPeriod = PWM_MAX_PERIOD * clockHz;
+  const edges = new Map<
+    number,
+    { rise?: number; fall?: number; duty?: number; period?: number; last: number }
+  >();
+  const trackEdge = (pin: number, level: boolean) => {
+    const e = edges.get(pin) ?? { last: -Infinity };
+    const now = cpu.cycles;
+    if (level) {
+      if (e.rise !== undefined && e.fall !== undefined && e.fall > e.rise) {
+        const period = now - e.rise;
+        if (period > 0 && period <= maxPeriod) {
+          e.duty = (e.fall - e.rise) / period;
+          e.period = period;
+        } else {
+          delete e.duty;
+          delete e.period;
+        }
+      }
+      e.rise = now;
+    } else e.fall = now;
+    e.last = now;
+    edges.set(pin, e);
+  };
+  /** 이 핀이 지금 PWM 중이면 듀티. */
+  const pwmDuty = (pin: number): number | undefined => {
+    const e = edges.get(pin);
+    if (!e || e.duty === undefined || e.period === undefined) return undefined;
+    return cpu.cycles - e.last <= 2 * e.period ? e.duty : undefined;
+  };
+
+  const levelOf = new Map<number, boolean>();
   const sync = () => {
     pinMap.forEach(({ port, bit }, pin) => {
       const state = ports[port].pinState(bit);
@@ -110,8 +154,26 @@ export function loadFirmware(
       if (prev.output !== output || prev.pullup !== pullup) {
         dispatch("pinMode", { pin, mode: output ? "output" : "input", pullup });
       }
-      if (output && prev.level !== level) dispatch("digitalWrite", { pin, level });
-      known.set(pin, { output, level, pullup });
+      if (output && levelOf.get(pin) !== level) trackEdge(pin, level);
+      levelOf.set(pin, output ? level : false);
+      known.set(pin, { ...prev, output, pullup });
+    });
+  };
+
+  /** 구간 끝: 출력 핀의 레벨(PWM이면 듀티)이 바뀌었으면 GPIO에 알린다. */
+  const flushOutputs = () => {
+    pinMap.forEach((_, pin) => {
+      const prev = known.get(pin);
+      if (!prev?.output) return;
+      const duty = pwmDuty(pin);
+      const level = duty === undefined ? levelOf.get(pin) === true : duty >= 0.5;
+      const sameDuty =
+        duty === undefined
+          ? prev.duty === undefined
+          : prev.duty !== undefined && Math.abs(prev.duty - duty) < 1 / 512;
+      if (prev.level === level && sameDuty) return;
+      dispatch("digitalWrite", duty === undefined ? { pin, level } : { pin, level, duty });
+      known.set(pin, { ...prev, level, duty });
     });
   };
 
@@ -161,6 +223,7 @@ export function loadFirmware(
       error = e as Error;
       return;
     }
+    flushOutputs();
     sim.schedule(sim.time + slice, run);
   };
   sim.schedule(sim.time, run);

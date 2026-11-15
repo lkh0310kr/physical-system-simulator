@@ -143,16 +143,40 @@ export function createSimulation(
     }
   }
 
+  /** PWM 구동원이 있을 때 한 주기를 이 개수의 위상으로 나눠 풀고 평균한다 (듀티 분해능 1/16). */
+  const PWM_PHASES = 16;
+
   function solveCircuit() {
-    const elements = units.flatMap((u) =>
+    const raw = units.flatMap((u) =>
       (u.behavior.circuit?.(u.state, { properties: u.properties, config: u.config }) ?? []).map(
-        (e) => toNodeElement(u, e),
+        (e) => ({ u, e }),
       ),
     );
-    if (elements.length === 0) return;
-    const solution = solver.solve(nodeCount, elements);
-    voltages = solution.voltages;
-    currents = solution.currents;
+    if (raw.length === 0) return;
+    const pwm = raw.some(
+      ({ e }) => e.kind === "drive" && e.duty !== undefined && e.duty > 0 && e.duty < 1,
+    );
+    const phases = pwm ? PWM_PHASES : 1;
+    let sumV: number[] | undefined;
+    const sumI = new Map<string, number>();
+    for (let k = 0; k < phases; k++) {
+      const phase = (k + 0.5) / phases;
+      const elements = raw.map(({ u, e }) =>
+        toNodeElement(
+          u,
+          e.kind === "drive" && e.duty !== undefined
+            ? { ...e, voltage: phase < e.duty ? e.voltage : 0 }
+            : e,
+        ),
+      );
+      const solution = solver.solve(nodeCount, elements);
+      sumV = (sumV ?? solution.voltages.map(() => 0)).map(
+        (v, i) => v + (solution.voltages[i] ?? 0),
+      );
+      for (const [id, i] of solution.currents) sumI.set(id, (sumI.get(id) ?? 0) + i);
+    }
+    voltages = (sumV ?? [0]).map((v) => v / phases);
+    currents = new Map([...sumI].map(([id, i]) => [id, i / phases]));
   }
 
   // ── 루프 ─────────────────────────────────────────────────

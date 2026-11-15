@@ -12,3 +12,4 @@ cp /tmp/out/blink.ino.hex src/fixtures/blink.hex
 - `button.ino` / `button.hex`: examples/button.ino와 같다. D2 버튼(INPUT_PULLUP) → D13 LED
 - `pot.ino` / `pot.hex`: A0를 analogRead해 100ms마다 Serial로 출력
 - `pwm.ino` / `pwm.hex`: D9에 analogWrite(9, 64) — 듀티 약 25%, 약 490Hz
+- `pwm0/128/255.hex`: 같은 스케치의 analogWrite 값만 0/128/255로 바꾼 빌드

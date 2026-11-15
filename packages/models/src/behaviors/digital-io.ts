@@ -6,6 +6,8 @@ export interface PinState {
   readonly pin: number;
   readonly mode: PinMode;
   readonly level: boolean;
+  /** PWM 출력의 듀티 (0~1). 없으면 일반 디지털 출력. */
+  readonly duty?: number;
   /** 입력 핀의 내부 풀업. 켜져 있으면 회로에서 logicLevel로 당겨진다. */
   readonly pullup?: boolean;
 }
@@ -22,8 +24,19 @@ export type DigitalIoEvent =
     }
   | {
       readonly type: "digitalWrite";
-      readonly payload: { readonly pin: number; readonly level: boolean };
+      readonly payload: {
+        readonly pin: number;
+        readonly level: boolean;
+        /** PWM 핀의 듀티 (0~1). 생략하면 일반 디지털 출력이고, 있으면 level은 듀티 ≥ 0.5로 근사한 값. */
+        readonly duty?: number;
+      };
     };
+
+/** `duty`가 있으면 넣고, 없으면 필드를 뺀다 (일반 디지털 출력으로 되돌아간다). */
+function withDuty(pin: PinState, duty: number | undefined): PinState {
+  const { duty: _old, ...rest } = pin;
+  return duty === undefined ? rest : { ...rest, duty };
+}
 
 /** 핀 번호 → Port 이름. 범위를 벗어나면 RangeError. */
 export function pinPort(config: ResolvedValues, pin: number): string {
@@ -52,7 +65,7 @@ export const digitalIo = defineBehavior<DigitalIoState>({
     const next: PinState =
       e.type === "pinMode"
         ? { ...prev, mode: e.payload.mode, pullup: e.payload.pullup === true }
-        : { ...prev, level: e.payload.level };
+        : withDuty({ ...prev, level: e.payload.level }, e.payload.duty);
     const state = { pins: { ...s.pins, [port]: next } };
     return { state, outputs: outputsOf(state) };
   },
@@ -64,8 +77,9 @@ export const digitalIo = defineBehavior<DigitalIoState>({
             kind: "drive" as const,
             id: port,
             port,
-            voltage: p.level ? numberOf(ctx.config, "logicLevel") : 0,
+            voltage: p.duty !== undefined || p.level ? numberOf(ctx.config, "logicLevel") : 0,
             resistance: numberOf(ctx.config, "outputResistance"),
+            ...(p.duty === undefined ? {} : { duty: p.duty }),
           },
         ];
       }

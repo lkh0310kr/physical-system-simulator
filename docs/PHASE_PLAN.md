@@ -160,11 +160,11 @@
 - [x] P6-T1a 풀업: `INPUT_PULLUP` 핀이 회로에서 약 20kΩ으로 5V에 당겨지게 (지금은 떠 있는 핀이 0으로 읽힘)
 - [x] P6-T1b 스위치(버튼) Model, 캔버스에서 클릭으로 누르기
 - [x] P6-T2 가변저항 Model + ADC 연결 (`analogRead`)
-- [ ] P6-T3 PWM 출력: `analogWrite` → 평균 전압으로 LED 밝기
+- [x] P6-T3 PWM 출력: `analogWrite` → 평균 전압으로 LED 밝기
 
 
 - [x] P6-T1b 센서 Model: 포토레지스터, 초음파 센서
-- [ ] P6-T3 모터 드라이버, DC 모터(전기적 모델), 서보
+- [x] P6-T3 모터 드라이버, DC 모터(전기적 모델), 서보
 - [ ] P6-T4 고장 모델: 과전류 LED 소손, 과전압 경고 (State·이벤트로 표현)
 - [ ] P6-T5 계측기 Model: 멀티미터, 오실로스코프(trace 뷰)
 - [ ] P6-T6 비선형 소자 Solver (다이오드 Newton-Raphson) 또는 SPICE 연동

@@ -186,3 +186,61 @@ describe("createSimulation", () => {
     expect(trace()).toBe(trace());
   });
 });
+
+describe("PWM drive (duty)", () => {
+  const pwmSupply = defineBehavior<{ duty: number }>({
+    id: "behavior.pwm-supply",
+    init: () => ({ duty: 0.25 }),
+    circuit: (s) => [
+      { kind: "drive", id: "out", port: "+", voltage: 6, resistance: 1e-3, duty: s.duty },
+    ],
+    step: (s) => ({ state: s, outputs: {} }),
+  });
+  const lib2 = loadLibrary({
+    behaviors: [pwmSupply, load],
+    capabilities: [
+      { id: "capability.pwm", name: "PWM", defaultBehavior: "behavior.pwm-supply" },
+      { id: "capability.load", name: "Load", defaultBehavior: "behavior.load" },
+    ],
+    models: [
+      {
+        id: "model.pwm",
+        name: "PWM",
+        category: "x",
+        ports: [e("+"), e("-", true)],
+        capabilities: [{ capability: "capability.pwm" }],
+      },
+      {
+        id: "model.resistor",
+        name: "R",
+        category: "x",
+        propertySchema: { resistance: { type: "number", unit: "Ω" } },
+        properties: { resistance: 100 },
+        ports: [e("1"), e("2")],
+        capabilities: [{ capability: "capability.load" }],
+      },
+    ],
+  });
+  if (!lib2.ok) throw new Error("fixture");
+
+  it("averages a resistive load to duty × voltage", () => {
+    const built = buildSystem(
+      lib2.value,
+      SystemSchema.parse({
+        name: "t",
+        instances: [
+          { id: "p", model: "model.pwm" },
+          { id: "r", model: "model.resistor" },
+        ],
+        connections: [
+          ["p:+", "r:1"],
+          ["r:2", "p:-"],
+        ],
+      }),
+    );
+    if (!built.ok) throw new Error("fixture");
+    const sim = createSimulation(lib2.value, built.value);
+    sim.run(0.001);
+    expect(sim.voltage("r:1")).toBeCloseTo(6 * 0.25, 1);
+  });
+});

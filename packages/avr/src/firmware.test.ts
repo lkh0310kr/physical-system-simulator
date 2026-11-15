@@ -140,3 +140,63 @@ describe("analogRead with a potentiometer (real firmware)", () => {
     expect(reading(0.75)[0]).toBe(767);
   });
 });
+
+describe("analogWrite PWM (real firmware, ~490 Hz on D9)", () => {
+  /** D9 → 220Ω → LED → GND. 최종 LED 밝기와 D9 상태를 돌려준다. */
+  function pwm(file: string) {
+    const built = buildSystem(
+      registry,
+      SystemSchema.parse({
+        name: "pwm",
+        instances: [
+          { id: "uno", model: "model.arduino-uno" },
+          { id: "r1", model: "model.resistor" },
+          { id: "led1", model: "model.led" },
+        ],
+        connections: [
+          ["uno:D9", "r1:1"],
+          ["r1:2", "led1:A"],
+          ["led1:C", "uno:GND.1"],
+        ],
+      }),
+    );
+    if (!built.ok) throw new Error(JSON.stringify(built.issues));
+    const sim = createSimulation(registry, built.value);
+    loadFirmware(sim, "uno", readFileSync(join(import.meta.dirname, "fixtures", file), "utf8"), {
+      pinCount: 14,
+    });
+    const rec = recordTrace(sim);
+    sim.run(0.2);
+    const trace = rec.stop();
+    return Number(trace.final["led1.brightness"]);
+  }
+
+  const full = 3 / 255 / 0.02; // 항상 켜졌을 때의 밝기
+
+  it("lights the LED in proportion to the duty cycle (average current, not average voltage)", () => {
+    expect(pwm("pwm0.hex")).toBe(0);
+    expect(pwm("pwm.hex")).toBeCloseTo(full * (64 / 255), 2);
+    expect(pwm("pwm128.hex")).toBeCloseTo(full * (128 / 255), 2);
+    expect(pwm("pwm255.hex")).toBeCloseTo(full, 6);
+  });
+
+  it("does not alias the 490 Hz waveform into alternating on/off", () => {
+    const built = buildSystem(
+      registry,
+      SystemSchema.parse({
+        name: "pwm",
+        instances: [{ id: "uno", model: "model.arduino-uno" }],
+        connections: [],
+      }),
+    );
+    if (!built.ok) throw new Error("fixture");
+    const sim = createSimulation(registry, built.value);
+    loadFirmware(sim, "uno", readFileSync(join(import.meta.dirname, "fixtures/pwm.hex"), "utf8"), {
+      pinCount: 14,
+    });
+    const rec = recordTrace(sim);
+    sim.run(0.2);
+    const changes = rec.stop().entries.filter((e) => e.signal === "uno.D9");
+    expect(changes.length).toBeLessThan(10); // 안정되면 더 이상 바뀌지 않는다
+  });
+});

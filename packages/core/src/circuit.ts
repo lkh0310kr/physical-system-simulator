@@ -19,6 +19,11 @@ export type CircuitElement =
       readonly port: string;
       readonly voltage: number;
       readonly resistance: number;
+      /**
+       * PWM 듀티 (0~1, 생략하면 항상 켜짐). `voltage`를 듀티만큼의 시간 동안, 나머지는 0V로 구동한다.
+       * 엔진은 켜짐·꺼짐 상태를 각각 풀어 평균하므로 LED 같은 비선형 부품도 평균 전류로 동작한다.
+       */
+      readonly duty?: number;
     }
   /** 구간 선형 다이오드: 순방향 전압을 넘으면 `onResistance`로 도통, 아니면 차단. 전류 방향 anode → cathode. */
   | {
