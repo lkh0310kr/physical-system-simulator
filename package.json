@@ -1,0 +1,12 @@
+{
+  "name": "physisim",
+  "private": true,
+  "type": "module",
+  "description": "AI agent-driven, model-centric physical system simulator",
+  "license": "MIT",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {}
+}
