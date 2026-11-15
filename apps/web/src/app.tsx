@@ -103,6 +103,7 @@ export function App() {
           onPress={sim.input}
           selection={selection}
           onSelect={setSelection}
+          systemPath={project.path}
         />
       )}
       {loaded && view === "2d" && (

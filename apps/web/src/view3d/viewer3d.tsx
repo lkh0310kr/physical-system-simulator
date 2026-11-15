@@ -1,11 +1,20 @@
 /** 3D 뷰어: 조립된 부품을 three.js로 그린다. 장면 데이터는 `scene.ts`의 순수 함수가 만든다. */
 import type { LoadedSystem } from "@physisim/core";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo } from "react";
-import { BoxGeometry, EdgesGeometry } from "three";
+import { useEffect, useMemo, useState } from "react";
+import {
+  BoxGeometry,
+  BufferGeometry,
+  DoubleSide,
+  EdgesGeometry,
+  Float32BufferAttribute,
+  Plane,
+  Vector3,
+} from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { Selection } from "../canvas/canvas.tsx";
 import { activityOf, buildScene3d, type SceneBox, sceneBounds } from "./scene.ts";
+import { type CaseMesh, downloadUrl, useCase } from "./use-case.ts";
 
 const ACCENT = "#2f6bff";
 const REAL = "#e4e8ee";
@@ -20,6 +29,8 @@ interface Props {
   readonly onPress?: (id: string, event: "press" | "release") => void;
   readonly selection?: Selection | undefined;
   readonly onSelect?: (s: Selection | undefined) => void;
+  /** 열린 System 파일 경로 — 케이스 생성에 쓴다. */
+  readonly systemPath?: string | undefined;
 }
 
 /** z가 위인 좌표계에서 궤도 카메라: 드래그 회전, 휠 확대, 우클릭 이동. 장면 크기에 맞춰 처음 거리를 잡는다. */
@@ -100,6 +111,43 @@ function Part({
   );
 }
 
+/** 케이스 메시(mm)를 장면 단위(m)로. 단면이 켜지면 중심 y 평면 앞쪽을 잘라 안을 보여 준다. */
+function CaseSolid({
+  mesh,
+  color,
+  clip,
+}: {
+  mesh: CaseMesh;
+  color: string;
+  clip: Plane | undefined;
+}) {
+  const geometry = useMemo(() => {
+    const g = new BufferGeometry();
+    g.setAttribute(
+      "position",
+      new Float32BufferAttribute(
+        mesh.positions.map((v) => v / 1000),
+        3,
+      ),
+    );
+    g.setIndex(mesh.indices);
+    g.computeVertexNormals();
+    return g;
+  }, [mesh]);
+  return (
+    <mesh geometry={geometry}>
+      <meshStandardMaterial
+        color={color}
+        transparent
+        opacity={0.55}
+        roughness={0.8}
+        side={DoubleSide}
+        clippingPlanes={clip ? [clip] : []}
+      />
+    </mesh>
+  );
+}
+
 export function Viewer3D({
   loaded,
   signals = {},
@@ -107,7 +155,11 @@ export function Viewer3D({
   onPress,
   selection,
   onSelect,
+  systemPath,
 }: Props) {
+  const [showCase, setShowCase] = useState(false);
+  const [section, setSection] = useState(false);
+  const caseState = useCase(systemPath, showCase, loaded);
   const boxes = useMemo(() => buildScene3d(loaded), [loaded]);
   const bounds = useMemo(() => sceneBounds(boxes), [boxes]);
   const center: [number, number, number] = bounds
@@ -129,6 +181,11 @@ export function Viewer3D({
   const targetKey = center.join(",");
   // biome-ignore lint/correctness/useExhaustiveDependencies: 값이 같으면 같은 target 배열을 쓰도록 키로 고정한다.
   const target = useMemo(() => center, [targetKey]);
+  const clip = useMemo(
+    () => (section ? new Plane(new Vector3(0, 1, 0), -center[1]) : undefined),
+    [section, center[1]],
+  );
+  const data = caseState.status === "ready" ? caseState.data : undefined;
 
   return (
     // r3f 래퍼는 height: 100%라서 높이가 있는 부모가 필요하다 — 전체 화면 컨테이너로 감싼다.
@@ -136,6 +193,7 @@ export function Viewer3D({
       <Canvas
         className="view3d"
         camera={{ fov: 40, near: 0.001, far: 5 }}
+        gl={{ localClippingEnabled: true }}
         onPointerMissed={() => onSelect?.(undefined)}
       >
         <ambientLight intensity={0.9} />
@@ -157,7 +215,55 @@ export function Viewer3D({
             onPress={(event) => onPress?.(b.id, event)}
           />
         ))}
+        {data && <CaseSolid mesh={data.base} color="#9aa5b4" clip={clip} />}
+        {data && <CaseSolid mesh={data.lid} color="#b8c1cd" clip={clip} />}
       </Canvas>
+      <div className="float case-bar">
+        <span className="seg">
+          <button
+            type="button"
+            className={showCase ? "on" : ""}
+            onClick={() => setShowCase((v) => !v)}
+          >
+            케이스
+          </button>
+          {showCase && (
+            <button
+              type="button"
+              className={section ? "on" : ""}
+              onClick={() => setSection((v) => !v)}
+            >
+              단면
+            </button>
+          )}
+        </span>
+        {caseState.status === "loading" && <span className="muted">만드는 중…</span>}
+        {caseState.status === "error" && <span className="muted">{caseState.message}</span>}
+        {data && systemPath && (
+          <>
+            <span className={data.ok ? "muted" : "case-bad"}>
+              {data.ok
+                ? `검증 통과${data.issues.length ? ` · 경고 ${data.issues.length}` : ""}`
+                : `검증 실패 ${data.issues.filter((i) => i.severity === "error").length}`}
+            </span>
+            {data.ok &&
+              (["3mf", "base", "lid", "bom"] as const).map((f) => (
+                <a key={f} className="pill" href={downloadUrl(systemPath, f)} download>
+                  {f === "3mf" ? "3MF" : f === "bom" ? "BOM" : `${f.toUpperCase()} STL`}
+                </a>
+              ))}
+          </>
+        )}
+      </div>
+      {data && data.issues.length > 0 && (
+        <ul className="float case-issues">
+          {data.issues.map((i) => (
+            <li key={`${i.code}-${i.message}`} className={i.severity}>
+              {i.message}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

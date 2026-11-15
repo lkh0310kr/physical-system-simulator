@@ -29,6 +29,9 @@ importers:
       '@physisim/avr':
         specifier: workspace:*
         version: link:../../packages/avr
+      '@physisim/cad':
+        specifier: workspace:*
+        version: link:../../packages/cad
       '@physisim/core':
         specifier: workspace:*
         version: link:../../packages/core

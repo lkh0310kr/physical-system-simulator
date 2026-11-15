@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@physisim/avr": "workspace:*",
+    "@physisim/cad": "workspace:*",
     "@physisim/core": "workspace:*",
     "@physisim/engine": "workspace:*",
     "@physisim/models": "workspace:*",
