@@ -23,7 +23,7 @@ function labelOf(json: unknown, fallback: string): string {
   return typeof id === "string" && id ? `${id}:` : fallback;
 }
 
-function parseWith<T>(schema: z.ZodType<T>, json: unknown, label: string): Result<T> {
+export function parseWith<T>(schema: z.ZodType<T>, json: unknown, label: string): Result<T> {
   const r = schema.safeParse(json);
   if (r.success) return ok(r.data);
   return fail(fromZodError(r.error).map((i) => ({ ...i, path: `${label}${i.path}` })));
