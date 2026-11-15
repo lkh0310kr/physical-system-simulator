@@ -28,6 +28,7 @@ describe("standard library", () => {
       "model.ultrasonic-rcwl-1601",
       "model.h-bridge",
       "model.avoider-controller",
+      "model.pid-controller",
       "model.wall",
       "model.resistor",
       "model.multimeter",

@@ -52,6 +52,12 @@
       "name": "shaft",
       "domain": "mechanical",
       "description": "출력축"
+    },
+    {
+      "name": "omega",
+      "domain": "signal",
+      "direction": "out",
+      "description": "축 각속도 [rad/s] (제어기 측정용)"
     }
   ],
   "capabilities": [

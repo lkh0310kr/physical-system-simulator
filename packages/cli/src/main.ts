@@ -30,7 +30,7 @@ const USAGE = `사용법:
   physisim compare <a.json> <b.json> ... --press btn@1s [--duration 4s] [--per-day 100]   같은 조건에서 비교
   physisim case <system.json> [--process fdm] [--profile <profile.json>] [--out out] [--meshes <dir>]   케이스 STL/3MF + BOM (검증 통과 시에만 파일 생성)
   physisim sweep <system.json> --set r1.resistance=100,220,470 [--set …] --watch led1.brightness,r1.current [--duration 1s]   속성 값을 바꿔 가며 비교
-  physisim tune <system.json> --range r1.resistance=50..2000 --maximize led1.brightness --require led1.burnt=false [--require r1.current<=0.02]   제약을 지키는 최적값 찾기
+  physisim tune <system.json> --range r1.resistance=50..2000 --maximize led1.brightness --require led1.burnt=false [--require r1.current<=0.02] [--stat final|max|min]   제약을 지키는 최적값 찾기
   physisim check <model-or-capability.json>                    새 부품 정의 검증 + 사람이 확인할 항목 (파일은 안 고침)
   physisim watch <system.json> [run 옵션]                       파일이 바뀔 때마다 다시 실행`;
 
@@ -54,6 +54,7 @@ async function main(argv: string[]): Promise<number> {
       press: { type: "string", multiple: true },
       set: { type: "string", multiple: true },
       range: { type: "string" },
+      stat: { type: "string" },
       maximize: { type: "string" },
       minimize: { type: "string" },
       require: { type: "string", multiple: true },
@@ -138,7 +139,14 @@ async function main(argv: string[]): Promise<number> {
       );
       return 2;
     }
-    const goal = { signal, direction: values.maximize ? ("max" as const) : ("min" as const) };
+    const stat = ["final", "max", "min"].includes(values.stat ?? "")
+      ? (values.stat as "final" | "max" | "min")
+      : undefined;
+    const goal = {
+      signal,
+      direction: values.maximize ? ("max" as const) : ("min" as const),
+      ...(stat ? { stat } : {}),
+    };
     const presses = (values.press ?? []).map((p) => parsePress(p, (t) => seconds(t, "press")));
     const result = await tuneSystem(
       file,

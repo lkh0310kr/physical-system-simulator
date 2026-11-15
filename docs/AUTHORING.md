@@ -147,3 +147,7 @@ Model에 `body`(박스 크기, mm)와 `mounts`를 쓰고, System의 `assembly`�
 
 Port `domain`이 `signal`이면 제어 신호 선이다. `direction`(`in`/`out`)이 필요하다: 출력 Port의 이름이 Behavior 출력 이름이고, 입력 Port의 이름이 `step`의 `inputs` 키다. 한 선에는 출력이 하나여야 하고, 값은 한 스텝(기본 1 ms) 늦게 전달된다. 예: `["sonar:distance", "ctrl:distance"]`. 출력이 아직 없는 첫 스텝에는 입력 키가 없다. 데모: `examples/robot-avoid.system.json` (센서 → 제어기 → H-브리지 → 모터 → 바퀴 → 차체 → 센서).
 - 세부 형상의 `motion`은 평행 이동(`{signal, axis, distance}`)이나 회전(`{signal, axis, rotate: true, scale, pivot}`)이다. 회전은 신호(rad)를 따라 `pivot`을 중심으로 돈다 — 바퀴 여러 형상이 같은 `pivot`을 쓰면 한 몸으로 돈다. 차체(`model.robot-chassis-2wd`)는 `leftAngle`·`rightAngle`을 내보내 바퀴가 모터를 따라 돈다.
+
+## PID 제어와 이득 탐색
+
+`model.pid-controller`는 `setpoint`(선택)·`measurement` 신호를 받아 `output`을 낸다(`target` 속성이 기본 목표). 오차 제곱 적분 `ise`도 신호로 나온다. 예: `examples/motor-pid.system.json`(모터 속도 제어). 이득은 탐색으로 고른다: `pnpm physisim tune examples/motor-pid.system.json --range ctrl.ki=0.05..5 --minimize ctrl.ise --stat final --duration 3s`. 누적 지표(ISE)는 `--stat final`로 마지막 값을 본다.

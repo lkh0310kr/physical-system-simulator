@@ -1,0 +1,69 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.pid-controller",
+  "name": "PID controller (block)",
+  "category": "control/block",
+  "description": "목표와 측정의 오차로 출력을 만드는 PID 블록. `setpoint` 신호가 없으면 `target` 속성이 목표다. 제어 성능 지표 `ise`(오차 제곱 적분)를 함께 낸다.",
+  "propertySchema": {
+    "kp": {
+      "type": "number",
+      "default": 1,
+      "description": "비례 이득"
+    },
+    "ki": {
+      "type": "number",
+      "default": 0,
+      "description": "적분 이득"
+    },
+    "kd": {
+      "type": "number",
+      "default": 0,
+      "description": "미분 이득 (측정값 미분)"
+    },
+    "target": {
+      "type": "number",
+      "default": 0,
+      "description": "setpoint 신호가 연결되지 않았을 때의 목표"
+    },
+    "outMin": {
+      "type": "number",
+      "default": -1,
+      "description": "출력 하한"
+    },
+    "outMax": {
+      "type": "number",
+      "default": 1,
+      "description": "출력 상한"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "setpoint",
+      "domain": "signal",
+      "direction": "in",
+      "description": "목표 (선택)"
+    },
+    {
+      "name": "measurement",
+      "domain": "signal",
+      "direction": "in",
+      "description": "측정값"
+    },
+    {
+      "name": "output",
+      "domain": "signal",
+      "direction": "out",
+      "description": "제어 출력"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.pid"
+    }
+  ],
+  "metadata": {
+    "fidelity": "ideal",
+    "assumptions": ["이상적인 이산 PID (계산 지연은 신호 선의 1 스텝뿐)"]
+  }
+}

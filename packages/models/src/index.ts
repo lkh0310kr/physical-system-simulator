@@ -13,6 +13,7 @@ import { digitalIo } from "./behaviors/digital-io.ts";
 import { driveBase } from "./behaviors/drive-base.ts";
 import { hBridge } from "./behaviors/h-bridge.ts";
 import { led as ledBehavior } from "./behaviors/led.ts";
+import { pid } from "./behaviors/pid.ts";
 import { potentiometer } from "./behaviors/potentiometer.ts";
 import { powerSupply } from "./behaviors/power-supply.ts";
 import { resistor as resistorBehavior } from "./behaviors/resistor.ts";
@@ -28,6 +29,7 @@ import gpio from "./capabilities/gpio.json" with { type: "json" };
 import hBridgeCapability from "./capabilities/h-bridge.json" with { type: "json" };
 import lightEmission from "./capabilities/light-emission.json" with { type: "json" };
 import measurement from "./capabilities/measurement.json" with { type: "json" };
+import pidCapability from "./capabilities/pid.json" with { type: "json" };
 import potentiometry from "./capabilities/potentiometry.json" with { type: "json" };
 import powerSupplyCapability from "./capabilities/power-supply.json" with { type: "json" };
 import ranging from "./capabilities/ranging.json" with { type: "json" };
@@ -48,6 +50,7 @@ import lipo1317 from "./models/lipo-adafruit-1317.json" with { type: "json" };
 import multimeter from "./models/multimeter.json" with { type: "json" };
 import ov2640Sensor from "./models/ov2640-sensor.json" with { type: "json" };
 import ov5640Sensor from "./models/ov5640-sensor.json" with { type: "json" };
+import pidModel from "./models/pid-controller.json" with { type: "json" };
 import potentiometerModel from "./models/potentiometer.json" with { type: "json" };
 import pushbutton from "./models/pushbutton.json" with { type: "json" };
 import resistor from "./models/resistor.json" with { type: "json" };
@@ -69,6 +72,7 @@ export {
   digitalIo,
   driveBase,
   ledBehavior,
+  pid,
   potentiometer,
   powerSupply,
   resistorBehavior,
@@ -84,6 +88,7 @@ export const standardLibrary: LibraryInput = {
     cameraNode,
     dcMotor,
     hBridge,
+    pid,
     ultrasonic,
     digitalIo,
     driveBase,
@@ -99,6 +104,7 @@ export const standardLibrary: LibraryInput = {
     batteryCapability,
     cameraNodeCapability,
     hBridgeCapability,
+    pidCapability,
     ranging,
     dcMotorCapability,
     driveBaseCapability,
@@ -127,6 +133,7 @@ export const standardLibrary: LibraryInput = {
     ultrasonicModel,
     hBridgeModel,
     avoiderController,
+    pidModel,
     wallModel,
     resistor,
     multimeter,

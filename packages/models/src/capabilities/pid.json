@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.pid",
+  "name": "PID Control",
+  "description": "목표값과 측정값의 오차로 비례·적분·미분 제어 출력을 만든다.",
+  "outputs": {
+    "output": { "type": "number", "description": "제어 출력 (outMin~outMax로 제한)" },
+    "error": { "type": "number", "description": "목표 − 측정" },
+    "ise": {
+      "type": "number",
+      "description": "오차 제곱의 시간 적분 (제어 성능 지표, 작을수록 좋다)"
+    }
+  },
+  "defaultBehavior": "behavior.pid"
+}
