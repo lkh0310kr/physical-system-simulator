@@ -100,6 +100,10 @@ import ultrasonicModel from "./models/ultrasonic-rcwl-1601.json" with { type: "j
 import wallModel from "./models/wall.json" with { type: "json" };
 import xiaoSense from "./models/xiao-esp32s3-sense.json" with { type: "json" };
 
+export * from "./arm-design.ts";
+export * from "./arm-kinematics.ts";
+export * from "./arm-protocol.ts";
+export * from "./arm-script.ts";
 export { type DigitalIoEvent, type DigitalIoState, pinPort } from "./behaviors/digital-io.ts";
 export { parseRails, type Rail } from "./behaviors/power-supply.ts";
 export {
