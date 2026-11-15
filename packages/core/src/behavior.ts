@@ -7,6 +7,7 @@
  * - 상태는 Behavior가 아니라 Instance가 가진다. Behavior는 상태를 받아 새 상태를 돌려준다.
  */
 import type { CircuitElement, CircuitReadings } from "./circuit.ts";
+import type { MechanicalElement, MechanicalReadings } from "./mechanics.ts";
 import type { PropertyValue, ResolvedValues } from "./property.ts";
 
 export type Signals = Record<string, PropertyValue>;
@@ -16,6 +17,8 @@ export interface BehaviorContext {
   readonly properties: ResolvedValues;
   /** Model의 Capability 바인딩 설정 (SI로 정규화됨). */
   readonly config: ResolvedValues;
+  /** 직전 스텝의 기계 해석 결과 (축 각속도). 기계 Port가 없으면 없다. */
+  readonly mechanical?: MechanicalReadings;
 }
 
 export interface StepContext extends BehaviorContext {
@@ -46,6 +49,10 @@ export interface Behavior<S = unknown, I extends Signals = Signals, O extends Si
   step(state: S, inputs: I, ctx: StepContext): StepResult<S, O>;
   /** 선택: 현재 상태에서 이 Behavior가 회로에 기여하는 요소. 매 스텝 해석 전에 호출된다. */
   circuit?(state: S, ctx: BehaviorContext): readonly CircuitElement[];
+  /**
+   * 선택: 이 Behavior가 기계 Net에 얹는 회전체. 회로 해석 직후, 스텝 전에 호출되므로 `ctx.circuit`(이번 스텝 전류)을 쓴다.
+   */
+  mechanics?(state: S, ctx: StepContext): readonly MechanicalElement[];
   /** 선택: 이벤트 처리. 없으면 이벤트는 무시된다. */
   onEvent?(state: S, event: SimEvent, ctx: StepContext): StepResult<S, O>;
 }
