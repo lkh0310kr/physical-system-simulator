@@ -257,3 +257,58 @@ export function explodeLifts(
     boxes.map((b) => [b.id, levels.indexOf(Math.round(b.position[2] * 1e6)) * step * amount]),
   );
 }
+
+/** 시뮬레이션 신호로 움직이는 부품의 현재 자세: 월드 위치 [m]와 z축 회전 더하기 [rad]. */
+export interface AnimatedPose {
+  readonly position: Vec3;
+  readonly heading: number;
+}
+
+/**
+ * 부품의 신호 `<id>.x`, `<id>.y`, `<id>.heading`(차체 같은 구동 부품의 출력)으로 자세를 계산한다.
+ * `parents`(assembly의 parent)로 연결된 부품은 부모와 같은 변위·회전을 받는다: 부모 위치를 중심으로 돌고 평행 이동한다.
+ * 신호가 없으면 정적 배치 그대로다.
+ */
+export function animatedPoses(
+  boxes: readonly SceneBox[],
+  parents: Readonly<Record<string, string | undefined>>,
+  signals: Readonly<Record<string, unknown>>,
+): Map<string, AnimatedPose> {
+  const num = (key: string) =>
+    typeof signals[key] === "number" ? (signals[key] as number) : undefined;
+  const byId = new Map(boxes.map((b) => [b.id, b]));
+  const poseSignals = (id: string) => {
+    const x = num(`${id}.x`);
+    const y = num(`${id}.y`);
+    const h = num(`${id}.heading`);
+    return x === undefined && y === undefined && h === undefined
+      ? undefined
+      : { x: x ?? 0, y: y ?? 0, h: h ?? 0 };
+  };
+  const out = new Map<string, AnimatedPose>();
+  for (const b of boxes) {
+    const own = poseSignals(b.id);
+    const parentId = parents[b.id];
+    const parent = parentId ? byId.get(parentId) : undefined;
+    const ps = own ?? (parentId ? poseSignals(parentId) : undefined);
+    if (!ps) {
+      out.set(b.id, { position: b.position, heading: 0 });
+      continue;
+    }
+    // 부모가 있으면 부모 중심을 축으로 돌린다. 스스로 신호를 가진 부품은 자기 중심이 축이다.
+    const pivot = own || !parent ? b.position : parent.position;
+    const dx = b.position[0] - pivot[0];
+    const dy = b.position[1] - pivot[1];
+    const c = Math.cos(ps.h);
+    const sn = Math.sin(ps.h);
+    out.set(b.id, {
+      position: [
+        pivot[0] + dx * c - dy * sn + ps.x,
+        pivot[1] + dx * sn + dy * c + ps.y,
+        b.position[2],
+      ],
+      heading: ps.h,
+    });
+  }
+  return out;
+}

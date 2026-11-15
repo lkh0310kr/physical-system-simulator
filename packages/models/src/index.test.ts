@@ -23,6 +23,8 @@ describe("standard library", () => {
       "model.ov2640-sensor",
       "model.ov5640-sensor",
       "model.xiao-esp32s3-sense",
+      "model.tt-motor",
+      "model.robot-chassis-2wd",
       "model.resistor",
       "model.multimeter",
       "model.pushbutton",

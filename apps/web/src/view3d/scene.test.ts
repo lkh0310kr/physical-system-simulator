@@ -3,6 +3,7 @@ import { createStandardRegistry } from "@physisim/models";
 import { describe, expect, it } from "vitest";
 import {
   activityOf,
+  animatedPoses,
   buildCables,
   buildScene3d,
   explodeLifts,
@@ -193,5 +194,49 @@ describe("explodeLifts", () => {
     const l = explodeLifts(boxes, 1, 0.01);
     expect(l.get("bat")).toBe(0);
     expect(l.get("node")).toBeCloseTo(0.01);
+  });
+});
+
+describe("animatedPoses", () => {
+  const box = (id: string, x: number, y: number) =>
+    ({
+      id,
+      model: "m",
+      position: [x, y, 0],
+      rotation: [0, 0, 0],
+      size: [1, 1, 1],
+      switchable: false,
+      real: true,
+      color: undefined,
+      mesh: undefined,
+      parts: [],
+    }) as never;
+
+  it("moves a part by its own x/y/heading signals about its own centre", () => {
+    const poses = animatedPoses(
+      [box("car", 1, 2)],
+      {},
+      { "car.x": 0.5, "car.y": -1, "car.heading": 0 },
+    );
+    expect(poses.get("car")?.position).toEqual([1.5, 1, 0]);
+  });
+
+  it("carries a child along with its parent and swings it around the parent's centre", () => {
+    const boxes = [box("car", 0, 0), box("motor", 0, 1)];
+    const poses = animatedPoses(
+      boxes,
+      { motor: "car" },
+      { "car.x": 2, "car.y": 0, "car.heading": Math.PI / 2 },
+    );
+    const m = poses.get("motor")?.position ?? [0, 0, 0];
+    // (0,1)을 +90° 돌리면 (−1,0), 거기에 x 이동 2 → (1, 0)
+    expect(m[0]).toBeCloseTo(1, 9);
+    expect(m[1]).toBeCloseTo(0, 9);
+    expect(poses.get("motor")?.heading).toBeCloseTo(Math.PI / 2, 9);
+  });
+
+  it("leaves parts without pose signals where the assembly put them", () => {
+    const poses = animatedPoses([box("a", 3, 4)], {}, {});
+    expect(poses.get("a")).toEqual({ position: [3, 4, 0], heading: 0 });
   });
 });

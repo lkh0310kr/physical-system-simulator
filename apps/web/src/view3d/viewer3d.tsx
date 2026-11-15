@@ -25,7 +25,9 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { Selection } from "../canvas/canvas.tsx";
 import {
+  type AnimatedPose,
   activityOf,
+  animatedPoses,
   buildCables,
   buildScene3d,
   explodeLifts,
@@ -54,8 +56,18 @@ interface Props {
 }
 
 /** z가 위인 좌표계에서 궤도 카메라: 드래그 회전, 휠 확대, 우클릭 이동. 장면 크기에 맞춰 처음 거리를 잡는다. */
-function Orbit({ radius, target }: { radius: number; target: [number, number, number] }) {
+function Orbit({
+  radius,
+  target,
+  follow,
+}: {
+  radius: number;
+  target: [number, number, number];
+  /** 움직이는 부품의 현재 위치. 주어지면 카메라가 같이 움직인다(보는 방향과 거리는 사용자가 정한 그대로). */
+  follow: readonly number[] | undefined;
+}) {
   const { camera, gl } = useThree();
+  const last = useRef<readonly number[] | undefined>(undefined);
   useEffect(() => {
     camera.up.set(0, 0, 1);
     camera.position.set(
@@ -71,9 +83,16 @@ function Orbit({ radius, target }: { radius: number; target: [number, number, nu
     (camera as { userData: { controls?: OrbitControls } }).userData.controls = controls;
     return () => controls.dispose();
   }, [camera, gl, radius, target]);
-  useFrame(() =>
-    (camera as { userData: { controls?: OrbitControls } }).userData.controls?.update(),
-  );
+  useFrame(() => {
+    const controls = (camera as { userData: { controls?: OrbitControls } }).userData.controls;
+    if (follow && last.current) {
+      const d = [0, 1, 2].map((i) => (follow[i] ?? 0) - (last.current?.[i] ?? 0));
+      camera.position.add(new Vector3(...(d as [number, number, number])));
+      controls?.target.add(new Vector3(...(d as [number, number, number])));
+    }
+    last.current = follow;
+    controls?.update();
+  });
   return null;
 }
 
@@ -180,12 +199,15 @@ function Part({
   activity,
   burnt,
   signals,
+  pose,
   pressable,
   onSelect,
   onPress,
 }: {
   box: SceneBox;
   signals: Readonly<Record<string, unknown>>;
+  /** 움직이는 부품의 현재 자세 (없으면 정적 배치). */
+  pose: AnimatedPose | undefined;
   /** 소손된 부품(고장): 어둡게 탄 색으로 보인다. */
   burnt: boolean;
   selected: boolean;
@@ -205,8 +227,8 @@ function Part({
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: three.js 객체이지 DOM 요소가 아니다 — r3f의 이벤트는 레이캐스트 이벤트다.
     <group
-      position={box.position}
-      rotation={rotation}
+      position={pose?.position ?? box.position}
+      rotation={[rotation[0], rotation[1], rotation[2] + (pose?.heading ?? 0)]}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
@@ -265,10 +287,12 @@ function LabelProjector({
   boxes,
   labels,
   lifts,
+  poses,
 }: {
   boxes: readonly SceneBox[];
   labels: RefObject<(HTMLElement | null)[]>;
   lifts: ReadonlyMap<string, number>;
+  poses: ReadonlyMap<string, AnimatedPose>;
 }) {
   const { camera, gl } = useThree();
   const v = useMemo(() => new Vector3(), []);
@@ -278,11 +302,8 @@ function LabelProjector({
     boxes.forEach((b, i) => {
       const el = labels.current?.[i];
       if (!el) return;
-      v.set(
-        b.position[0],
-        b.position[1],
-        b.position[2] + b.size[2] / 2 + (lifts.get(b.id) ?? 0),
-      ).project(camera);
+      const p = poses.get(b.id)?.position ?? b.position;
+      v.set(p[0], p[1], p[2] + b.size[2] / 2 + (lifts.get(b.id) ?? 0)).project(camera);
       const visible = v.z < 1;
       el.style.display = visible ? "block" : "none";
       el.style.transform = `translate(${((v.x + 1) / 2) * w}px, ${((1 - v.y) / 2) * h}px) translate(-50%, -140%)`;
@@ -473,6 +494,22 @@ export function Viewer3D({
   // 케이스를 보는 동안은 치수 없는 자리표시를 숨긴다 — 케이스에 들어가지 않는 가정 크기가 섞여 보이지 않게
   const cablesAll = useMemo(() => buildCables(loaded, buildScene3d(loaded)), [loaded]);
   const boxes = useMemo(() => (showCase ? all.filter((b) => b.real) : all), [all, showCase]);
+  const parents = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(loaded.doc.assembly ?? {}).map(([id, p]) => [id, p.parent]),
+      ),
+    [loaded],
+  );
+  const poses = useMemo(() => animatedPoses(boxes, parents, signals), [boxes, parents, signals]);
+  // 스스로 자세 신호(x·y·heading)를 내는 부품이 있으면 카메라가 따라간다
+  const followPos = useMemo(
+    () =>
+      boxes
+        .filter((b) => typeof signals[`${b.id}.x`] === "number")
+        .map((b) => poses.get(b.id)?.position)[0],
+    [boxes, signals, poses],
+  );
   const lifts = useMemo(() => explodeLifts(boxes, explode), [boxes, explode]);
   const lidLift = Math.max(0, ...lifts.values()) + 0.008 * explode;
   const bounds = useMemo(() => sceneBounds(boxes), [boxes]);
@@ -537,8 +574,8 @@ export function Viewer3D({
           rotation={[Math.PI / 2, 0, 0]}
           position={[center[0], center[1], floor]}
         />
-        <Orbit radius={radius} target={target} />
-        <LabelProjector boxes={boxes} labels={labels} lifts={lifts} />
+        <Orbit radius={radius} target={target} follow={followPos} />
+        <LabelProjector boxes={boxes} labels={labels} lifts={lifts} poses={poses} />
         {!printView &&
           boxes.map((b) => (
             <group key={b.id} position={[0, 0, lifts.get(b.id) ?? 0]}>
@@ -549,6 +586,7 @@ export function Viewer3D({
                 activity={activityOf(b.id, signals)}
                 burnt={signals[`${b.id}.burnt`] === true}
                 signals={signals}
+                pose={poses.get(b.id)}
                 pressable={running && b.switchable}
                 onSelect={() => onSelect?.({ kind: "part", id: b.id })}
                 onPress={(event) => onPress?.(b.id, event)}

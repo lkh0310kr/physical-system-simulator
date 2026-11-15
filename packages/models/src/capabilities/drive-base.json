@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.drive-base",
+  "name": "Drive Base",
+  "description": "두 바퀴 축(left·right)의 회전을 평면 위의 위치·방향으로 바꾸는 2륜 차동 구동 차체.",
+  "outputs": {
+    "x": { "type": "number", "unit": "m", "description": "월드 x 위치 (시작점 기준)" },
+    "y": { "type": "number", "unit": "m", "description": "월드 y 위치 (시작점 기준)" },
+    "heading": { "type": "number", "unit": "rad", "description": "방향 (+x가 0, 반시계가 +)" },
+    "speed": { "type": "number", "unit": "m/s", "description": "전진 속도" },
+    "yawRate": { "type": "number", "unit": "rad/s", "description": "회전 각속도" }
+  },
+  "defaultBehavior": "behavior.drive-base"
+}

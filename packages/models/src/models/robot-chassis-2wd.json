@@ -1,0 +1,78 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.robot-chassis-2wd",
+  "name": "2-wheel differential-drive chassis",
+  "category": "mechanical/chassis",
+  "description": "두 바퀴 축(left·right)에 모터를 붙이면 평면 위를 달리는 차체. 바퀴가 같은 방향으로 돌면 직진, 반대 방향이면 제자리 회전. 아직 특정 제품이 아니라 일반 값(전부 가정)이다.",
+  "propertySchema": {
+    "wheelRadius": {
+      "type": "number",
+      "unit": "m",
+      "min": 0.001,
+      "default": 0.033,
+      "description": "바퀴 반지름. TT 모터용 지름 약 66 mm 바퀴 가정"
+    },
+    "trackWidth": {
+      "type": "number",
+      "unit": "m",
+      "min": 0.01,
+      "default": 0.13,
+      "description": "좌우 바퀴 사이 거리. 가정"
+    },
+    "mass": {
+      "type": "number",
+      "unit": "kg",
+      "min": 0.01,
+      "default": 0.5,
+      "description": "차체 총 질량. 가정"
+    },
+    "wheelInertia": {
+      "type": "number",
+      "min": 0,
+      "default": 1e-5,
+      "description": "바퀴 한 개 관성 [kg·m²]. 가정"
+    },
+    "rollingDamping": {
+      "type": "number",
+      "min": 0,
+      "default": 6e-5,
+      "description": "구름 저항을 점성 계수로 단순화 [N·m·s/rad]: 구름 저항 계수 0.02 가정 → 바퀴당 1.6 mN·m / 26 rad/s"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "left",
+      "domain": "mechanical",
+      "description": "왼쪽 바퀴 축"
+    },
+    {
+      "name": "right",
+      "domain": "mechanical",
+      "description": "오른쪽 바퀴 축"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.drive-base"
+    }
+  ],
+  "metadata": {
+    "fidelity": "approximate",
+    "source": "일반적인 2륜 로봇 값 — 특정 제품 데이터가 아니다",
+    "assumptions": [
+      "wheelRadius",
+      "trackWidth",
+      "mass",
+      "wheelInertia",
+      "rollingDamping",
+      "선회 관성 무시",
+      "바퀴 미끄러짐 없음"
+    ]
+  },
+  "body": {
+    "size": [200, 130, 30],
+    "mass": 500,
+    "color": "#7a8ca8"
+  }
+}

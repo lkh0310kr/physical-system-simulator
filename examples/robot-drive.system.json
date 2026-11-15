@@ -1,0 +1,52 @@
+{
+  "$schema": "../schemas/system.schema.json",
+  "name": "2-wheel robot — motors drive the wheels",
+  "description": "배터리 → 모터(Adafruit 3777 TT 모터 값) → 바퀴 축 → 차체. 전압이 걸리면 역기전력과 관성으로 속도가 오르고 차체가 달린다. 오른쪽 모터 극성을 뒤집으면 제자리에서 돈다. 차체·바퀴 값은 일반 가정.",
+  "instances": [
+    {
+      "id": "bat",
+      "model": "model.li-ion-cell",
+      "properties": {
+        "capacity": 2000
+      }
+    },
+    {
+      "id": "ml",
+      "model": "model.tt-motor"
+    },
+    {
+      "id": "mr",
+      "model": "model.tt-motor"
+    },
+    {
+      "id": "car",
+      "model": "model.robot-chassis-2wd"
+    }
+  ],
+  "connections": [
+    ["bat:+", "ml:A"],
+    ["bat:-", "ml:B"],
+    ["bat:+", "mr:A"],
+    ["bat:-", "mr:B"],
+    ["ml:shaft", "car:left"],
+    ["mr:shaft", "car:right"]
+  ],
+  "assembly": {
+    "car": {
+      "position": [0, 0, 15]
+    },
+    "bat": {
+      "position": [0, 0, 36],
+      "rotation": [0, 0, 90],
+      "parent": "car"
+    },
+    "ml": {
+      "position": [0, -76, 9],
+      "parent": "car"
+    },
+    "mr": {
+      "position": [0, 76, 9],
+      "parent": "car"
+    }
+  }
+}

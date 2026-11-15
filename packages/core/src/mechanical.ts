@@ -118,6 +118,8 @@ export const PlacementSchema = z.strictObject({
   position: Vec3Schema,
   /** x·y·z 축 회전 [도] (z → y → x 순서로 적용). 생략하면 0. */
   rotation: z.tuple([z.number(), z.number(), z.number()]).optional(),
+  /** 이 부품이 따라 움직이는 부품(Instance ID). 3D에서 부모의 위치·방향 신호(x, y, heading)를 같이 받는다. 예: 차체 위의 모터·배터리. */
+  parent: z.string().optional(),
 });
 
 export type Body = z.output<typeof BodySchema>;

@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.dc-motor",
+  "name": "DC Motor",
+  "description": "전압을 받아 축을 돌린다: 권선 저항 + 역기전력(전기), 토크 = 토크 상수 × 전류(기계).",
+  "outputs": {
+    "omega": { "type": "number", "unit": "rad/s", "description": "축 각속도 (A→B로 +전압이면 +)" },
+    "current": { "type": "number", "unit": "A", "description": "권선 전류 (A → B)" },
+    "torque": { "type": "number", "unit": "N*m", "description": "발생 토크" },
+    "angle": { "type": "number", "unit": "rad", "description": "축 누적 각도" }
+  },
+  "defaultBehavior": "behavior.dc-motor"
+}

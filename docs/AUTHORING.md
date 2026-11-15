@@ -136,3 +136,9 @@ Model에 `body`(박스 크기, mm)와 `mounts`를 쓰고, System의 `assembly`�
 ## 기구 동작 (플런저)
 
 `capability.switching`에 `travel`(mm)을 주면 누름이 즉시가 아니라 플런저 이동으로 접점을 움직인다(`operatingTravel`에서 닫히고 80% 지점에서 열림, `pressTime`에 걸쳐 이동). 출력 `plunger`(0~1)를 세부 형상의 `motion`(`{signal:"plunger", axis:"z", distance:-1}`)에 연결하면 3D에서 플런저가 눌린다. 예: `model.tactile-12mm`, `examples/tactile-led.system.json`.
+
+## 기계 연결과 움직임 (모터·바퀴)
+
+- Port의 `domain`이 `mechanical`이면 회전축이다. 두 축을 `connections`로 이으면 같은 각속도를 공유하는 하나의 기계 Net이 된다(강체 결합). 예: `["ml:shaft", "car:left"]`.
+- 모터 Model(`model.tt-motor`)은 전기 단자 A·B와 축 `shaft`를 가진다: 전압 → 전류 → 토크, 역기전력이 속도를 제한한다. 차체(`model.robot-chassis-2wd`)는 `left`·`right` 축의 속도로 `x`·`y`·`heading`·`speed`를 출력한다(오른쪽 모터 극성을 뒤집으면 제자리 회전).
+- 3D에서 움직이게 하려면 System `assembly`에서 차체에 붙는 부품(모터·배터리)에 `"parent": "car"`를 쓴다. 차체의 `x/y/heading` 신호로 함께 움직이고, 카메라가 따라간다. 예: `examples/robot-drive.system.json`.
