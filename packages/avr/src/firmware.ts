@@ -8,9 +8,11 @@
  */
 import { createSerialLog, type Program, type Simulation } from "@physisim/engine";
 import {
+  AVRADC,
   AVRIOPort,
   AVRTimer,
   AVRUSART,
+  adcConfig,
   avrInstruction,
   CPU,
   PinState,
@@ -41,6 +43,8 @@ export interface FirmwareOptions {
    * 없으면 `{instance}:{pinPrefix}{pin}` Port의 전압이 `logicLevel`/2를 넘는지로 읽는다.
    */
   readonly readPin?: (pin: number) => boolean;
+  /** 아날로그 입력 A0–A5의 전압 [V]. 없으면 `${instance}:A${n}` Port의 회로 전압. */
+  readonly readAnalog?: (channel: number) => number;
   /** Port 이름 접두어 (핀 n → `${pinPrefix}${n}`). 기본 "D". */
   readonly pinPrefix?: string;
   /** HIGH 전압 [V]. 기본 5. */
@@ -64,6 +68,7 @@ export function loadFirmware(
   let error: Error | undefined;
 
   let cpu: CPU;
+  let adc: AVRADC;
   let ports: Record<PortName, AVRIOPort>;
   try {
     const flash = parseIntelHex(hex);
@@ -71,6 +76,7 @@ export function loadFirmware(
     new AVRTimer(cpu, timer0Config);
     new AVRTimer(cpu, timer1Config);
     new AVRTimer(cpu, timer2Config);
+    adc = new AVRADC(cpu, adcConfig);
     ports = {
       B: new AVRIOPort(cpu, portBConfig),
       C: new AVRIOPort(cpu, portCConfig),
@@ -113,7 +119,13 @@ export function loadFirmware(
   const threshold = (options.logicLevel ?? 5) / 2;
   const readPin =
     options.readPin ?? ((pin: number) => sim.voltage(`${instance}:${prefix}${pin}`) > threshold);
+  const readAnalog = options.readAnalog ?? ((ch: number) => sim.voltage(`${instance}:A${ch}`));
+  /** ADC 채널(A0–A5)에 회로 전압을 넣는다. 변환은 ADCSRA를 쓸 때 시작하므로 그보다 먼저 최신이어야 한다. */
+  const feedAnalog = () => {
+    for (let ch = 0; ch < 6; ch++) adc.channelValues[ch] = Math.min(5, Math.max(0, readAnalog(ch)));
+  };
   const feedInputs = () => {
+    feedAnalog();
     pinMap.forEach(({ port, bit }, pin) => {
       const state = ports[port].pinState(bit);
       if (state === PinState.Input || state === PinState.InputPullUp)

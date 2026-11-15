@@ -102,3 +102,41 @@ describe("loadFirmware errors", () => {
     expect(loadFirmware(blinkCircuit(), "uno", ":zz\n").error).toBeInstanceOf(SyntaxError);
   });
 });
+
+describe("analogRead with a potentiometer (real firmware)", () => {
+  const potHex = readFileSync(join(import.meta.dirname, "fixtures/pot.hex"), "utf8");
+
+  function reading(position: number) {
+    const built = buildSystem(
+      registry,
+      SystemSchema.parse({
+        name: "pot",
+        instances: [
+          { id: "uno", model: "model.arduino-uno" },
+          { id: "pot", model: "model.potentiometer", properties: { position } },
+        ],
+        connections: [
+          ["pot:1", "uno:GND.1"],
+          ["pot:3", "uno:5V"],
+          ["pot:2", "uno:A0"],
+        ],
+      }),
+    );
+    if (!built.ok) throw new Error(JSON.stringify(built.issues));
+    const sim = createSimulation(registry, built.value);
+    const program = loadFirmware(sim, "uno", potHex, { pinCount: 14 });
+    sim.run(0.25);
+    return program.serial.map((l) => Number(l.text));
+  }
+
+  it("follows the wiper position from 0 to 1023, as the 10-bit ADC does", () => {
+    // 1023 × position, 소수점 아래는 ADC가 버린다
+    expect(new Set(reading(0))).toEqual(new Set([0]));
+    expect(new Set(reading(0.5))).toEqual(new Set([511]));
+    expect(new Set(reading(1))).toEqual(new Set([1023]));
+  });
+
+  it("reads the very first sample correctly (no stale value after boot)", () => {
+    expect(reading(0.75)[0]).toBe(767);
+  });
+});
