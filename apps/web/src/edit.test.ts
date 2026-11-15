@@ -8,6 +8,7 @@ import {
   nextInstanceId,
   removeInstance,
   rotateInstance,
+  setProgram,
   setProperty,
 } from "./edit.ts";
 
@@ -74,6 +75,13 @@ describe("edit", () => {
       undefined,
     );
     expect((cleared.instances as unknown[])[1]).toEqual({ id: "led1", model: "model.led" });
+  });
+});
+
+describe("setProgram", () => {
+  it("attaches a program file to an instance", () => {
+    const d = setProgram(doc, "led1", "led1.js");
+    expect((d.instances as { program?: string }[])[1]?.program).toBe("led1.js");
   });
 });
 

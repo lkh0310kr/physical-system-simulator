@@ -94,6 +94,31 @@ export function setProperty(doc: unknown, id: string, key: string, value: unknow
   };
 }
 
+/** Instance에 MCU 프로그램 파일(문서 기준 상대 경로)을 연결한다. */
+export function setProgram(doc: unknown, id: string, path: string): Json {
+  const d = obj(doc);
+  return {
+    ...d,
+    instances: instancesOf(d).map((inst) => (inst.id === id ? { ...inst, program: path } : inst)),
+  };
+}
+
+/** 새 프로그램 파일의 기본 내용. */
+export const PROGRAM_TEMPLATE = `function setup() {
+  pinMode(13, OUTPUT);
+  Serial.begin(9600);
+}
+
+function* loop() {
+  digitalWrite(13, HIGH);
+  Serial.println("on");
+  yield delay(500);
+  digitalWrite(13, LOW);
+  Serial.println("off");
+  yield delay(500);
+}
+`;
+
 /**
  * Biome JSON 포맷과 같은 모양으로 직렬화한다: 한 줄(폭 100)에 들어가면 인라인, 아니면 여러 줄.
  * 에디터가 저장한 파일이 lint를 깨지 않게 하기 위함.

@@ -172,5 +172,11 @@ export function useProject() {
     [open, refreshFiles],
   );
 
-  return { ...state, open, update, undo, redo };
+  /** 문서 기준 상대 경로의 파일을 쓴다 (프로그램 등). 감시가 다시 불러온다. */
+  const saveFile = useCallback(async (rel: string, content: string) => {
+    const path = pathRef.current;
+    if (path) await writeFile(joinPath(dirOf(path), rel), content);
+  }, []);
+
+  return { ...state, open, update, undo, redo, saveFile };
 }

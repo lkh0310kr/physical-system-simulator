@@ -1,16 +1,27 @@
 import { formatIssues } from "@physisim/core";
 import { useEffect, useRef, useState } from "react";
 import { Canvas, type Selection } from "./canvas/canvas.tsx";
+import { CodePanel } from "./code-panel.tsx";
 import {
   addInstance,
   connect,
   disconnect,
   moveInstance,
+  PROGRAM_TEMPLATE,
   removeInstance,
   rotateInstance,
+  setProgram,
   setProperty,
 } from "./edit.ts";
-import { PauseIcon, PlayIcon, PlusIcon, ResetIcon, RotateIcon, TrashIcon } from "./icons.tsx";
+import {
+  CodeIcon,
+  PauseIcon,
+  PlayIcon,
+  PlusIcon,
+  ResetIcon,
+  RotateIcon,
+  TrashIcon,
+} from "./icons.tsx";
 import { Inspector } from "./inspector-panel.tsx";
 import { PartsPanel } from "./parts-panel.tsx";
 import { useSimulation } from "./sim/use-simulation.ts";
@@ -35,6 +46,7 @@ export function App() {
   const running = frame?.running ?? false;
   const [selection, setSelection] = useState<Selection | undefined>(undefined);
   const [adding, setAdding] = useState(false);
+  const [coding, setCoding] = useState(false);
   const center = useRef(() => ({ x: 0, y: 0 }));
 
   const problems = [
@@ -68,6 +80,7 @@ export function App() {
       else if (e.key === "Escape") {
         setSelection(undefined);
         setAdding(false);
+        setCoding(false);
       } else if (e.key === " ") {
         e.preventDefault();
         if (k.running) k.sim.pause();
@@ -116,11 +129,31 @@ export function App() {
 
       {loaded && (
         <div className="float tools">
-          <button type="button" className="tool" onClick={() => setAdding((a) => !a)}>
+          <button
+            type="button"
+            className="tool"
+            onClick={() => {
+              setAdding((a) => !a);
+              setCoding(false);
+            }}
+          >
             <div className={`round${adding ? " active" : ""}`}>
               <PlusIcon />
             </div>
             <span>추가</span>
+          </button>
+          <button
+            type="button"
+            className="tool"
+            onClick={() => {
+              setCoding((c) => !c);
+              setAdding(false);
+            }}
+          >
+            <div className={`round${coding ? " active" : ""}`}>
+              <CodeIcon />
+            </div>
+            <span>코드</span>
           </button>
         </div>
       )}
@@ -133,6 +166,21 @@ export function App() {
             setSelection({ kind: "part", id });
             setAdding(false);
           }}
+        />
+      )}
+
+      {coding && loaded && (
+        <CodePanel
+          loaded={loaded}
+          files={project.refs}
+          serial={frame?.serial ?? {}}
+          onSave={(path, content) => project.saveFile(path, content)}
+          onCreate={async (id) => {
+            const path = `${id}.js`;
+            await project.saveFile(path, PROGRAM_TEMPLATE);
+            update(setProgram(docJson, id, path));
+          }}
+          onClose={() => setCoding(false)}
         />
       )}
 

@@ -23,6 +23,8 @@ export interface Frame {
   readonly energized: readonly number[];
   /** Instance ID → 프로그램 오류. */
   readonly errors: Readonly<Record<string, string>>;
+  /** Instance ID → 최근 시리얼 출력 줄. */
+  readonly serial: Readonly<Record<string, readonly { time: number; text: string }[]>>;
 }
 
 export type FromWorker = Frame | { readonly type: "error"; readonly message: string };

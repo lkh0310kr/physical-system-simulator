@@ -502,3 +502,79 @@ button.icon {
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
 }
+
+/* 코드 패널 */
+.code-panel {
+  position: absolute;
+  z-index: 11;
+  top: 72px;
+  bottom: 84px;
+  left: 64px;
+  width: min(480px, calc(100vw - 96px));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+
+.code-panel header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-panel .tabs {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  overflow: auto;
+}
+
+.code-panel .tabs button {
+  border: 0;
+  border-radius: 8px;
+  padding: 4px 10px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.code-panel .tabs button.on {
+  background: var(--surface-line);
+}
+
+.code-panel .code {
+  flex: 2;
+  min-height: 0;
+  resize: none;
+  padding: 10px 12px;
+  border: 1px solid var(--surface-line);
+  border-radius: 10px;
+  background: transparent;
+  font: 12.5px / 1.55 var(--mono);
+  outline: none;
+  tab-size: 2;
+}
+
+.code-panel .code:focus {
+  border-color: var(--accent);
+}
+
+.code-panel .serial {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--surface-line);
+  font: 12px / 1.5 var(--mono);
+  white-space: pre-wrap;
+}
+
+.code-panel .create {
+  display: flex;
+  gap: 12px;
+}
+
+.code-panel .empty {
+  padding: 12px 4px;
+}

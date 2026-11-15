@@ -13,6 +13,8 @@ const LIVE_VOLTAGE = 0.5;
 const FRAME_MS = 33;
 /** 탭이 멈췄다 돌아와도 한 프레임에 이만큼만 진행한다 [s]. */
 const MAX_STEP = 0.1;
+/** 프레임마다 보내는 시리얼 줄 수. */
+const SERIAL_LINES = 200;
 
 let loaded: LoadedSystem | undefined;
 let sim: Simulation | undefined;
@@ -53,7 +55,16 @@ function frame() {
   const errors = Object.fromEntries(
     programs.flatMap(([id, p]) => (p.error ? [[id, p.error.message]] : [])),
   );
-  post({ type: "frame", running, time: s.time, signals: { ...signals }, energized, errors });
+  const serial = Object.fromEntries(programs.map(([id, p]) => [id, p.serial.slice(-SERIAL_LINES)]));
+  post({
+    type: "frame",
+    running,
+    time: s.time,
+    signals: { ...signals },
+    energized,
+    errors,
+    serial,
+  });
 }
 
 setInterval(() => {
