@@ -160,16 +160,18 @@ export function createSimulation(
     const { instance, port } = splitPortRef(outRef);
     for (const u of units) {
       const out = previous.get(u);
-      if (u.instance === instance && out && port in out) return out[port] ?? 0;
+      if (u.instance === instance && out && port in out) return out[port];
     }
-    return 0;
+    // 출력이 아직 한 번도 나오지 않았다 (첫 스텝) — 값이 없는 것으로 둔다
+    return undefined;
   };
   /** 스텝 시작 시점의 출력으로 입력을 만든다 — Behavior 실행 순서와 무관하게 정확히 한 스텝 지연. */
   const inputsOf = (previous: ReadonlyMap<Unit, Signals>, u: Unit): Signals => {
     const inputs: Signals = {};
     for (const [inRef, outRef] of signalSource) {
       const { instance, port } = splitPortRef(inRef);
-      if (instance === u.instance) inputs[port] = signalValue(previous, outRef);
+      const value = instance === u.instance ? signalValue(previous, outRef) : undefined;
+      if (value !== undefined) inputs[port] = value;
     }
     return inputs;
   };

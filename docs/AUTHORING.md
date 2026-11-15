@@ -142,3 +142,7 @@ Model에 `body`(박스 크기, mm)와 `mounts`를 쓰고, System의 `assembly`�
 - Port의 `domain`이 `mechanical`이면 회전축이다. 두 축을 `connections`로 이으면 같은 각속도를 공유하는 하나의 기계 Net이 된다(강체 결합). 예: `["ml:shaft", "car:left"]`.
 - 모터 Model(`model.tt-motor`)은 전기 단자 A·B와 축 `shaft`를 가진다: 전압 → 전류 → 토크, 역기전력이 속도를 제한한다. 차체(`model.robot-chassis-2wd`)는 `left`·`right` 축의 속도로 `x`·`y`·`heading`·`speed`를 출력한다(오른쪽 모터 극성을 뒤집으면 제자리 회전).
 - 3D에서 움직이게 하려면 System `assembly`에서 차체에 붙는 부품(모터·배터리)에 `"parent": "car"`를 쓴다. 차체의 `x/y/heading` 신호로 함께 움직이고, 카메라가 따라간다. 예: `examples/robot-drive.system.json`.
+
+## 신호 선 (제어 블록)
+
+Port `domain`이 `signal`이면 제어 신호 선이다. `direction`(`in`/`out`)이 필요하다: 출력 Port의 이름이 Behavior 출력 이름이고, 입력 Port의 이름이 `step`의 `inputs` 키다. 한 선에는 출력이 하나여야 하고, 값은 한 스텝(기본 1 ms) 늦게 전달된다. 예: `["sonar:distance", "ctrl:distance"]`. 출력이 아직 없는 첫 스텝에는 입력 키가 없다. 데모: `examples/robot-avoid.system.json` (센서 → 제어기 → H-브리지 → 모터 → 바퀴 → 차체 → 센서).

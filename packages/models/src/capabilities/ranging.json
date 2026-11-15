@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.ranging",
+  "name": "Ranging",
+  "description": "센서 앞의 장애물까지 거리를 잰다 (초음파). 거리 신호는 측정 범위로 잘려 나온다.",
+  "outputs": {
+    "distance": {
+      "type": "number",
+      "unit": "m",
+      "description": "장애물까지 거리. 에코가 없으면 최대 측정 거리"
+    }
+  },
+  "defaultBehavior": "behavior.ultrasonic"
+}

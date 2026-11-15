@@ -68,6 +68,19 @@ describe("signal lines", () => {
     expect(at?.[1]).toBeCloseTo(0.008, 9);
   });
 
+  it("an input sees no value until the source has produced its first output", () => {
+    const built = build(doc);
+    if (!built.ok) throw new Error(JSON.stringify(built.issues));
+    const sim = createSimulation(registry, built.value);
+    let first: number | undefined;
+    sim.onStep(({ outputs }) => {
+      first ??= Number(outputs.get("snk")?.get("capability.sink")?.doubled);
+    });
+    sim.run(0.002);
+    // 첫 스텝: 입력 없음 → 싱크가 기본값(−1)×2 = −2를 낸다 (0이 들어오지 않는다)
+    expect(first).toBe(-2);
+  });
+
   it("an input with nothing connected sees no value", () => {
     const built = build({ name: "s", instances: [{ id: "snk", model: "model.sink" }] });
     if (!built.ok) throw new Error(JSON.stringify(built.issues));

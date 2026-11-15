@@ -61,7 +61,7 @@
   ],
   "metadata": {
     "fidelity": "approximate",
-    "source": "https://www.adafruit.com/product/3777 (정격 3~6 V, 무부하 150 mA ±10%, 6 V 정지 토크 0.8 kg·cm, 기어비 1:48, 70×22×18 mm, 30.6 g; Adafruit 측정: 4.5 V 155 mA @ 185 RPM 무부하·1.2 A 정지, 6 V 160 mA @ 250 RPM 무부하·1.5 A 정지)",
+    "source": "https://www.adafruit.com/product/3777 (정격 3~6 V, 무부하 150 mA ±10%, 6 V 정지 토크 0.8 kg·cm, 기어비 1:48, 70×22×18 mm, 30.6 g; Adafruit 측정: 4.5 V 155 mA @ 185 RPM 무부하·1.2 A 정지, 6 V 160 mA @ 250 RPM 무부하·1.5 A 정지) 형상: github.com/adafruit/Adafruit_CAD_Parts 3777 STEP (MIT) — 외곽 70.6×36.6(양쪽 축 포함)×22.4 mm. 긴 방향이 x, 축이 y.",
     "assumptions": [
       "inertia(회전자·기어 관성)",
       "마찰을 전부 점성으로 단순화(실제는 쿨롱 마찰 포함)",
@@ -76,8 +76,9 @@
     }
   },
   "body": {
-    "size": [70, 22, 18],
+    "size": [70.6, 36.6, 22.4],
     "mass": 30.6,
+    "mesh": "tt-motor.glb",
     "color": "#d9c34a"
   }
 }

@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.avoider",
+  "name": "Obstacle Avoider",
+  "description": "거리 신호를 보고 앞으로 가다가 장애물이 가까우면 제자리에서 돌아 피하는 반응형 제어기 (소프트웨어 추상화).",
+  "outputs": {
+    "left": { "type": "number", "min": -1, "max": 1, "description": "왼쪽 모터 명령" },
+    "right": { "type": "number", "min": -1, "max": 1, "description": "오른쪽 모터 명령" },
+    "turning": { "type": "boolean", "description": "지금 피하는 중인지" }
+  },
+  "defaultBehavior": "behavior.avoider"
+}

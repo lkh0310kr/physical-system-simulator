@@ -50,6 +50,24 @@
       "name": "right",
       "domain": "mechanical",
       "description": "오른쪽 바퀴 축"
+    },
+    {
+      "name": "x",
+      "domain": "signal",
+      "direction": "out",
+      "description": "월드 x 위치 [m]"
+    },
+    {
+      "name": "y",
+      "domain": "signal",
+      "direction": "out",
+      "description": "월드 y 위치 [m]"
+    },
+    {
+      "name": "heading",
+      "domain": "signal",
+      "direction": "out",
+      "description": "방향 [rad]"
     }
   ],
   "capabilities": [
