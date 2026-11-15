@@ -21,9 +21,9 @@ describe("describeModel", () => {
     expect(describeModel(registry, led)).toBe(
       [
         "model.led  LED  [electronics/output]",
-        "  5mm 단색 LED",
+        "  5mm 단색 LED. 절대 최대 전류를 넘겨 지속하면 소손(개방)된다.",
         "  ports       A, C",
-        "  properties  forwardVoltage=2 V, maxCurrent=20 mA, color=red, dynamicResistance=10 Ω",
+        "  properties  forwardVoltage=2 V, maxCurrent=20 mA, color=red, dynamicResistance=10 Ω, absoluteMaxCurrent=30 mA, burnTime=200 ms",
         "  capability  capability.light-emission → behavior.led",
       ].join("\n"),
     );

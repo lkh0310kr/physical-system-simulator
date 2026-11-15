@@ -160,11 +160,14 @@ function Part({
   box,
   selected,
   activity,
+  burnt,
   pressable,
   onSelect,
   onPress,
 }: {
   box: SceneBox;
+  /** 소손된 부품(고장): 어둡게 탄 색으로 보인다. */
+  burnt: boolean;
   selected: boolean;
   /** 0~1: 시뮬레이션에서 이 부품이 "살아 있는" 정도 (발광 세기). */
   activity: number;
@@ -214,7 +217,7 @@ function Part({
           {/* 실치수는 채운 면, 자리표시(치수 가정)는 투명하게 — 가정을 실물처럼 보이게 하지 않는다.
               살아 있는 부품은 강조색으로 발광한다 (강조색은 살아 있는 것에만). */}
           <meshStandardMaterial
-            color={selected ? ACCENT : (box.color ?? REAL)}
+            color={burnt ? "#3a2724" : selected ? ACCENT : (box.color ?? REAL)}
             emissive={ACCENT}
             emissiveIntensity={glow * 1.2}
             transparent={!box.real}
@@ -522,6 +525,7 @@ export function Viewer3D({
                 box={b}
                 selected={selection?.kind === "part" && selection.id === b.id}
                 activity={activityOf(b.id, signals)}
+                burnt={signals[`${b.id}.burnt`] === true}
                 pressable={running && b.switchable}
                 onSelect={() => onSelect?.({ kind: "part", id: b.id })}
                 onPress={(event) => onPress?.(b.id, event)}
@@ -553,6 +557,7 @@ export function Viewer3D({
             }}
           >
             {b.real ? b.id : `${b.id} · 가정 크기`}
+            {signals[`${b.id}.burnt`] === true ? " · 소손" : ""}
           </span>
         ))}
       <div className="float case-bar">
