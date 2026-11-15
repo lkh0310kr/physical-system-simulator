@@ -67,7 +67,7 @@
 **목표**: 스펙 §7, §8 — Model로부터 Instance를 만들고, Port 간 연결로 System을 구성한다.
 
 - [x] P2-T1 Port(핀/커넥터) 개념을 Model에 추가 — 도메인(electrical, mechanical, signal …) 구분
-- [ ] P2-T2 Instance 생성 (Model 참조 + 초기 State + 파라미터 override)
+- [x] P2-T2 Instance 생성 (Model 참조 + 초기 State + 파라미터 override)
 - [ ] P2-T3 System 문서 포맷 (instances + connections) 스키마와 로더
 - [ ] P2-T4 연결 검증과 Net 해석 (존재하는 Port인지, 도메인 호환). 단락 같은 전기적 검사는 Phase 3 Solver와 함께
 - [ ] P2-T5 `examples/blink-led.system.json`

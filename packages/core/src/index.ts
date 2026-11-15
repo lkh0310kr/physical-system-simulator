@@ -4,6 +4,7 @@ export const CORE_VERSION = "0.0.0";
 export * from "./behavior.ts";
 export * from "./capability.ts";
 export * from "./ids.ts";
+export * from "./instance.ts";
 export * from "./issues.ts";
 export * from "./json-schema.ts";
 export * from "./loader.ts";
