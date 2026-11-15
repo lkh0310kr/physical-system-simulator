@@ -1,0 +1,109 @@
+/**
+ * 열린 System 파일과 그 의존 파일을 dev 서버에서 불러오고, 파일이 바뀌면 다시 불러온다.
+ * 같은 파일을 에이전트와 에디터가 함께 고치므로 "파일 = 진실"이다. 화면 상태는 파일에서 다시 만든다.
+ */
+import {
+  type Issue,
+  type LoadedSystem,
+  loadSystemProject,
+  referencedFiles,
+  SystemSchema,
+} from "@physisim/core";
+import { createStandardRegistry } from "@physisim/models";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { dirOf, joinPath, listFiles, onFileChange, readFile } from "./project-client.ts";
+
+export interface ProjectState {
+  readonly files: readonly string[];
+  readonly systems: readonly string[];
+  readonly path: string | undefined;
+  /** 파일에 적힌 그대로의 문서 JSON (편집은 이것을 고쳐 저장한다). */
+  readonly docJson: unknown;
+  readonly loaded: LoadedSystem | undefined;
+  readonly issues: readonly Issue[];
+  /** 마지막으로 불러온 시각 — 다시 불러올 때마다 바뀐다. */
+  readonly revision: number;
+}
+
+const EMPTY: ProjectState = {
+  files: [],
+  systems: [],
+  path: undefined,
+  docJson: undefined,
+  loaded: undefined,
+  issues: [],
+  revision: 0,
+};
+
+async function load(path: string): Promise<Pick<ProjectState, "docJson" | "loaded" | "issues">> {
+  const text = await readFile(path);
+  if (text === undefined)
+    return {
+      docJson: undefined,
+      loaded: undefined,
+      issues: [{ path, message: "파일을 읽을 수 없다" }],
+    };
+  let json: unknown;
+  try {
+    json = JSON.parse(text);
+  } catch (e) {
+    return {
+      docJson: undefined,
+      loaded: undefined,
+      issues: [{ path, message: (e as Error).message }],
+    };
+  }
+  const parsed = SystemSchema.safeParse(json);
+  const refs = parsed.success ? referencedFiles(parsed.data) : [];
+  const contents = new Map(
+    await Promise.all(
+      refs.map(async (r) => [r, await readFile(joinPath(dirOf(path), r))] as const),
+    ),
+  );
+  const r = loadSystemProject(json, (rel) => contents.get(rel), createStandardRegistry);
+  return r.ok
+    ? { docJson: json, loaded: r.value, issues: [] }
+    : { docJson: json, loaded: undefined, issues: r.issues };
+}
+
+export function useProject() {
+  const [state, setState] = useState<ProjectState>(EMPTY);
+  const pathRef = useRef<string | undefined>(undefined);
+
+  const open = useCallback(async (path: string) => {
+    pathRef.current = path;
+    const result = await load(path);
+    if (pathRef.current !== path) return;
+    const url = new URL(location.href);
+    url.searchParams.set("system", path);
+    history.replaceState(null, "", url);
+    setState((s) => ({ ...s, path, ...result, revision: s.revision + 1 }));
+  }, []);
+
+  const refreshFiles = useCallback(async () => {
+    const { files } = await listFiles();
+    const systems = files.filter((f) => f.endsWith(".system.json"));
+    setState((s) => ({ ...s, files, systems }));
+    return systems;
+  }, []);
+
+  useEffect(() => {
+    refreshFiles().then((systems) => {
+      const wanted = new URL(location.href).searchParams.get("system");
+      const first = wanted && systems.includes(wanted) ? wanted : systems[0];
+      if (first) open(first);
+    });
+  }, [open, refreshFiles]);
+
+  // 열린 문서나 그 의존 파일이 바뀌면 다시 불러온다.
+  useEffect(
+    () =>
+      onFileChange(() => {
+        refreshFiles();
+        if (pathRef.current) open(pathRef.current);
+      }),
+    [open, refreshFiles],
+  );
+
+  return { ...state, open };
+}
