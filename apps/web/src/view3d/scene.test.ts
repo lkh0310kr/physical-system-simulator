@@ -7,6 +7,7 @@ import {
   buildCables,
   buildScene3d,
   explodeLifts,
+  followPose,
   gridCell,
   PLACEHOLDER_SIZE,
   sceneBounds,
@@ -249,5 +250,18 @@ describe("gridCell", () => {
     for (const extent of [0.02, 0.2, 1, 3, 20]) {
       expect(Math.max(extent * 3, 0.12) / gridCell(extent) <= 80).toBe(true);
     }
+  });
+});
+
+describe("followPose", () => {
+  it("moves a pin with its part: rotate about the part centre, then translate to the new centre", () => {
+    const pin = followPose([1, 1, 0], [0, 1, 0], { position: [5, 5, 0], heading: Math.PI / 2 });
+    // 중심 기준 (1, 0)을 +90° 돌리면 (0, 1) → 새 중심 (5, 5)에 더해 (5, 6)
+    expect(pin[0]).toBeCloseTo(5, 9);
+    expect(pin[1]).toBeCloseTo(6, 9);
+  });
+
+  it("leaves the pin alone when the part does not move", () => {
+    expect(followPose([1, 2, 3], [0, 0, 0], undefined)).toEqual([1, 2, 3]);
   });
 });

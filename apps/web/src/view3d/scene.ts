@@ -354,3 +354,20 @@ export function gridCell(extent: number): number {
   }
   return 10;
 }
+
+/**
+ * 부품에 붙은 점(핀)이 부품의 움직임(자세)을 따라간 위치: 부품 중심 기준 상대 위치를 헤딩만큼 돌려 새 중심에 더한다.
+ * `pose`가 없으면 그대로다.
+ */
+export function followPose(point: Vec3, center: Vec3, pose: AnimatedPose | undefined): Vec3 {
+  if (!pose) return point;
+  const dx = point[0] - center[0];
+  const dy = point[1] - center[1];
+  const c = Math.cos(pose.heading);
+  const s = Math.sin(pose.heading);
+  return [
+    pose.position[0] + dx * c - dy * s,
+    pose.position[1] + dx * s + dy * c,
+    pose.position[2] + (point[2] - center[2]),
+  ];
+}

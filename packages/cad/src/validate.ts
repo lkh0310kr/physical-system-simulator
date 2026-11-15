@@ -4,7 +4,7 @@
  */
 import type { CaseGeometry, CaseInput } from "./case.ts";
 import { skirtOf, tongueOf } from "./case.ts";
-import { box, inspect, loadGeometry } from "./geometry.ts";
+import { box, inspect, loadGeometry, scope } from "./geometry.ts";
 import { solidsOfGlb } from "./glb.ts";
 import type { ProcessProfile } from "./process.ts";
 
@@ -36,6 +36,22 @@ export async function validateCase(
   options: ValidateOptions = {},
 ): Promise<CaseIssue[]> {
   const m = await loadGeometry();
+  const tmp = scope();
+  try {
+    return await checkCase(m, tmp, input, g, profile, options);
+  } finally {
+    tmp.release();
+  }
+}
+
+async function checkCase(
+  m: Awaited<ReturnType<typeof loadGeometry>>,
+  tmp: ReturnType<typeof scope>,
+  input: CaseInput,
+  g: CaseGeometry,
+  profile: ProcessProfile,
+  options: ValidateOptions,
+): Promise<CaseIssue[]> {
   const issues: CaseIssue[] = [];
   const err = (code: string, message: string) => issues.push({ severity: "error", code, message });
   const warn = (code: string, message: string) =>
@@ -58,7 +74,7 @@ export async function validateCase(
   }
 
   // 1b. 뚜껑을 닫았을 때 베이스와 겹치지 않는가 (돌기가 홈에 들어가는지 포함)
-  const clash = g.base.intersect(g.lid).volume();
+  const clash = tmp.keep(g.base.intersect(g.lid)).volume();
   if (clash > 1e-6)
     err("lid-clash", `뚜껑이 베이스와 ${clash.toFixed(3)} mm³ 겹친다 — 닫히지 않는다`);
 
@@ -75,9 +91,9 @@ export async function validateCase(
   }
 
   // 3. 부품이 케이스 입체와 겹치지 않는가 (공동 안에 들어가는가)
-  const shell = g.base.add(g.lid);
+  const shell = tmp.keep(g.base.add(g.lid));
   for (const p of input.parts) {
-    const v = shell.intersect(box(m, p.min, p.max)).volume();
+    const v = tmp.keep(shell.intersect(tmp.keep(box(m, p.min, p.max)))).volume();
     if (v > 1e-6) err("interference", `부품 ${p.id}가 케이스와 ${v.toFixed(2)} mm³ 겹친다`);
   }
 
@@ -90,16 +106,16 @@ export async function validateCase(
       warn("mesh-missing", `부품 ${p.id}: 형상 파일 ${p.mesh.file}을 못 읽어 박스로만 검사했다`);
       continue;
     }
-    const solids = await solidsOfGlb(data);
+    const solids = (await solidsOfGlb(data)).map((x) => tmp.keep(x));
     exact.push(p.id);
     const [rx, ry, rz] = p.mesh.rotation;
     for (const s of solids) {
-      const placed = s
-        .rotate([0, 0, rz])
-        .rotate([0, ry, 0])
-        .rotate([rx, 0, 0])
-        .translate([...p.mesh.position] as [number, number, number]);
-      const v = shell.intersect(placed).volume();
+      const placed = tmp.keep(
+        tmp
+          .keep(tmp.keep(tmp.keep(s.rotate([0, 0, rz])).rotate([0, ry, 0])).rotate([rx, 0, 0]))
+          .translate([...p.mesh.position] as [number, number, number]),
+      );
+      const v = tmp.keep(shell.intersect(placed)).volume();
       if (v > MESH_OVERLAP)
         err("mesh-interference", `부품 ${p.id}의 실제 형상이 케이스와 ${v.toFixed(2)} mm³ 겹친다`);
     }
@@ -125,13 +141,13 @@ export async function validateCase(
       );
 
     // 벽을 실제로 뚫는가
-    const cut = g.uncut.base.add(g.uncut.lid).intersect(solid).volume();
+    const cut = tmp.keep(tmp.keep(g.uncut.base.add(g.uncut.lid)).intersect(solid)).volume();
     if (cut < 1e-6) err("opening-misses-wall", `${label}: 통로가 케이스 벽과 만나지 않는다`);
 
     // 통로가 다른 부품에 막히지 않는가
     for (const p of input.parts) {
       if (p.id === o.part) continue;
-      if (solid.intersect(box(m, p.min, p.max)).volume() > 1e-6)
+      if (tmp.keep(solid.intersect(tmp.keep(box(m, p.min, p.max)))).volume() > 1e-6)
         err("opening-blocked", `${label}: 통로가 부품 ${p.id}에 막힌다`);
     }
 

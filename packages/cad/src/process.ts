@@ -71,7 +71,8 @@ export function resolveProfile(
 ): { ok: true; value: ProcessProfile } | { ok: false; message: string } {
   if (input === undefined) return { ok: true, value: fdmProfile };
   if (typeof input === "string") {
-    const found = profiles[input];
+    // 상속 속성(constructor 등)이 프로필로 잡히지 않게 자기 키만 본다
+    const found = Object.hasOwn(profiles, input) ? profiles[input] : undefined;
     return found
       ? { ok: true, value: found }
       : { ok: false, message: `알 수 없는 공정 "${input}" (${Object.keys(profiles).join(", ")})` };

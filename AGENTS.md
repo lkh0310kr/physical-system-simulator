@@ -138,7 +138,7 @@ physical-system-simulator/
     └── web/         # 웹 에디터 (Vite + React, pnpm dev)
 ```
 
-의존 방향: `engine → core`, `models → core`, `cad → core`, `cli → engine, models, cad`, `web → core, engine, models`. 역방향·순환 의존 금지.
+의존 방향: `engine → core`, `models → core`, `cad → core`, `cli → engine, models, cad`, `web → core, engine, models, cad`. 역방향·순환 의존 금지.
 
 ## 7. 명령어 (Phase 0 이후)
 

@@ -136,10 +136,19 @@ export function createSimulation(
     }
     return n;
   };
+  // 연결되지 않은 기계 Port도 미리 Net을 만든다 — 회전체 기여만 하고 회로는 없는 Behavior(차체 등)도 풀리게
+  for (const inst of system.instances) {
+    const model = registry.getModel(inst.model);
+    for (const port of model?.ports ?? []) {
+      if (port.domain === "mechanical") mechNode(`${inst.id}:${port.name}`);
+    }
+  }
   const omegas: number[] = [];
   const mechanicalFor = (u: Unit): MechanicalReadings => ({
     omega: (port) => omegas[mechNode(`${u.instance}:${port}`)] ?? 0,
   });
+
+  const NO_INPUTS: Signals = Object.freeze({});
 
   // ── 신호 선 (출력 → 입력, 한 스텝 지연) ─────────────────────
   /** 입력 Port 참조 → 그 선의 출력 Port 참조. */
@@ -155,23 +164,35 @@ export function createSimulation(
     if (!out) continue;
     for (const ref of net.ports) if (portDirection(ref) === "in") signalSource.set(ref, out);
   }
-  /** 출력 Port 참조가 가리키는 Instance의 직전 스텝 출력 값 (출력 이름 = Port 이름). */
-  const signalValue = (previous: ReadonlyMap<Unit, Signals>, outRef: string) => {
-    const { instance, port } = splitPortRef(outRef);
-    for (const u of units) {
-      const out = previous.get(u);
-      if (u.instance === instance && out && port in out) return out[port];
+  /**
+   * 입력 연결을 만들 때 한 번 풀어 둔다: 입력을 받는 단위마다 [입력 이름, 출력을 내는 단위들, 출력 이름].
+   * 스텝마다 문자열을 다시 쪼개거나 모든 단위를 훑지 않는다.
+   */
+  const inputLinks = new Map<Unit, { name: string; sources: Unit[]; outName: string }[]>();
+  for (const [inRef, outRef] of signalSource) {
+    const to = splitPortRef(inRef);
+    const from = splitPortRef(outRef);
+    const sources = units.filter((x) => x.instance === from.instance);
+    for (const u of units.filter((x) => x.instance === to.instance)) {
+      const list = inputLinks.get(u) ?? [];
+      list.push({ name: to.port, sources, outName: from.port });
+      inputLinks.set(u, list);
     }
-    // 출력이 아직 한 번도 나오지 않았다 (첫 스텝) — 값이 없는 것으로 둔다
-    return undefined;
-  };
+  }
   /** 스텝 시작 시점의 출력으로 입력을 만든다 — Behavior 실행 순서와 무관하게 정확히 한 스텝 지연. */
   const inputsOf = (previous: ReadonlyMap<Unit, Signals>, u: Unit): Signals => {
+    const links = inputLinks.get(u);
+    if (!links) return NO_INPUTS;
     const inputs: Signals = {};
-    for (const [inRef, outRef] of signalSource) {
-      const { instance, port } = splitPortRef(inRef);
-      const value = instance === u.instance ? signalValue(previous, outRef) : undefined;
-      if (value !== undefined) inputs[port] = value;
+    for (const link of links) {
+      for (const source of link.sources) {
+        const out = previous.get(source);
+        // 출력이 아직 한 번도 나오지 않았다 (첫 스텝) — 값이 없는 것으로 둔다
+        if (out && link.outName in out) {
+          inputs[link.name] = out[link.outName] as Signals[string];
+          break;
+        }
+      }
     }
     return inputs;
   };

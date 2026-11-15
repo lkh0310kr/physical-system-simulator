@@ -31,6 +31,7 @@ import {
   buildCables,
   buildScene3d,
   explodeLifts,
+  followPose,
   gridCell,
   type SceneBox,
   type SceneCable,
@@ -248,7 +249,9 @@ function Part({
   const geometry = useMemo(() => new BoxGeometry(...box.size), [box.size]);
   const edges = useMemo(() => new EdgesGeometry(geometry), [geometry]);
   const rotation = box.rotation.map((d) => (d * Math.PI) / 180) as [number, number, number];
-  const glb = useGlb(box.mesh);
+  const glbSource = useGlb(box.mesh);
+  // 렌더마다 장면을 복제하면 프레임마다 객체가 새로 만들어진다 — 원본이 바뀔 때만 복제
+  const glb = useMemo(() => glbSource?.clone(), [glbSource]);
   const detailed = glb !== undefined || box.parts.length > 0;
   const [hover, setHover] = useState(false);
   const glow = activity + (hover ? 0.3 : 0);
@@ -279,7 +282,7 @@ function Part({
       }}
     >
       {glb ? (
-        <primitive object={glb.clone()} />
+        <primitive object={glb} />
       ) : detailed ? (
         box.parts.map((p) => (
           <Shape key={p.name} part={p} glow={glow * 0.35} signals={signals} id={box.id} />
@@ -345,8 +348,13 @@ function Cable({
   cable,
   fromLift,
   toLift,
+  fromPose,
+  toPose,
 }: {
   cable: SceneCable;
+  /** 끝점 부품의 움직임 (없으면 정적 배치). */
+  fromPose: AnimatedPose | undefined;
+  toPose: AnimatedPose | undefined;
   fromLift: number;
   toLift: number;
 }) {
@@ -371,17 +379,19 @@ function Cable({
       p[1] ?? 0,
       (p[2] ?? 0) + l,
     ];
-    const from = up(cable.from, fromLift);
-    const to = up(cable.to, toLift);
+    const fromC = followPose(cable.fromCenter, cable.fromCenter, fromPose);
+    const toC = followPose(cable.toCenter, cable.toCenter, toPose);
+    const from = up(followPose(cable.from, cable.fromCenter, fromPose), fromLift);
+    const to = up(followPose(cable.to, cable.toCenter, toPose), toLift);
     const a = new Vector3(...from);
     const b = new Vector3(...to);
-    const a1 = exit(from, up(cable.fromCenter, fromLift), cable.fromHalf);
-    const b1 = exit(to, up(cable.toCenter, toLift), cable.toHalf);
+    const a1 = exit(from, up(fromC, fromLift), cable.fromHalf);
+    const b1 = exit(to, up(toC, toLift), cable.toHalf);
     const mid = a1.clone().add(b1).multiplyScalar(0.5);
     mid.z -= 0.0015;
     const curve = new CatmullRomCurve3([a, a1, mid, b1, b], false, "catmullrom", 0.5);
     return new TubeGeometry(curve, 64, 0.0004, 8, false);
-  }, [cable, fromLift, toLift]);
+  }, [cable, fromLift, toLift, fromPose, toPose]);
   return (
     <mesh geometry={geometry} castShadow>
       <meshStandardMaterial color={cable.ground ? "#16181c" : "#c0392b"} roughness={0.6} />
@@ -520,7 +530,6 @@ export function Viewer3D({
   const caseState = useCase(systemPath, showCase, loaded);
   const all = useMemo(() => buildScene3d(loaded), [loaded]);
   // 케이스를 보는 동안은 치수 없는 자리표시를 숨긴다 — 케이스에 들어가지 않는 가정 크기가 섞여 보이지 않게
-  const cablesAll = useMemo(() => buildCables(loaded, buildScene3d(loaded)), [loaded]);
   const boxes = useMemo(() => (showCase ? all.filter((b) => b.real) : all), [all, showCase]);
   const parents = useMemo(
     () =>
@@ -537,6 +546,14 @@ export function Viewer3D({
         .filter((b) => typeof signals[`${b.id}.x`] === "number")
         .map((b) => poses.get(b.id)?.position)[0],
     [boxes, signals, poses],
+  );
+  // 케이블은 표시 중인 부품 사이만, 이미 만든 장면 데이터로 계산한다
+  const cablesAll = useMemo(
+    () =>
+      buildCables(loaded, boxes).filter(
+        (c) => boxes.some((b) => b.id === c.fromId) && boxes.some((b) => b.id === c.toId),
+      ),
+    [loaded, boxes],
   );
   const lifts = useMemo(() => explodeLifts(boxes, explode), [boxes, explode]);
   const lidLift = Math.max(0, ...lifts.values()) + 0.008 * explode;
@@ -629,6 +646,8 @@ export function Viewer3D({
               cable={c}
               fromLift={lifts.get(c.fromId) ?? 0}
               toLift={lifts.get(c.toId) ?? 0}
+              fromPose={poses.get(c.fromId)}
+              toPose={poses.get(c.toId)}
             />
           ))}
         {data && !printView && <CaseSolid mesh={data.base} color="#9aa5b4" clip={clip} />}

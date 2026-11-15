@@ -367,3 +367,9 @@ export function printLayout(g: CaseGeometry): PrintLayout {
     .translate([-g.outer.min[0] + width + 10, g.outer.max[1], g.outer.max[2]]);
   return { base: meshOf(base), lid: meshOf(lid) };
 }
+
+/** 케이스 형상이 잡은 WASM 메모리를 푼다. 서버처럼 오래 도는 곳에서 결과를 버릴 때 부른다. */
+export function disposeCase(g: CaseGeometry): void {
+  for (const s of [g.base, g.lid, g.uncut.base, g.uncut.lid, ...g.cutters.map((c) => c.solid)])
+    s.delete();
+}

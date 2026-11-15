@@ -82,3 +82,21 @@ export function inspect(solid: Solid): SolidReport {
     max: [b.max[0], b.max[1], b.max[2]],
   };
 }
+
+/**
+ * WASM 힙은 JS 가비지 컬렉터가 비우지 않는다 — Manifold 객체는 `delete()`로 직접 풀어 줘야 한다.
+ * 임시로 만든 입체를 모아 두었다가 `release()`로 한꺼번에 푼다.
+ */
+export function scope() {
+  const items: Solid[] = [];
+  return {
+    /** 풀어야 할 입체로 등록하고 그대로 돌려 준다. */
+    keep<T extends Solid>(solid: T): T {
+      items.push(solid);
+      return solid;
+    },
+    release() {
+      for (const s of items.splice(0)) s.delete();
+    },
+  };
+}

@@ -205,9 +205,16 @@ async function main(argv: string[]): Promise<number> {
   }
 
   if (command === "case") {
-    const profile = resolveProfile(
-      values.profile ? JSON.parse(readFileSync(values.profile, "utf8")) : values.process,
-    );
+    let profileInput: unknown = values.process;
+    if (values.profile) {
+      try {
+        profileInput = JSON.parse(readFileSync(values.profile, "utf8"));
+      } catch (e) {
+        console.error(`✗ --profile ${values.profile}: ${(e as Error).message}`);
+        return 2;
+      }
+    }
+    const profile = resolveProfile(profileInput as string | undefined);
     if (!profile.ok) {
       console.error(`✗ ${profile.message}`);
       return 2;
