@@ -3,7 +3,7 @@
   "id": "model.wall",
   "name": "Wall (environment)",
   "category": "mechanical/environment",
-  "description": "로봇 시뮬레이션용 벽. 초음파 센서 모델의 wallX와 앞면 위치를 맞춰 쓴다 (환경 가정).",
+  "description": "로봇 시뮬레이션용 벽. 물리가 켜지면 로봇이 부딪혀 막히는 정적 장애물이다. 초음파 센서 모델의 wallX와 앞면 위치를 맞춰 쓴다 (환경 가정).",
   "ports": [],
   "capabilities": [],
   "metadata": {
@@ -11,6 +11,7 @@
   },
   "body": {
     "size": [20, 1200, 200],
-    "color": "#8a8f98"
+    "color": "#8a8f98",
+    "collision": "static"
   }
 }

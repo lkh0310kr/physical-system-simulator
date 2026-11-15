@@ -42,9 +42,11 @@ describe("obstacle-avoiding robot (P7-T11)", () => {
     expect(Math.abs(Number(final["car.y"]))).toBeGreaterThan(1);
   });
 
-  it("without the avoidance rule (threshold 0) the same robot drives into the wall", () => {
+  it("without the avoidance rule (threshold 0) the physics stops it against the wall instead of letting it through", () => {
     const { maxX } = run(0, 3);
-    expect(maxX + 0.1).toBeGreaterThan(1.0);
+    // 벽 앞면 x = 1.0 m, 차체 절반 길이 0.1 m → 중심은 약 0.9 m에서 멈춘다 (살짝 파고드는 것까지 허용)
+    expect(maxX).toBeGreaterThan(0.88);
+    expect(maxX + 0.1).toBeLessThan(1.02);
   });
 
   it("is deterministic", () => {

@@ -127,3 +127,5 @@
 
 사용 허락: 사용자가 2026-11-15에 확인(라이선스 문제 없음으로 판단). 원본 STEP·PDF는 계속 저장소에 올리지 않는다(`datasheets/`). 변환본에는 출처를 `metadata.source`에 남긴다. 색은 STEP에 들어 있는 값 그대로이고 PBR 재질 값은 렌더 추정이다.
 | `apps/web/public/meshes/lipo-adafruit-1317.glb` | [adafruit/Adafruit_CAD_Parts](https://github.com/adafruit/Adafruit_CAD_Parts) `1317 150mAh Lipo Battery.step` (저장소 라이선스 MIT) | 같은 도구, `--map Y,-X,Z`. 외곽 26.02×19.75×3.8 mm가 제품 페이지 치수와 일치 |
+
+| Rapier (`@dimforge/rapier3d-compat`) | Apache-2.0 | 강체 물리·충돌 (ADR-0002) — 엔진 안 어댑터 |

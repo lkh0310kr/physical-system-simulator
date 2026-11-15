@@ -53,8 +53,28 @@ export interface Behavior<S = unknown, I extends Signals = Signals, O extends Si
    * 선택: 이 Behavior가 기계 Net에 얹는 회전체. 회로 해석 직후, 스텝 전에 호출되므로 `ctx.circuit`(이번 스텝 전류)을 쓴다.
    */
   mechanics?(state: S, ctx: StepContext): readonly MechanicalElement[];
+  /**
+   * 선택: 이 Behavior가 평면을 달리는 몸체를 구동한다. 물리 엔진이 켜져 있으면 몸체(강체)가 만들어지고,
+   * 매 스텝 `drive`의 명령으로 움직이며 장애물에 막힌다. 물리가 없으면 Behavior가 직접 적분한다.
+   */
+  drive?(state: S, ctx: StepContext): PlanarCommand;
+  /** 선택: 물리가 계산한 자세를 받아 상태와 출력을 갱신한다 (`drive`와 함께 쓴다). */
+  onPose?(state: S, outputs: O, pose: PlanarPose): StepResult<S, O>;
   /** 선택: 이벤트 처리. 없으면 이벤트는 무시된다. */
   onEvent?(state: S, event: SimEvent, ctx: StepContext): StepResult<S, O>;
+}
+
+/** 평면 이동 명령: 몸체 방향으로 `speed`[m/s], 위에서 보아 반시계 `yawRate`[rad/s]. */
+export interface PlanarCommand {
+  readonly speed: number;
+  readonly yawRate: number;
+}
+
+/** 물리가 계산한 평면 자세. 시작 위치 기준 [m]와 방향 [rad](연속, 감기지 않음). */
+export interface PlanarPose {
+  readonly x: number;
+  readonly y: number;
+  readonly heading: number;
 }
 
 /** 타입 추론을 돕는 항등 함수. */

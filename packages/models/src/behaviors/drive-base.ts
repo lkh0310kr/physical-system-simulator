@@ -32,6 +32,20 @@ export const driveBase = defineBehavior<PoseState>({
       damping,
     }));
   },
+  // 물리가 켜져 있으면 바퀴 속도로 만든 이동 명령을 강체에 걸고, 충돌이 반영된 자세를 돌려받는다
+  drive: (_s, ctx) => {
+    const r = numberOf(ctx.properties, "wheelRadius");
+    const wl = ctx.mechanical?.omega("left") ?? 0;
+    const wr = ctx.mechanical?.omega("right") ?? 0;
+    return {
+      speed: (r * (wl + wr)) / 2,
+      yawRate: (r * (wr - wl)) / numberOf(ctx.properties, "trackWidth"),
+    };
+  },
+  onPose: (s, outputs, pose) => ({
+    state: { ...s, ...pose },
+    outputs: { ...outputs, ...pose },
+  }),
   step: (s, _inputs, ctx) => {
     const r = numberOf(ctx.properties, "wheelRadius");
     const width = numberOf(ctx.properties, "trackWidth");

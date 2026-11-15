@@ -6,10 +6,14 @@
 
 import { startPrograms } from "@physisim/avr";
 import { type LoadedSystem, loadSystemProject, type PropertyValue } from "@physisim/core";
-import { createSimulation, type Program, type Simulation } from "@physisim/engine";
+import { createSimulation, initPhysics, type Program, type Simulation } from "@physisim/engine";
 import { createStandardRegistry } from "@physisim/models";
 import { PressQueue } from "./press-queue.ts";
 import type { FromWorker, ToWorker } from "./protocol.ts";
+
+// 물리(WASM) 초기화는 비동기다. 최상위 await를 쓰면 모듈 실행이 끝나기 전에 도착한 메시지가 사라질 수 있어서,
+// 핸들러는 바로 걸고 초기화가 끝나기를 기다렸다가 도착 순서대로 처리한다.
+const physicsInit = initPhysics();
 
 /** 이 전압을 넘으면 선에 "전기가 살아 있다"고 본다. */
 const LIVE_VOLTAGE = 0.5;
@@ -37,7 +41,9 @@ function start() {
     programs = [];
     return;
   }
-  sim = createSimulation(loaded.registry, loaded.system);
+  sim = createSimulation(loaded.registry, loaded.system, {
+    ...(loaded.doc.assembly ? { assembly: loaded.doc.assembly } : {}),
+  });
   sim.onStep(({ outputs }) => {
     for (const [instance, byCap] of outputs) {
       for (const out of byCap.values())
@@ -87,7 +93,8 @@ setInterval(() => {
   frame();
 }, FRAME_MS);
 
-self.onmessage = (e: MessageEvent<ToWorker>) => {
+self.onmessage = async (e: MessageEvent<ToWorker>) => {
+  await physicsInit;
   const m = e.data;
   switch (m.type) {
     case "load": {
