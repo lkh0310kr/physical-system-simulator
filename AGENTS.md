@@ -130,6 +130,7 @@ physical-system-simulator/
 │   ├── core/        # Model·Capability·Behavior·Instance 스키마, Registry
 │   ├── engine/      # 시간·이벤트·상태·Behavior 실행·Solver
 │   ├── models/      # 표준 Model/Capability/Behavior 라이브러리
+│   ├── cad/         # 제작 산출물: 케이스 생성·검증, STL/3MF, BOM (manifold-3d)
 │   └── cli/         # physisim CLI (validate/run/watch/models)
 ├── examples/        # System 예제 (사용법 문서 역할)
 ├── schemas/         # 생성된 JSON Schema (pnpm schemas)
@@ -137,7 +138,7 @@ physical-system-simulator/
     └── web/         # 웹 에디터 (Vite + React, pnpm dev)
 ```
 
-의존 방향: `engine → core`, `models → core`, `cli → engine, models`, `web → core, engine, models`. 역방향·순환 의존 금지.
+의존 방향: `engine → core`, `models → core`, `cad → core`, `cli → engine, models, cad`, `web → core, engine, models`. 역방향·순환 의존 금지.
 
 ## 7. 명령어 (Phase 0 이후)
 

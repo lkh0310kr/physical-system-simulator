@@ -106,3 +106,13 @@ void loop() {
 ## 6. 부품 값의 출처
 
 부품 Model의 값(전류, 전압, 시간 등)은 실제 제품 데이터시트에서 가져온다. 확인한 값은 `metadata.source`에 문서·표 번호를 적고, 확인하지 못한 값은 가정이라고 설명(description)에 쓴다. 예: `docs/scenarios/wearable-camera-specs.md`.
+
+## 제작 가능한 케이스 (기구)
+
+Model에 `body`(박스 크기, mm)와 `mounts`를 쓰고, System의 `assembly`에 배치(mm, 회전 도)를 쓰면 케이스를 만들 수 있다.
+
+- 케이스에 구멍이 필요한 곳은 mount에 `opening`을 붙인다: `{"shape":"round","diameter":5.3}` 또는 `{"shape":"rect","width":12.4,"height":6.5}`. mount의 `normal`은 x·y·z 축 방향이어야 하고, `position`은 부품이 통과하는 점(부품 끝면)이다.
+- 구매 부품은 Model `metadata.bom`에 `{vendor, name, mpn, url}`을 쓴다. 없으면 BOM에서 "모델링 전용"으로 빠진다.
+- `pnpm physisim case <system.json>` — 검증을 통과하면 `out/`에 베이스·뚜껑 STL, 3MF, BOM CSV를 쓴다. 검증 실패 시 이유를 보여 주고 파일을 쓰지 않는다. 웹 3D 화면의 `케이스`(단면, 다운로드)로도 볼 수 있다.
+- 공정 규칙(벽 두께, 틈새, 최소 구멍, 브리지 한계, 출력 크기)은 프로필: `--process fdm`(기본) 또는 `--profile my.json`(기본값에 덮어쓸 항목만).
+- 예제: `examples/camera-case-xiao-s3-sense.system.json`.

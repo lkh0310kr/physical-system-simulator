@@ -4,6 +4,7 @@
  *   GET  /api/files              프로젝트 안의 .json/.js 파일 목록
  *   GET  /api/file?path=…        파일 읽기
  *   PUT  /api/file?path=…        파일 쓰기 (본문 = 내용)
+ *   GET  /api/case(/download)    케이스 메시·STL/3MF/BOM (case-api.ts)
  *   POST /api/compile?path=…     Arduino 스케치(.ino) 컴파일 → { ok, hex } | { ok: false, issues }
  *   HMR 이벤트 "physisim:file"   파일이 바뀌면 { path } 알림
  */
@@ -12,6 +13,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { compileSketch } from "@physisim/avr/compile";
 import type { Plugin } from "vite";
+import { handleCase } from "./case-api.ts";
 
 const EXTENSIONS = new Set([".json", ".js", ".ino"]);
 const SKIP = new Set(["node_modules", ".git", "dist"]);
@@ -83,6 +85,16 @@ export function projectApi(root: string): Plugin {
             JSON.stringify({ root, files: listProjectFiles(root) }),
             "application/json",
           );
+        }
+        if (
+          (url.pathname === "/api/case" || url.pathname === "/api/case/download") &&
+          req.method === "GET"
+        ) {
+          try {
+            return await handleCase(root, url, res, url.pathname.endsWith("/download"));
+          } catch (e) {
+            return send(res, 500, (e as Error).message);
+          }
         }
         if (url.pathname === "/api/compile" && req.method === "POST") {
           const rel = url.searchParams.get("path") ?? "";

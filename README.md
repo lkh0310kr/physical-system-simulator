@@ -23,6 +23,7 @@ PHYSISIM_PROJECT=./my-project pnpm dev      # 다른 폴더 열기
 pnpm physisim models led                                   # 부품 찾기
 pnpm physisim run examples/blink-led.system.json --duration 2s
 pnpm physisim watch examples/blink-led.system.json         # 파일이 바뀔 때마다 다시 실행
+pnpm physisim case examples/camera-case-xiao-s3-sense.system.json            # 케이스 STL/3MF + BOM (out/)
 pnpm physisim report examples/camera-case-a2-ov2640.system.json --press btn@1s   # 촬영 지연·에너지·배터리 수명
 ```
 

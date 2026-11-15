@@ -1,0 +1,60 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.xiao-esp32s3-sense",
+  "name": "Seeed XIAO ESP32S3 Sense",
+  "category": "electronic/module",
+  "description": "ESP32-S3 + 카메라(OV5640 AF) + 마이크 + microSD 확장 보드를 겹친 실제 모듈. 외형·렌즈·USB-C·버튼 위치는 Seeed 공식 STEP(2023-05)에서 읽은 값. 전기 동작은 별도 camera-node 모델이 맡는다.",
+  "ports": [],
+  "capabilities": [],
+  "metadata": {
+    "fidelity": "approximate",
+    "source": "https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/ (21×17.8 mm, 확장 포함 높이 15 mm), https://files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/res/seeed-studio-xiao-esp32s3-sense-3d_model.zip (STEP: 부품별 좌표). docs/scenarios/wearable-camera-specs.md 참조",
+    "assumptions": [
+      "STEP 높이 14.0 mm (사양표는 15 mm) — 케이스는 STEP 기준",
+      "USB-C 개구부 12.4×6.5 mm = 플러그 오버몰드 최대 크기 가정 (USB Type-C 규격, 재확인 안 함)",
+      "버튼 접근 구멍 지름 2.2 mm = 클립·핀 도구 가정, 두 버튼 중 어느 쪽이 BOOT인지 미확인",
+      "STEP의 카메라는 JUSHUO AFC01-S24FCA FPC 모듈 — 현행 출하 OV5640 모듈과 같은지 미확인",
+      "microSD 소켓 접근 개구부 없음 (카드는 케이스를 닫기 전에 넣어야 함)"
+    ],
+    "bom": {
+      "vendor": "Seeed Studio",
+      "name": "XIAO ESP32S3 Sense",
+      "mpn": "5639 (Seeed product page id)",
+      "url": "https://www.seeedstudio.com/XIAO-ESP32S3-Sense-p-5639.html"
+    }
+  },
+  "body": {
+    "size": [24.38, 17.8, 13.98],
+    "color": "#2b3a55"
+  },
+  "mounts": [
+    {
+      "name": "lens",
+      "position": [5.59, 0.69, 6.98],
+      "normal": [0, 0, 1],
+      "description": "카메라 렌즈 끝 (STEP 렌즈 통 윗면 지름 5.3 mm)",
+      "opening": { "shape": "round", "diameter": 5.3 }
+    },
+    {
+      "name": "usb-c",
+      "position": [10.6, 0.01, -4.62],
+      "normal": [1, 0, 0],
+      "description": "USB-C 리셉터클 끝면",
+      "opening": { "shape": "rect", "width": 12.4, "height": 6.5 }
+    },
+    {
+      "name": "button-a",
+      "position": [10.71, 5.93, -5.0],
+      "normal": [0, 0, 1],
+      "description": "보드 가장자리 택트 버튼 (+y쪽), 윗면",
+      "opening": { "shape": "round", "diameter": 2.2 }
+    },
+    {
+      "name": "button-b",
+      "position": [10.71, -5.92, -5.0],
+      "normal": [0, 0, 1],
+      "description": "보드 가장자리 택트 버튼 (−y쪽), 윗면",
+      "opening": { "shape": "round", "diameter": 2.2 }
+    }
+  ]
+}

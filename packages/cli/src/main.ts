@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 /** physisim CLI. 사용법은 USAGE 참고. */
+import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
+import { resolveProfile } from "@physisim/cad";
 import { formatIssues, parseQuantity, type Registry } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
+import { writeCase } from "./case.ts";
 import { describeModel, searchModels } from "./catalog.ts";
 import { compareSystems, formatComparison } from "./compare.ts";
 import { formatTime, formatValue, unitOf } from "./format.ts";
@@ -22,6 +25,7 @@ const USAGE = `사용법:
   physisim run <system.json> [--duration 2s] [--dt 1ms] [--json] [--limit 40]
   physisim report <system.json> --press btn@1s [--duration 4s] [--node node] [--battery bat] [--per-day 10,100]
   physisim compare <a.json> <b.json> ... --press btn@1s [--duration 4s] [--per-day 100]   같은 조건에서 비교
+  physisim case <system.json> [--process fdm] [--profile <profile.json>] [--out out]   케이스 STL/3MF + BOM (검증 통과 시에만 파일 생성)
   physisim watch <system.json> [run 옵션]                       파일이 바뀔 때마다 다시 실행`;
 
 function seconds(text: string, name: string): number {
@@ -45,6 +49,9 @@ async function main(argv: string[]): Promise<number> {
       node: { type: "string", default: "node" },
       battery: { type: "string", default: "bat" },
       "per-day": { type: "string", default: "10,100,1000" },
+      process: { type: "string", default: "fdm" },
+      profile: { type: "string" },
+      out: { type: "string", default: "out" },
       help: { type: "boolean", short: "h", default: false },
     },
   });
@@ -54,7 +61,7 @@ async function main(argv: string[]): Promise<number> {
     values.help ||
     !command ||
     !file ||
-    !["validate", "run", "watch", "report", "compare"].includes(command)
+    !["validate", "run", "watch", "report", "compare", "case"].includes(command)
   ) {
     console.log(USAGE);
     return values.help ? 0 : 2;
@@ -105,6 +112,19 @@ async function main(argv: string[]): Promise<number> {
   if (command === "validate") {
     console.log(`✓ ${doc.name} — 부품 ${system.instances.length}개, Net ${system.nets.length}개`);
     return 0;
+  }
+
+  if (command === "case") {
+    const profile = resolveProfile(
+      values.profile ? JSON.parse(readFileSync(values.profile, "utf8")) : values.process,
+    );
+    if (!profile.ok) {
+      console.error(`✗ ${profile.message}`);
+      return 2;
+    }
+    const out = await writeCase(loaded.value, profile.value, values.out, file);
+    console.log(out.summary);
+    return out.ok ? 0 : 1;
   }
 
   const firmware = await compileFirmware(loaded.value);
