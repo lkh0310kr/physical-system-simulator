@@ -5,6 +5,7 @@
 import type { CaseGeometry, CaseInput } from "./case.ts";
 import { skirtOf, tongueOf } from "./case.ts";
 import { box, inspect, loadGeometry } from "./geometry.ts";
+import { solidsOfGlb } from "./glb.ts";
 import type { ProcessProfile } from "./process.ts";
 
 export interface CaseIssue {
@@ -20,10 +21,19 @@ const DEEP_RATIO = 5;
 /** 개구부 기준점이 부품 상자에서 이만큼(mm) 벗어나도 부품 위로 본다. */
 const MOUNT_SLACK = 0.5;
 
+export interface ValidateOptions {
+  /** 형상 파일 이름 → glb 내용. 주면 박스가 아니라 실제 형상으로도 간섭을 검사한다. */
+  readonly readMesh?: (file: string) => Uint8Array | undefined;
+}
+
+/** 실제 형상이 케이스와 이만큼(mm³) 넘게 겹치면 거부한다. 메시 삼각분할 오차를 넘기는 값. */
+const MESH_OVERLAP = 0.5;
+
 export async function validateCase(
   input: CaseInput,
   g: CaseGeometry,
   profile: ProcessProfile,
+  options: ValidateOptions = {},
 ): Promise<CaseIssue[]> {
   const m = await loadGeometry();
   const issues: CaseIssue[] = [];
@@ -64,6 +74,30 @@ export async function validateCase(
   for (const p of input.parts) {
     const v = shell.intersect(box(m, p.min, p.max)).volume();
     if (v > 1e-6) err("interference", `부품 ${p.id}가 케이스와 ${v.toFixed(2)} mm³ 겹친다`);
+  }
+
+  // 3b. 제작사 형상으로 정밀 간섭 (박스 검사는 통과해도 실제 형상이 닿는지는 다르다)
+  const exact: string[] = [];
+  for (const p of input.parts) {
+    if (!p.mesh) continue;
+    const data = options.readMesh?.(p.mesh.file);
+    if (!data) {
+      warn("mesh-missing", `부품 ${p.id}: 형상 파일 ${p.mesh.file}을 못 읽어 박스로만 검사했다`);
+      continue;
+    }
+    const solids = await solidsOfGlb(data);
+    exact.push(p.id);
+    const [rx, ry, rz] = p.mesh.rotation;
+    for (const s of solids) {
+      const placed = s
+        .rotate([0, 0, rz])
+        .rotate([0, ry, 0])
+        .rotate([rx, 0, 0])
+        .translate([...p.mesh.position] as [number, number, number]);
+      const v = shell.intersect(placed).volume();
+      if (v > MESH_OVERLAP)
+        err("mesh-interference", `부품 ${p.id}의 실제 형상이 케이스와 ${v.toFixed(2)} mm³ 겹친다`);
+    }
   }
 
   // 4. 개구부
@@ -130,6 +164,35 @@ export async function validateCase(
         "bridge",
         `${label}: 벽을 가로지르는 구멍 폭 ${(size[0] ?? 0).toFixed(1)} mm > 브리지 한계 ${profile.bridgeLimit} mm — 윗면이 처질 수 있다`,
       );
+  }
+
+  for (const m of g.merged)
+    warn("opening-merged", `가까운 구멍을 하나로 합쳤다: ${m} (사이 벽이 최소 벽 두께보다 얇음)`);
+
+  // 4b. 같은 벽의 구멍끼리 사이 벽이 minWall 이상인가
+  const faceRect = (o: CaseGeometry["openings"][number]) => {
+    const [u, v] = [0, 1, 2].filter((k) => k !== o.axis) as [number, number];
+    const w = o.size[0] + 2 * profile.openingClearance;
+    const h = o.size[1] + 2 * profile.openingClearance;
+    return {
+      u: [(o.position[u] ?? 0) - w / 2, (o.position[u] ?? 0) + w / 2] as const,
+      v: [(o.position[v] ?? 0) - h / 2, (o.position[v] ?? 0) + h / 2] as const,
+    };
+  };
+  for (const [i, a] of g.openings.entries()) {
+    for (const b of g.openings.slice(i + 1)) {
+      if (a.axis !== b.axis || a.sign !== b.sign) continue;
+      const ra = faceRect(a);
+      const rb = faceRect(b);
+      const gap = (x: readonly [number, number], y: readonly [number, number]) =>
+        Math.max(x[0] - y[1], y[0] - x[1]);
+      const web = Math.max(gap(ra.u, rb.u), gap(ra.v, rb.v));
+      if (web + 1e-9 < profile.minWall)
+        err(
+          "opening-spacing",
+          `${a.part}.${a.mount}와 ${b.part}.${b.mount} 사이 벽 ${Math.max(0, web).toFixed(2)} mm < 최소 ${profile.minWall} mm`,
+        );
+    }
   }
 
   // 5. 출력 크기: 각 부품이 한 번에 출력되는가 (축을 돌려 맞추는 것 허용)

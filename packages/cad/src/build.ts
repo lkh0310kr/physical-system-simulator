@@ -2,7 +2,7 @@
 import type { LoadedSystem } from "@physisim/core";
 import { type CaseGeometry, type CaseInput, caseInputOf, generateCase } from "./case.ts";
 import type { ProcessProfile } from "./process.ts";
-import { type CaseIssue, hasErrors, validateCase } from "./validate.ts";
+import { type CaseIssue, hasErrors, type ValidateOptions, validateCase } from "./validate.ts";
 
 export interface CaseResult {
   readonly ok: boolean;
@@ -14,9 +14,10 @@ export interface CaseResult {
 export async function buildCase(
   loaded: LoadedSystem,
   profile: ProcessProfile,
+  options: ValidateOptions = {},
 ): Promise<CaseResult> {
   const input = caseInputOf(loaded);
   const geometry = await generateCase(input, profile);
-  const issues = await validateCase(input, geometry, profile);
+  const issues = await validateCase(input, geometry, profile, options);
   return { ok: !hasErrors(issues), input, geometry, issues };
 }

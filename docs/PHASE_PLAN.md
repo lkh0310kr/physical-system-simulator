@@ -230,6 +230,19 @@
 
 ---
 
+## Phase 7d — 3D 표현 (목표: 보면 실물이라고 알아볼 수 있게)
+
+- [x] P7-T20 조사: BenchTwin 직접 확인, r3f 조명·그림자 기법, Claude Code 시각 검증 루프 (`docs/references.md`)
+- [x] P7-T21 부품 세부 형상 `body.parts`(표시 전용 프리미티브 + 재질 분류), XIAO 모듈 적용
+- [x] P7-T22 렌더링: 이미지 기반 조명(RoomEnvironment), 부드러운 그림자, PBR 재질, ACES 톤매핑
+- [x] P7-T23 배터리 실제 메시, Model `body.pins`와 3D 케이블 (XIAO BAT± 패드 ↔ 배터리 리드, 리드 출구 위치는 가정)
+- [x] P7-T24 제작사 STEP → glb 변환(`tools/step-to-glb.py`)과 뷰어 로딩 (XIAO 적용, 사용 허락 확인)
+- [x] P7-T27 케이스 뷰의 "출력 배치"(베이스·뒤집은 뚜껑을 베드 위에 나란히)
+- [x] P7-T26 케이스 검증이 제작사 실제 형상(glb→manifold)으로도 간섭을 검사 (`--meshes`, 웹은 같은 폴더)
+- [x] P7-T25 케이스 뷰: 분해(exploded) 슬라이더(부품 단별로 벌려 케이블도 보임), 부품 이름표(치수 없는 부품은 "가정 크기" 표시)
+
+---
+
 ## Phase 8 — Control & Agent v2
 
 - [ ] P8-T1 Control 도메인 Model: PID 컨트롤러 (블록 Behavior)

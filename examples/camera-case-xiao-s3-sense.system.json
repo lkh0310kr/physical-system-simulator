@@ -1,7 +1,7 @@
 {
   "$schema": "../schemas/system.schema.json",
   "name": "Wearable Camera — XIAO ESP32S3 Sense case",
-  "description": "실제 판매 보드(Seeed XIAO ESP32S3 Sense, 공식 STEP 치수)와 Adafruit 1317 배터리를 겹친 케이스 제작용 구성. 전기 동작은 A-3와 같은 camera-node 모델, 형상은 XIAO 모듈 body. 조립 좌표 원점은 XIAO 중심, 단위 mm. 배터리는 USB-C가 있는 +x 벽과 멀어지지 않게 −2.5 mm 밀어 USB-C 플러그가 지나는 자리를 비웠다.",
+  "description": "실제 판매 보드(Seeed XIAO ESP32S3 Sense, 공식 STEP 치수·메시)와 Adafruit 1317 배터리를 겹친 케이스 제작용 구성. 보드가 곧 camera-node 동작 모델이다(A-3와 같은 전류·JPEG 가정). 배터리 리드는 보드 뒷면 BAT± 패드에 3D 케이블로 이어진다. 조립 좌표 원점은 보드 중심, 단위 mm. 배터리는 USB-C 플러그 자리를 비우려 −2.5 mm 밀었다.",
   "instances": [
     {
       "id": "bat",
@@ -9,7 +9,7 @@
     },
     {
       "id": "node",
-      "model": "model.esp32-s3-camera-node",
+      "model": "model.xiao-esp32s3-sense",
       "properties": {
         "captureCurrent": "206mA",
         "imageBytes": 450000
@@ -18,10 +18,6 @@
     {
       "id": "btn",
       "model": "model.pushbutton"
-    },
-    {
-      "id": "xiao",
-      "model": "model.xiao-esp32s3-sense"
     }
   ],
   "connections": [
@@ -43,15 +39,11 @@
       "btn": {
         "x": 160,
         "y": -140
-      },
-      "xiao": {
-        "x": 320,
-        "y": -20
       }
     }
   },
   "assembly": {
-    "xiao": {
+    "node": {
       "position": [0, 0, 0]
     },
     "bat": {

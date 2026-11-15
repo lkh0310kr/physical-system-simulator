@@ -5,8 +5,9 @@ import { type LoadedSystem, loadSystemProject } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
 import { describe, expect, it } from "vitest";
 import { buildCase } from "./build.ts";
-import { type CaseInput, generateCase, printLayout } from "./case.ts";
+import { type CaseInput, generateCase, mergeOpenings, printLayout } from "./case.ts";
 import { inspect } from "./geometry.ts";
+import { meshDirReader } from "./mesh-dir.ts";
 import { fdmProfile, resolveProfile } from "./process.ts";
 import { hasErrors, validateCase } from "./validate.ts";
 
@@ -51,10 +52,11 @@ describe("case generator", () => {
   it("collects the lens, USB-C and button openings from the XIAO model mounts", async () => {
     const r = await buildCase(sample, fdmProfile);
     expect(r.input.openings.map((o) => `${o.part}.${o.mount}`).sort()).toEqual([
-      "xiao.button-a",
-      "xiao.button-b",
-      "xiao.lens",
-      "xiao.usb-c",
+      "node.button-a",
+      "node.button-b",
+      "node.lens",
+      "node.microsd",
+      "node.usb-c",
     ]);
     const lens = r.input.openings.find((o) => o.mount === "lens");
     expect([lens?.axis, lens?.sign]).toEqual([2, 1]);
@@ -145,5 +147,68 @@ describe("case validation", () => {
     expect(codes).toContain("deep-hole");
     expect(codes).toContain("bridge");
     expect(r.ok).toBe(true);
+  });
+});
+
+describe("exact mesh interference", () => {
+  const readMesh = meshDirReader(resolve(root, "apps/web/public/meshes"));
+
+  it("the real XIAO and battery meshes fit the generated case (no interference, no missing mesh)", async () => {
+    const r = await buildCase(sample, fdmProfile, { readMesh });
+    expect(
+      r.issues.filter((i) => i.code === "mesh-interference" || i.code === "mesh-missing"),
+    ).toEqual([]);
+    expect(r.input.parts.every((p) => p.mesh)).toBe(true);
+  });
+
+  it("warns that only boxes were checked when the mesh file cannot be read", async () => {
+    const r = await buildCase(sample, fdmProfile, { readMesh: () => undefined });
+    expect(r.issues.filter((i) => i.code === "mesh-missing")).toHaveLength(2);
+    expect(r.ok).toBe(true);
+  });
+
+  it("rejects a case whose cavity is too small for the real geometry", async () => {
+    const r = await buildCase(sample, fdmProfile);
+    // 보드를 작은 상자로 속여 공동을 줄이면, 실제 형상이 벽·뚜껑을 파고든다
+    const input: CaseInput = {
+      ...r.input,
+      parts: r.input.parts.map((p) =>
+        p.mesh && p.id === "node" ? { ...p, min: [-2, -2, -2], max: [2, 2, 2] } : p,
+      ),
+      openings: [],
+    };
+    const g = await generateCase(input, fdmProfile);
+    const issues = await validateCase(input, g, fdmProfile, { readMesh });
+    expect(issues.some((i) => i.code === "mesh-interference")).toBe(true);
+  });
+});
+
+describe("opening spacing", () => {
+  it("merges USB-C and microSD into one opening because the web between them is thinner than the minimum wall", async () => {
+    const r = await buildCase(sample, fdmProfile);
+    expect(r.geometry.merged).toEqual(["node.usb-c, node.microsd"]);
+    expect(r.geometry.openings.map((o) => o.mount).sort()).toEqual([
+      "button-a",
+      "button-b",
+      "lens",
+      "usb-c+microsd",
+    ]);
+    expect(r.issues.some((i) => i.code === "opening-spacing")).toBe(false);
+    expect(r.issues.some((i) => i.code === "opening-merged")).toBe(true);
+  });
+
+  it("keeps openings that are far enough apart", () => {
+    const mk = (mount: string, x: number) => ({
+      part: "p",
+      mount,
+      position: [x, 0, 0] as const,
+      axis: 2 as const,
+      sign: 1 as const,
+      shape: "round" as const,
+      size: [2, 2] as const,
+    });
+    const r = mergeOpenings([mk("a", 0), mk("b", 10)], fdmProfile);
+    expect(r.merged).toEqual([]);
+    expect(r.openings).toHaveLength(2);
   });
 });

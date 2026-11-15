@@ -61,8 +61,11 @@
   ],
   "metadata": {
     "fidelity": "approximate",
-    "source": "https://www.adafruit.com/product/1317 (용량 150 mAh, 3.7 V 공칭, 4.2 V 만충, 3.0 V 종지, 19.75×26.02×3.8 mm, 4.65 g). 내부 저항 0.15 Ω은 미확인 가정",
-    "assumptions": ["internalResistance"],
+    "source": "https://www.adafruit.com/product/1317 (용량 150 mAh, 3.7 V 공칭, 4.2 V 만충, 3.0 V 종지, 19.75×26.02×3.8 mm, 4.65 g). 내부 저항 0.15 Ω은 미확인 가정 3D 메시는 github.com/adafruit/Adafruit_CAD_Parts (MIT)의 1317 STEP — 외곽 26.02×19.75×3.8 mm가 제품 페이지 치수와 일치함을 확인.",
+    "assumptions": [
+      "internalResistance",
+      "리드선 출구 위치: STEP에 리드가 없어 긴 변 끝 중앙(±1.5 mm)으로 가정"
+    ],
     "bom": {
       "vendor": "Adafruit",
       "name": "Lithium Ion Polymer Battery 3.7V 150mAh",
@@ -73,6 +76,19 @@
   "body": {
     "size": [19.75, 26.02, 3.8],
     "mass": 4.65,
-    "color": "#7a8ca8"
+    "color": "#7a8ca8",
+    "mesh": "lipo-adafruit-1317.glb",
+    "pins": [
+      {
+        "port": "+",
+        "label": "리드 +",
+        "position": [1.5, 13.01, 0]
+      },
+      {
+        "port": "-",
+        "label": "리드 -",
+        "position": [-1.5, 13.01, 0]
+      }
+    ]
   }
 }

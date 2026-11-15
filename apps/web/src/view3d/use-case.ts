@@ -17,6 +17,8 @@ export interface CaseData {
   readonly issues: readonly CaseIssue[];
   readonly base: CaseMesh;
   readonly lid: CaseMesh;
+  /** 출력 자세(베드 위에 평평하게, 뚜껑은 뒤집힘). */
+  readonly print: { readonly base: CaseMesh; readonly lid: CaseMesh };
   readonly process: string;
 }
 
