@@ -20,7 +20,7 @@ pnpm physisim watch my.system.json            #    또는 저장할 때마다 �
   "$schema": "../schemas/system.schema.json",
   "name": "Blink LED",
   "instances": [
-    { "id": "uno", "model": "model.arduino-uno", "program": "blink.js" },
+    { "id": "uno", "model": "model.arduino-uno", "program": "blink.ino" },
     { "id": "r1", "model": "model.resistor", "properties": { "resistance": "220Ω" } },
     { "id": "led1", "model": "model.led" }
   ],
@@ -38,25 +38,31 @@ pnpm physisim watch my.system.json            #    또는 저장할 때마다 �
 - 회로가 닫히려면 **GND**(`(GND)` 표시 Port)로 돌아와야 한다.
 - `layout`: 에디터용 화면 정보. 시뮬레이션에는 영향 없음.
 
-## 3. MCU 프로그램 (`*.js`)
+## 3. MCU 프로그램 — Arduino 스케치 (`*.ino`)
 
-```js
-function setup() {
+실제 보드에 올리는 Arduino 코드를 그대로 쓴다. arduino-cli로 컴파일한 펌웨어를 avr8js가 명령어 단위로 실행하므로 실제 UNO와 같이 동작한다.
+
+```cpp
+void setup() {
   pinMode(13, OUTPUT);
+  Serial.begin(9600);
 }
 
-function* loop() {
+void loop() {
   digitalWrite(13, HIGH);
-  yield delay(500);        // delay는 반드시 yield와 함께
+  Serial.println("on");
+  delay(500);
   digitalWrite(13, LOW);
-  yield delay(500);
+  Serial.println("off");
+  delay(500);
 }
 ```
 
-- API: `pinMode(pin, INPUT|OUTPUT)`, `digitalWrite(pin, HIGH|LOW)`, `digitalRead(pin)`, `delay(ms)`, `millis()`, `micros()`, `Serial.begin(baud)`, `Serial.print(x)`, `Serial.println(x)`.
-- 핀 번호 n은 Port `D<n>`이다 (Arduino UNO: 0~13).
-- `delay` 없는 `loop`는 1ms마다 다시 호출된다.
-- 오류가 나면 프로그램만 멈추고 결과에 `프로그램 오류`로 표시된다.
+- 필요: `arduino-cli`와 AVR 코어 (`brew install arduino-cli && arduino-cli core install arduino:avr`). 없으면 오류 메시지가 설치법을 알려 준다.
+- 핀 번호 n은 Port `D<n>`이다 (Arduino UNO: 0~13). `Serial` 출력은 실행 결과와 에디터의 코드 패널에 나온다.
+- 컴파일 오류는 `blink.ino:10:3: 'digitalWrit' was not declared in this scope`처럼 줄 위치와 함께 나온다.
+- 지금은 스케치 파일 하나(.ino)만 지원한다. 외부 라이브러리 설치는 아직 지원하지 않는다.
+- 가벼운 실험용으로 JS 스크립트(`*.js`, `function* loop() { …; yield delay(500); }`)도 쓸 수 있다.
 
 ## 4. 새 부품 (로컬 Model)
 

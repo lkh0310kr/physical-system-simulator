@@ -7,13 +7,14 @@ AI 에이전트 기반 로봇, 하드웨어, 회로, 물리 시뮬레이션 플�
 ## 시작
 
 ```bash
+brew install arduino-cli && arduino-cli core install arduino:avr   # Arduino 스케치 컴파일용
 pnpm install
 pnpm dev                                    # 웹 에디터 → http://localhost:5173 (examples/ 폴더를 연다)
 PHYSISIM_PROJECT=./my-project pnpm dev      # 다른 폴더 열기
 ```
 
 - 캔버스: 드래그로 이동, 핀에서 핀으로 드래그해 배선, `R` 회전, `Delete` 삭제, `⌘Z` 되돌리기, `Space` 실행/정지
-- 왼쪽 `추가`로 부품, `코드`로 MCU 프로그램·시리얼 출력
+- 왼쪽 `추가`로 부품, `코드`로 Arduino 스케치(.ino) 편집·시리얼 출력 — 실제 펌웨어를 컴파일해 실행한다
 - 에디터에서 고치면 파일에 저장되고, 에이전트가 파일을 고치면 화면에 바로 반영된다
 
 ## CLI

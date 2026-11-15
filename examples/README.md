@@ -9,5 +9,5 @@ pnpm physisim run examples/blink-led.system.json --duration 2s
 
 | 파일 | 내용 |
 |---|---|
-| `blink-led.system.json` | Arduino UNO D13 → 220Ω → LED → GND, 프로그램 `blink.js` |
-| `blink.js` | Arduino식 JS: 0.5초마다 D13 토글 (`yield delay(ms)`) |
+| `blink-led.system.json` | Arduino UNO D13 → 220Ω → LED → GND, 프로그램 `blink.ino` |
+| `blink.ino` | Arduino 스케치: 0.5초마다 D13 토글, Serial 출력 (실행에 arduino-cli 필요) |
