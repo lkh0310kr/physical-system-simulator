@@ -112,7 +112,7 @@
 - [x] P4-T2 `physisim models [검색어] [--json]`: 부품·Port·속성·Capability 탐색
 - [x] P4-T3 JSON Schema 파일(`schemas/`) 생성과 `$schema` 지원, 최신 상태 테스트
 - [x] P4-T4 `physisim watch`: System·프로그램·로컬 Model 변경 시 재검증·재실행
-- [ ] P4-T5 `docs/AUTHORING.md`: 에이전트용 작성 가이드, AGENTS.md 연결
+- [x] P4-T5 `docs/AUTHORING.md`: 에이전트용 작성 가이드, AGENTS.md 연결
 - [ ] P4-T6 시나리오 테스트: 파일 수정 → watch 감지 → 결과 변화
 
 🔶 결정 게이트
