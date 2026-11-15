@@ -667,3 +667,8 @@ button.icon {
 .case-issues .error {
   color: var(--danger);
 }
+
+.explode {
+  width: 90px;
+  accent-color: var(--accent);
+}

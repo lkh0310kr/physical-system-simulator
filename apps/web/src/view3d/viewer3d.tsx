@@ -194,10 +194,13 @@ function CaseSolid({
   mesh,
   color,
   clip,
+  lift = 0,
 }: {
   mesh: CaseMesh;
   color: string;
   clip: Plane | undefined;
+  /** 분해 보기에서 위로 띄우는 높이 [m]. */
+  lift?: number;
 }) {
   const geometry = useMemo(() => {
     const g = new BufferGeometry();
@@ -213,7 +216,7 @@ function CaseSolid({
     return g;
   }, [mesh]);
   return (
-    <mesh geometry={geometry}>
+    <mesh geometry={geometry} position={[0, 0, lift]}>
       <meshPhysicalMaterial
         color={color}
         transparent
@@ -238,6 +241,8 @@ export function Viewer3D({
 }: Props) {
   const [showCase, setShowCase] = useState(false);
   const [section, setSection] = useState(false);
+  /** 분해 보기 0~1: 뚜껑과 부품을 위로 벌려 안쪽 구성을 보여 준다. */
+  const [explode, setExplode] = useState(0);
   const caseState = useCase(systemPath, showCase, loaded);
   const all = useMemo(() => buildScene3d(loaded), [loaded]);
   // 케이스를 보는 동안은 치수 없는 자리표시를 숨긴다 — 케이스에 들어가지 않는 가정 크기가 섞여 보이지 않게
@@ -306,18 +311,20 @@ export function Viewer3D({
         />
         <Orbit radius={radius} target={target} />
         {boxes.map((b) => (
-          <Part
-            key={b.id}
-            box={b}
-            selected={selection?.kind === "part" && selection.id === b.id}
-            activity={activityOf(b.id, signals)}
-            pressable={running && b.switchable}
-            onSelect={() => onSelect?.({ kind: "part", id: b.id })}
-            onPress={(event) => onPress?.(b.id, event)}
-          />
+          <group key={b.id} position={[0, 0, showCase ? explode * 0.01 : 0]}>
+            <Part
+              key={b.id}
+              box={b}
+              selected={selection?.kind === "part" && selection.id === b.id}
+              activity={activityOf(b.id, signals)}
+              pressable={running && b.switchable}
+              onSelect={() => onSelect?.({ kind: "part", id: b.id })}
+              onPress={(event) => onPress?.(b.id, event)}
+            />
+          </group>
         ))}
         {data && <CaseSolid mesh={data.base} color="#9aa5b4" clip={clip} />}
-        {data && <CaseSolid mesh={data.lid} color="#b8c1cd" clip={clip} />}
+        {data && <CaseSolid mesh={data.lid} color="#b8c1cd" clip={clip} lift={explode * 0.022} />}
       </Canvas>
       <div className="float case-bar">
         <span className="seg">
@@ -328,6 +335,18 @@ export function Viewer3D({
           >
             케이스
           </button>
+          {showCase && (
+            <input
+              type="range"
+              className="explode"
+              aria-label="분해"
+              min={0}
+              max={1}
+              step={0.01}
+              value={explode}
+              onChange={(e) => setExplode(Number(e.target.value))}
+            />
+          )}
           {showCase && (
             <button
               type="button"
