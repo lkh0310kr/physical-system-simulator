@@ -16,6 +16,7 @@ describe("standard library", () => {
       "model.resistor",
       "model.pushbutton",
       "model.toggle-switch",
+      "model.potentiometer",
       "model.atmega328p",
       "model.arduino-uno",
     ]);

@@ -1,0 +1,30 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.potentiometer",
+  "name": "Potentiometer",
+  "category": "electronics/input",
+  "description": "회전식 가변저항. 단자 1–3이 양 끝, 2가 와이퍼.",
+  "propertySchema": {
+    "resistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 1,
+      "description": "양 끝 단자 사이의 전체 저항"
+    },
+    "position": {
+      "type": "number",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "description": "와이퍼 위치 (0 = 단자 1쪽, 1 = 단자 3쪽)"
+    }
+  },
+  "properties": { "resistance": 10000, "position": 0.5 },
+  "ports": [
+    { "name": "1", "domain": "electrical" },
+    { "name": "2", "domain": "electrical", "description": "와이퍼" },
+    { "name": "3", "domain": "electrical" }
+  ],
+  "capabilities": [{ "capability": "capability.potentiometry" }],
+  "metadata": { "fidelity": "ideal" }
+}
