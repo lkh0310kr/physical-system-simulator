@@ -156,3 +156,116 @@ select.bare {
   outline: none;
   cursor: pointer;
 }
+
+/* 캔버스 */
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+
+.canvas:active {
+  cursor: grabbing;
+}
+
+.grid-line {
+  fill: none;
+  stroke: var(--grid);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.grid-line.major {
+  stroke: var(--grid-major);
+}
+
+.wire {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+
+.wire.live {
+  stroke: var(--accent);
+  stroke-width: 2;
+  opacity: 1;
+}
+
+.part {
+  cursor: default;
+}
+
+.part .lead {
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.part .body {
+  fill: var(--part);
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.part .lit {
+  fill: var(--accent);
+  pointer-events: none;
+}
+
+.part .glow {
+  fill: var(--accent-glow);
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+.part .mark {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+.part .board {
+  fill: var(--part-dark);
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.part .pin {
+  fill: var(--bg);
+  stroke: var(--line);
+  stroke-width: 1.2;
+}
+
+.part .pin-label {
+  fill: #c9d1da;
+  font-size: 8px;
+  font-family: var(--mono);
+  dominant-baseline: middle;
+}
+
+.part .board-name {
+  fill: #e7ebf0;
+  font-size: 13px;
+  font-weight: 600;
+  text-anchor: middle;
+  letter-spacing: 0.02em;
+}
+
+.part .part-id {
+  fill: var(--muted);
+  font-size: 11px;
+}
+
+.part .selection {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}

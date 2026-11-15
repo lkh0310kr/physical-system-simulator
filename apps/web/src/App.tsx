@@ -1,4 +1,5 @@
 import { formatIssues } from "@physisim/core";
+import { Canvas } from "./canvas/Canvas.tsx";
 import { useProject } from "./use-project.ts";
 
 export function App() {
@@ -33,13 +34,15 @@ export function App() {
         </div>
       )}
 
-      <div style={{ display: "grid", placeItems: "center", height: "100vh" }} className="muted">
-        {loaded
-          ? `${loaded.doc.name} — 부품 ${loaded.system.instances.length}개, Net ${loaded.system.nets.length}개`
-          : project.systems.length === 0
-            ? "*.system.json 파일이 없다"
-            : ""}
-      </div>
+      {loaded ? (
+        <Canvas loaded={loaded} layout={loaded.doc.layout} />
+      ) : (
+        project.systems.length === 0 && (
+          <div style={{ display: "grid", placeItems: "center", height: "100vh" }} className="muted">
+            *.system.json 파일이 없다
+          </div>
+        )
+      )}
     </main>
   );
 }
