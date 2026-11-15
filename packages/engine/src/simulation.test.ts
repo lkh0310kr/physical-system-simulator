@@ -155,6 +155,15 @@ describe("createSimulation", () => {
     expect(currents.map((c) => Math.round(c * 1000))).toEqual([0, 0, 20, 20]);
   });
 
+  it("re-solves the circuit as soon as an event changes behavior state", () => {
+    const sim = simulate(circuit);
+    sim.run(0.001);
+    expect(sim.voltage("r2:1")).toBe(0);
+    sim.dispatch("bat", "capability.supply", { type: "on" });
+    // 다음 스텝을 기다리지 않고 바로 반영된다 (풀업을 켠 직후에 읽는 펌웨어를 위해).
+    expect(sim.voltage("r2:1")).toBeCloseTo(4, 3);
+  });
+
   it("exposes port voltages from the last circuit solve", () => {
     const sim = simulate(circuit);
     sim.dispatch("bat", "capability.supply", { type: "on" });

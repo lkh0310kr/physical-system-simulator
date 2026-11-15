@@ -205,6 +205,8 @@ export function createSimulation(
       if (r) {
         u.state = r.state;
         u.outputs = r.outputs;
+        // 상태가 바뀌었으니 회로도 바로 최신으로: 풀업을 켠 직후의 읽기가 다음 스텝을 기다리지 않는다.
+        solveCircuit();
       }
     },
     voltage: (ref) => voltages[nodeOf.get(ref) ?? 0] ?? 0,
