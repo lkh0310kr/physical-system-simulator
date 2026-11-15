@@ -1,6 +1,6 @@
 import { formatIssues } from "@physisim/core";
 import { useEffect, useRef, useState } from "react";
-import { Canvas, type Selection } from "./canvas/Canvas.tsx";
+import { Canvas, type Selection } from "./canvas/canvas.tsx";
 import {
   addInstance,
   connect,
@@ -8,9 +8,11 @@ import {
   moveInstance,
   removeInstance,
   rotateInstance,
+  setProperty,
 } from "./edit.ts";
 import { PauseIcon, PlayIcon, PlusIcon, ResetIcon, RotateIcon, TrashIcon } from "./icons.tsx";
-import { PartsPanel } from "./PartsPanel.tsx";
+import { Inspector } from "./inspector-panel.tsx";
+import { PartsPanel } from "./parts-panel.tsx";
 import { useSimulation } from "./sim/use-simulation.ts";
 import { useProject } from "./use-project.ts";
 
@@ -145,6 +147,16 @@ export function App() {
             <TrashIcon />
           </button>
         </div>
+      )}
+
+      {loaded && selection?.kind === "part" && (
+        <Inspector
+          loaded={loaded}
+          id={selection.id}
+          signals={frame?.signals ?? {}}
+          onChange={(key, value) => update(setProperty(docJson, selection.id, key, value))}
+          onClose={() => setSelection(undefined)}
+        />
       )}
 
       {loaded && (

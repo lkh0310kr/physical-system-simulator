@@ -24,7 +24,7 @@ import {
   snap,
   symbolFor,
 } from "./geometry.ts";
-import { Part } from "./Part.tsx";
+import { Part } from "./part.tsx";
 
 export interface Live {
   /** "instance.output" → 값. */
