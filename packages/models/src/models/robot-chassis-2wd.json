@@ -3,7 +3,7 @@
   "id": "model.robot-chassis-2wd",
   "name": "2-wheel differential-drive chassis",
   "category": "mechanical/chassis",
-  "description": "두 바퀴 축(left·right)에 모터를 붙이면 평면 위를 달리는 차체. 바퀴가 같은 방향으로 돌면 직진, 반대 방향이면 제자리 회전. 아직 특정 제품이 아니라 일반 값(전부 가정)이다.",
+  "description": "두 바퀴 축(left·right)에 모터를 붙이면 평면 위를 달리는 차체. 바퀴가 같은 방향으로 돌면 직진, 반대 방향이면 제자리 회전. 아직 특정 제품이 아니라 일반 값(전부 가정)이다. 3D에서는 가운데 판 양옆에 모터를 달 수 있고, 바퀴가 모터 각도를 따라 돌고 흰 표식으로 회전을 보인다. 바퀴 지름 66 mm·너비 26 mm는 TT 모터용 바퀴 가정.",
   "propertySchema": {
     "wheelRadius": {
       "type": "number",
@@ -89,8 +89,82 @@
     ]
   },
   "body": {
-    "size": [200, 130, 30],
+    "size": [200, 186, 66],
     "mass": 500,
-    "color": "#7a8ca8"
+    "color": "#7a8ca8",
+    "parts": [
+      {
+        "name": "plate",
+        "shape": "box",
+        "position": [0, 0, 0],
+        "size": [200, 80, 30],
+        "material": "plastic",
+        "color": "#7a8ca8"
+      },
+      {
+        "name": "wheel-left",
+        "shape": "cylinder",
+        "position": [0, -78, 0],
+        "diameter": 66,
+        "length": 26,
+        "axis": "y",
+        "material": "rubber",
+        "color": "#1d1f23",
+        "motion": {
+          "signal": "leftAngle",
+          "axis": "y",
+          "rotate": true,
+          "scale": 1,
+          "pivot": [0, -78, 0]
+        }
+      },
+      {
+        "name": "wheel-left-mark",
+        "shape": "box",
+        "position": [0, -91.5, 0],
+        "size": [52, 2, 10],
+        "material": "plastic",
+        "color": "#e6e2d3",
+        "motion": {
+          "signal": "leftAngle",
+          "axis": "y",
+          "rotate": true,
+          "scale": 1,
+          "pivot": [0, -78, 0]
+        }
+      },
+      {
+        "name": "wheel-right",
+        "shape": "cylinder",
+        "position": [0, 78, 0],
+        "diameter": 66,
+        "length": 26,
+        "axis": "y",
+        "material": "rubber",
+        "color": "#1d1f23",
+        "motion": {
+          "signal": "rightAngle",
+          "axis": "y",
+          "rotate": true,
+          "scale": 1,
+          "pivot": [0, 78, 0]
+        }
+      },
+      {
+        "name": "wheel-right-mark",
+        "shape": "box",
+        "position": [0, 91.5, 0],
+        "size": [52, 2, 10],
+        "material": "plastic",
+        "color": "#e6e2d3",
+        "motion": {
+          "signal": "rightAngle",
+          "axis": "y",
+          "rotate": true,
+          "scale": 1,
+          "pivot": [0, 78, 0]
+        }
+      }
+    ]
   }
 }

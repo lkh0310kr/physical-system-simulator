@@ -277,22 +277,66 @@
                     "type": "string"
                   },
                   "motion": {
-                    "type": "object",
-                    "properties": {
-                      "signal": {
-                        "type": "string",
-                        "minLength": 1
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "signal": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "axis": {
+                            "type": "string",
+                            "enum": ["x", "y", "z"]
+                          },
+                          "rotate": {
+                            "type": "boolean",
+                            "const": true
+                          },
+                          "scale": {
+                            "default": 1,
+                            "type": "number"
+                          },
+                          "pivot": {
+                            "type": "array",
+                            "prefixItems": [
+                              {
+                                "type": ["number", "string"]
+                              },
+                              {
+                                "type": ["number", "string"]
+                              },
+                              {
+                                "type": ["number", "string"]
+                              }
+                            ],
+                            "items": false,
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": ["signal", "axis", "rotate"],
+                        "additionalProperties": false
                       },
-                      "axis": {
-                        "type": "string",
-                        "enum": ["x", "y", "z"]
-                      },
-                      "distance": {
-                        "type": ["number", "string"]
+                      {
+                        "type": "object",
+                        "properties": {
+                          "signal": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "axis": {
+                            "type": "string",
+                            "enum": ["x", "y", "z"]
+                          },
+                          "distance": {
+                            "type": ["number", "string"]
+                          }
+                        },
+                        "required": ["signal", "axis", "distance"],
+                        "additionalProperties": false
                       }
-                    },
-                    "required": ["signal", "axis", "distance"],
-                    "additionalProperties": false
+                    ]
                   }
                 },
                 "required": ["name", "shape", "position", "size"],
@@ -346,22 +390,66 @@
                     "type": "string"
                   },
                   "motion": {
-                    "type": "object",
-                    "properties": {
-                      "signal": {
-                        "type": "string",
-                        "minLength": 1
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "signal": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "axis": {
+                            "type": "string",
+                            "enum": ["x", "y", "z"]
+                          },
+                          "rotate": {
+                            "type": "boolean",
+                            "const": true
+                          },
+                          "scale": {
+                            "default": 1,
+                            "type": "number"
+                          },
+                          "pivot": {
+                            "type": "array",
+                            "prefixItems": [
+                              {
+                                "type": ["number", "string"]
+                              },
+                              {
+                                "type": ["number", "string"]
+                              },
+                              {
+                                "type": ["number", "string"]
+                              }
+                            ],
+                            "items": false,
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": ["signal", "axis", "rotate"],
+                        "additionalProperties": false
                       },
-                      "axis": {
-                        "type": "string",
-                        "enum": ["x", "y", "z"]
-                      },
-                      "distance": {
-                        "type": ["number", "string"]
+                      {
+                        "type": "object",
+                        "properties": {
+                          "signal": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "axis": {
+                            "type": "string",
+                            "enum": ["x", "y", "z"]
+                          },
+                          "distance": {
+                            "type": ["number", "string"]
+                          }
+                        },
+                        "required": ["signal", "axis", "distance"],
+                        "additionalProperties": false
                       }
-                    },
-                    "required": ["signal", "axis", "distance"],
-                    "additionalProperties": false
+                    ]
                   }
                 },
                 "required": ["name", "shape", "position", "diameter", "length"],

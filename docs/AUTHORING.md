@@ -146,3 +146,4 @@ Model에 `body`(박스 크기, mm)와 `mounts`를 쓰고, System의 `assembly`�
 ## 신호 선 (제어 블록)
 
 Port `domain`이 `signal`이면 제어 신호 선이다. `direction`(`in`/`out`)이 필요하다: 출력 Port의 이름이 Behavior 출력 이름이고, 입력 Port의 이름이 `step`의 `inputs` 키다. 한 선에는 출력이 하나여야 하고, 값은 한 스텝(기본 1 ms) 늦게 전달된다. 예: `["sonar:distance", "ctrl:distance"]`. 출력이 아직 없는 첫 스텝에는 입력 키가 없다. 데모: `examples/robot-avoid.system.json` (센서 → 제어기 → H-브리지 → 모터 → 바퀴 → 차체 → 센서).
+- 세부 형상의 `motion`은 평행 이동(`{signal, axis, distance}`)이나 회전(`{signal, axis, rotate: true, scale, pivot}`)이다. 회전은 신호(rad)를 따라 `pivot`을 중심으로 돈다 — 바퀴 여러 형상이 같은 `pivot`을 쓰면 한 몸으로 돈다. 차체(`model.robot-chassis-2wd`)는 `leftAngle`·`rightAngle`을 내보내 바퀴가 모터를 따라 돈다.

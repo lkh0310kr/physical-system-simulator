@@ -18,11 +18,21 @@ const GAP = 0.005;
 
 /** 부품 안의 세부 형상 (body 중심 기준 [m]). 박스 또는 축 방향 원기둥. */
 /** 신호를 따라 움직이는 방식 (거리는 m). */
-export interface SceneMotion {
-  readonly signal: string;
-  readonly axis: "x" | "y" | "z";
-  readonly distance: number;
-}
+export type SceneMotion =
+  | {
+      readonly kind: "translate";
+      readonly signal: string;
+      readonly axis: "x" | "y" | "z";
+      readonly distance: number;
+    }
+  | {
+      readonly kind: "rotate";
+      readonly signal: string;
+      readonly axis: "x" | "y" | "z";
+      readonly scale: number;
+      /** 회전 중심 [m] (없으면 형상 중심). */
+      readonly pivot: Vec3 | undefined;
+    };
 
 export type ScenePart =
   | {
@@ -67,8 +77,28 @@ export interface SceneBox {
 }
 
 const motionOf = (
-  m: { signal: string; axis: "x" | "y" | "z"; distance: number | string } | undefined,
-) => (m ? { signal: m.signal, axis: m.axis, distance: toMeters(m.distance) } : undefined);
+  m:
+    | { signal: string; axis: "x" | "y" | "z"; distance: number | string }
+    | {
+        signal: string;
+        axis: "x" | "y" | "z";
+        rotate: true;
+        scale: number;
+        pivot?: readonly [number | string, number | string, number | string] | undefined;
+      }
+    | undefined,
+): SceneMotion | undefined => {
+  if (!m) return undefined;
+  if ("rotate" in m)
+    return {
+      kind: "rotate",
+      signal: m.signal,
+      axis: m.axis,
+      scale: m.scale,
+      pivot: m.pivot ? v3(m.pivot) : undefined,
+    };
+  return { kind: "translate", signal: m.signal, axis: m.axis, distance: toMeters(m.distance) };
+};
 
 const v3 = (v: readonly [number | string, number | string, number | string]): Vec3 => [
   toMeters(v[0]),

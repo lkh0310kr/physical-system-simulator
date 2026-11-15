@@ -138,15 +138,16 @@ function Shape({
         : new CylinderGeometry(part.diameter / 2, part.diameter / 2, part.length, 40),
     [part],
   );
-  // 신호를 따라 움직이는 부품 (눌리는 플런저 등): 신호 0~1 × 거리
+  // 신호를 따라 움직이는 부품: 평행 이동(눌리는 플런저) 또는 축 회전(바퀴)
   const m = part.motion;
-  const moved = m ? Number(signals[`${id}.${m.signal}`] ?? 0) * m.distance : 0;
+  const value = m ? Number(signals[`${id}.${m.signal}`] ?? 0) : 0;
+  const moved = m?.kind === "translate" ? value * m.distance : 0;
   const position: [number, number, number] = [
-    part.position[0] + (m?.axis === "x" ? moved : 0),
-    part.position[1] + (m?.axis === "y" ? moved : 0),
-    part.position[2] + (m?.axis === "z" ? moved : 0),
+    part.position[0] + (m?.kind === "translate" && m.axis === "x" ? moved : 0),
+    part.position[1] + (m?.kind === "translate" && m.axis === "y" ? moved : 0),
+    part.position[2] + (m?.kind === "translate" && m.axis === "z" ? moved : 0),
   ];
-  const rotation: [number, number, number] =
+  const shapeRotation: [number, number, number] =
     part.kind === "cylinder"
       ? part.axis === "z"
         ? [Math.PI / 2, 0, 0]
@@ -154,8 +155,34 @@ function Shape({
           ? [0, 0, Math.PI / 2]
           : [0, 0, 0]
       : [0, 0, 0];
+  if (m?.kind === "rotate") {
+    // 회전 중심에 둔 그룹을 돌리고, 형상은 그 안에서 중심과의 차이만큼 떨어져 있다
+    const pivot = m.pivot ?? part.position;
+    const spin: [number, number, number] = [
+      m.axis === "x" ? value * m.scale : 0,
+      m.axis === "y" ? value * m.scale : 0,
+      m.axis === "z" ? value * m.scale : 0,
+    ];
+    return (
+      <group position={[pivot[0], pivot[1], pivot[2]]} rotation={spin}>
+        <mesh
+          geometry={geometry}
+          position={[
+            part.position[0] - pivot[0],
+            part.position[1] - pivot[1],
+            part.position[2] - pivot[2],
+          ]}
+          rotation={shapeRotation}
+          castShadow
+          receiveShadow
+        >
+          <PartMaterial part={part} glow={glow} />
+        </mesh>
+      </group>
+    );
+  }
   return (
-    <mesh geometry={geometry} position={position} rotation={rotation} castShadow receiveShadow>
+    <mesh geometry={geometry} position={position} rotation={shapeRotation} castShadow receiveShadow>
       <PartMaterial part={part} glow={glow} />
     </mesh>
   );

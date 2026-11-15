@@ -4,6 +4,9 @@ interface PoseState {
   readonly x: number;
   readonly y: number;
   readonly heading: number;
+  /** 바퀴 누적 각도 [rad] (표시용). */
+  readonly leftAngle: number;
+  readonly rightAngle: number;
 }
 
 /**
@@ -14,7 +17,7 @@ interface PoseState {
  */
 export const driveBase = defineBehavior<PoseState>({
   id: "behavior.drive-base",
-  init: () => ({ x: 0, y: 0, heading: 0 }),
+  init: () => ({ x: 0, y: 0, heading: 0, leftAngle: 0, rightAngle: 0 }),
   mechanics: (_s, ctx) => {
     const r = numberOf(ctx.properties, "wheelRadius");
     const inertia =
@@ -42,6 +45,8 @@ export const driveBase = defineBehavior<PoseState>({
       x: s.x + speed * Math.cos(mid) * ctx.dt,
       y: s.y + speed * Math.sin(mid) * ctx.dt,
       heading: s.heading + yawRate * ctx.dt,
+      leftAngle: s.leftAngle + wl * ctx.dt,
+      rightAngle: s.rightAngle + wr * ctx.dt,
     };
     return { state: next, outputs: { ...next, speed, yawRate } };
   },

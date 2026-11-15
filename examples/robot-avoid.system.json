@@ -65,19 +65,19 @@
   ],
   "assembly": {
     "car": {
-      "position": [0, 0, 15]
+      "position": [0, 0, 33]
     },
     "bat": {
-      "position": [-30, 0, 36],
+      "position": [-30, 0, 50],
       "rotation": [0, 0, 90],
       "parent": "car"
     },
     "ml": {
-      "position": [0, -58, 12],
+      "position": [0, -58, 33],
       "parent": "car"
     },
     "mr": {
-      "position": [0, 58, 12],
+      "position": [0, 58, 33],
       "parent": "car"
     },
     "wall": {
