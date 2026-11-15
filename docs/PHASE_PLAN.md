@@ -148,6 +148,16 @@
 
 **목표**: BenchTwin 수준의 "실부품처럼 동작하고, 실패할 회로는 실패한다".
 
+**6a — Arduino 실펌웨어 (사용자 결정으로 먼저 진행)**
+
+- [ ] P6-T0a `@physisim/avr`: avr8js로 ATmega328P 펌웨어 실행, 포트 ↔ GPIO 이벤트, USART ↔ 시리얼
+- [ ] P6-T0b 스케치 컴파일 (arduino-cli, 캐시, 오류를 파일·줄 위치로)
+- [ ] P6-T0c CLI·dev 서버·웹에서 `.ino` 프로그램 실행·편집
+- [ ] P6-T0d 예제를 `blink.ino`로, 미리 컴파일한 hex로 CI E2E, 작성 가이드 갱신
+
+**6b — 부품·계측·고장**
+
+
 - [ ] P6-T1 입력·센서 Model: 버튼, 가변저항, 포토레지스터, 초음파 센서
 - [ ] P6-T2 PWM·ADC Capability 및 Behavior
 - [ ] P6-T3 모터 드라이버, DC 모터(전기적 모델), 서보
@@ -157,7 +167,7 @@
 - [ ] P6-T7 두 번째 MCU (ESP32 또는 Pico)로 Capability 재사용·override 검증
 
 🔶 결정 게이트
-- G6-1 실제 펌웨어 에뮬레이션(avr8js·rp2040js) 도입 여부와 시점
+- ~~G6-1 실제 펌웨어 에뮬레이션~~ → avr8js로 지금 도입 (사용자 결정). rp2040js 등 다른 MCU는 그때 결정
 - G6-2 부품 데이터 확보 방법 (직접 작성 / Fritzing parts(CC-BY-SA) / Agent 생성 후 검수)
 
 **완료 기준**: 버튼으로 LED 토글, 잘못된 저항값에서 LED 소손 이벤트 발생.
