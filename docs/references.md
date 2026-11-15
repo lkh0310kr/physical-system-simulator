@@ -118,3 +118,11 @@
 | realvirtual WEB | 브라우저 3D HMI, 렌더·시뮬레이션이 사용자 기기에서 동작 (AGPL — 코드는 안 가져옴) | 구조 참고만 |
 
 실제 부품 형상: Seeed XIAO 모듈은 공식 STEP의 **부품별 치수**만 옮겨 프리미티브로 구성했다 (STEP 메시를 배포하지 않으므로 라이선스 문제 없음).
+
+## 원본 3D 메시 사용 (P7-T24)
+
+| 파일 | 출처 | 변환 |
+|---|---|---|
+| `apps/web/public/meshes/xiao-esp32s3-sense.glb` | Seeed Studio 공식 STEP (`seeed-studio-xiao-esp32s3-sense-3d_model.zip`, 2023-05) | `tools/step-to-glb.py` (cadquery/OpenCascade, 개발 환경에서만 사용): 면 색 유지, 편향 0.05 mm, PhysiSim body 좌표(m, z 위)로 변환 |
+
+사용 허락: 사용자가 2026-11-15에 확인(라이선스 문제 없음으로 판단). 원본 STEP·PDF는 계속 저장소에 올리지 않는다(`datasheets/`). 변환본에는 출처를 `metadata.source`에 남긴다. 색은 STEP에 들어 있는 값 그대로이고 PBR 재질 값은 렌더 추정이다.

@@ -117,3 +117,4 @@ Model에 `body`(박스 크기, mm)와 `mounts`를 쓰고, System의 `assembly`�
 - 공정 규칙(벽 두께, 틈새, 최소 구멍, 브리지 한계, 출력 크기)은 프로필: `--process fdm`(기본) 또는 `--profile my.json`(기본값에 덮어쓸 항목만).
 - 예제: `examples/camera-case-xiao-s3-sense.system.json`.
 - 3D 화면에서 더 실물처럼 보이게 하려면 Model `body.parts`에 세부 형상(box/cylinder, `material`은 pcb·metal·plastic·glass·rubber)을 mm로 적는다. 표시 전용이고 케이스 계산은 `body.size` 박스를 쓰므로, 모든 세부 형상은 박스 안에 들어가야 한다. 예: `xiao-esp32s3-sense.json`.
+- 제작사 CAD가 있으면 `tools/step-to-glb.py`로 glb를 만들어 `apps/web/public/meshes/`에 두고 Model `body.mesh`에 파일 이름을 쓴다. 메시를 못 읽으면 `parts`, 그것도 없으면 박스로 대신 그린다. 메시는 `body.size` 박스 안에 들어와야 한다(테스트가 확인).

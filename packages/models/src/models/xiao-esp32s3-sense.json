@@ -8,7 +8,7 @@
   "capabilities": [],
   "metadata": {
     "fidelity": "approximate",
-    "source": "https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/ (21×17.8 mm, 확장 포함 높이 15 mm), https://files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/res/seeed-studio-xiao-esp32s3-sense-3d_model.zip (STEP: 부품별 좌표). docs/scenarios/wearable-camera-specs.md 참조 세부 형상(parts)은 STEP 부품별 외곽 상자와 렌즈 통 원기둥 치수에서 옮긴 것 — 형상 데이터가 아니라 치수만 사용.",
+    "source": "https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/ (21×17.8 mm, 확장 포함 높이 15 mm), https://files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/res/seeed-studio-xiao-esp32s3-sense-3d_model.zip (STEP: 부품별 좌표). docs/scenarios/wearable-camera-specs.md 참조 세부 형상(parts)은 STEP 부품별 외곽 상자와 렌즈 통 원기둥 치수에서 옮긴 것 — 형상 데이터가 아니라 치수만 사용. 3D 메시(mesh)는 같은 STEP을 tools/step-to-glb.py로 변환한 것 (Seeed 공식 모델, 사용 허락은 사용자 확인).",
     "assumptions": [
       "STEP 높이 14.0 mm (사양표는 15 mm) — 케이스는 STEP 기준",
       "USB-C 개구부 12.4×6.5 mm = 플러그 오버몰드 최대 크기 가정 (USB Type-C 규격, 재확인 안 함)",
@@ -161,7 +161,8 @@
         "material": "glass",
         "color": "#1a2233"
       }
-    ]
+    ],
+    "mesh": "xiao-esp32s3-sense.glb"
   },
   "mounts": [
     {

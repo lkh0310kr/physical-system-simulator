@@ -10,6 +10,8 @@ import {
   DoubleSide,
   EdgesGeometry,
   Float32BufferAttribute,
+  type Group,
+  Mesh,
   PCFSoftShadowMap,
   Plane,
   PMREMGenerator,
@@ -17,6 +19,8 @@ import {
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { Selection } from "../canvas/canvas.tsx";
 import { activityOf, buildScene3d, type SceneBox, type ScenePart, sceneBounds } from "./scene.ts";
 import { type CaseMesh, downloadUrl, useCase } from "./use-case.ts";
@@ -109,6 +113,38 @@ function Shape({ part, glow }: { part: ScenePart; glow: number }) {
   );
 }
 
+/** glb를 한 번만 읽어 캐시한다. 실패하면 undefined(→ 세부 형상으로 대체). 날카로운 모서리는 살리고 곡면만 부드럽게 한다. */
+const glbCache = new Map<string, Promise<Group | undefined>>();
+function useGlb(url: string | undefined): Group | undefined {
+  const [group, setGroup] = useState<Group | undefined>();
+  useEffect(() => {
+    if (!url) return setGroup(undefined);
+    let cancelled = false;
+    let p = glbCache.get(url);
+    if (!p) {
+      p = new GLTFLoader()
+        .loadAsync(url)
+        .then((g) => {
+          g.scene.traverse((o) => {
+            if (o instanceof Mesh) {
+              o.geometry = toCreasedNormals(o.geometry, Math.PI / 6);
+              o.castShadow = true;
+              o.receiveShadow = true;
+            }
+          });
+          return g.scene as Group;
+        })
+        .catch(() => undefined);
+      glbCache.set(url, p);
+    }
+    p.then((g) => !cancelled && setGroup(g));
+    return () => {
+      cancelled = true;
+    };
+  }, [url]);
+  return group;
+}
+
 function Part({
   box,
   selected,
@@ -128,7 +164,8 @@ function Part({
   const geometry = useMemo(() => new BoxGeometry(...box.size), [box.size]);
   const edges = useMemo(() => new EdgesGeometry(geometry), [geometry]);
   const rotation = box.rotation.map((d) => (d * Math.PI) / 180) as [number, number, number];
-  const detailed = box.parts.length > 0;
+  const glb = useGlb(box.mesh);
+  const detailed = glb !== undefined || box.parts.length > 0;
   const [hover, setHover] = useState(false);
   const glow = activity + (hover ? 0.3 : 0);
   return (
@@ -157,7 +194,9 @@ function Part({
         if (pressable) onPress("release");
       }}
     >
-      {detailed ? (
+      {glb ? (
+        <primitive object={glb.clone()} />
+      ) : detailed ? (
         box.parts.map((p) => <Shape key={p.name} part={p} glow={glow * 0.35} />)
       ) : (
         <mesh geometry={geometry} castShadow receiveShadow>

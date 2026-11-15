@@ -63,7 +63,7 @@ export const BodySchema = z.strictObject({
   size: Vec3Schema,
   /** 질량 [g]. 물리 엔진(7b)과 무게 비교에 쓴다. */
   mass: z.number().min(0).optional(),
-  /** CAD에서 내보낸 형상 파일 (이 Model 파일 기준 상대 경로, glTF/STL). 없으면 박스. */
+  /** 제작사 CAD에서 변환한 형상(glb). PhysiSim body 좌표계(m, z 위, 중심 원점). 웹은 `/meshes/<이름>`에서 읽는다. 없으면 `parts`, 그것도 없으면 박스. */
   mesh: z.string().min(1).optional(),
   /** 표시 색 (CSS 색). 없으면 분류별 기본색. */
   color: z.string().optional(),

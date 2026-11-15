@@ -51,6 +51,8 @@ export interface SceneBox {
   /** 실치수(body 선언)인지, 자리표시인지. */
   readonly real: boolean;
   readonly color: string | undefined;
+  /** 제작사 CAD에서 변환한 메시 URL. 없거나 불러오지 못하면 `parts`로 그린다. */
+  readonly mesh: string | undefined;
   /** 세부 형상. 비어 있으면 박스 하나로 그린다. */
   readonly parts: readonly ScenePart[];
 }
@@ -87,6 +89,7 @@ export function buildScene3d(loaded: LoadedSystem): SceneBox[] {
       switchable,
       real: !!body,
       color: body?.color,
+      mesh: body?.mesh ? `/meshes/${body.mesh}` : undefined,
       parts: (body?.parts ?? []).map(
         (p): ScenePart =>
           p.shape === "box"
