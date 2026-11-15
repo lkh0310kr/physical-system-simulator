@@ -51,6 +51,8 @@ export interface Simulation {
   schedule(at: number, run: () => void): void;
   /** Behavior의 `onEvent`로 이벤트를 즉시 전달한다. */
   dispatch(instance: string, capability: string, event: SimEvent): void;
+  /** 마지막 회로 해석에서 Port(`"instance:port"`)의 전압 [V]. 회로에 없는 Port는 0. */
+  voltage(ref: string): number;
   /** Behavior 상태 조회 (읽기 전용으로 다룰 것). */
   state(instance: string, capability: string): unknown;
   /** 매 스텝 후 호출될 구독자. 해제 함수를 돌려준다. */
@@ -205,6 +207,7 @@ export function createSimulation(
         u.outputs = r.outputs;
       }
     },
+    voltage: (ref) => voltages[nodeOf.get(ref) ?? 0] ?? 0,
     state: (instance, capability) => unitOf(instance, capability).state,
     onStep(listener) {
       listeners.add(listener);
