@@ -470,6 +470,8 @@ AI Agent는 필요한 Model을 검색하고 Instance를 생성하며 연결 관�
 | 개발 전략 | Headless 코어 우선 | 확정 (v0.5) |
 | 런타임 Schema 검증 | Zod v4 | 확정 (v0.5) |
 | 저장소 / 툴체인 | pnpm 모노레포 | 확정 (v0.5) |
+| 런타임 | Node.js 22 LTS | 확정 (v0.5) |
+| 공개 범위 / 라이선스 | Public GitHub 저장소, MIT | 확정 (v0.5) |
 | Instance 구조 | 미결정 | 대기 |
 | Behavior 인터페이스 | 미결정 | 대기 |
 | Composition 구조 | 미결정 | 대기 |
@@ -560,6 +562,8 @@ interface ModelCapabilityBinding {
 | 항목 | 결정 | 비고 |
 |---|---|---|
 | 언어 | TypeScript (strict, ESM) | §11 |
+| 런타임 | Node.js 22 LTS | 코어는 Node와 브라우저 양쪽에서 동작 |
+| 라이선스 | MIT | Public 저장소 |
 | 런타임 Schema | Zod v4 | `z.toJSONSchema()`로 Agent tool schema 생성 |
 | 저장소 | pnpm workspaces 모노레포 | packages/*, apps/* |
 | 테스트 | Vitest | |
