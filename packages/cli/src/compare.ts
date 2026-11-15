@@ -1,5 +1,5 @@
 /** 같은 조건(버튼 일정)에서 여러 시스템을 돌려 지표를 나란히 비교한다 (M5). */
-import type { Issue, Result } from "@physisim/core";
+import { analyzeLoadedFit, type FitReport, type Issue, type Result } from "@physisim/core";
 import { analyzeCaptures, batteryLifeDays, type CameraReport, capacityMah } from "./report.ts";
 import { compileFirmware, loadSystemFile, type RunOptions, runLoaded } from "./simulate.ts";
 
@@ -10,6 +10,8 @@ export interface ComparisonRow {
   readonly capacityMah: number;
   /** 노드 Model이 가정으로 남겨 둔 항목 (docs/scenarios/*-specs.md 참조). */
   readonly assumptions: readonly string[];
+  /** 조립(assembly)과 body로 계산한 크기·간섭. 조립이 없으면 부품이 하나도 없다. */
+  readonly fit: FitReport;
 }
 
 export async function compareSystems(
@@ -42,6 +44,7 @@ export async function compareSystems(
       report: analyzeCaptures(result.trace, { node: nodeId, battery: batteryId }),
       capacityMah: capacityMah(loaded.value, batteryId),
       assumptions,
+      fit: analyzeLoadedFit(loaded.value),
     });
   }
   return issues.length ? { ok: false, issues } : { ok: true, value: rows };
@@ -65,6 +68,13 @@ export function formatComparison(rows: readonly ComparisonRow[], perDay: number)
         })()} 일`
       : "—",
     assumptions: `${r.assumptions.length}개`,
+    area: r.fit.boxes.length ? `${(r.fit.footprintArea * 1e6).toFixed(0)} mm²` : "—",
+    overlap: r.fit.boxes.length
+      ? r.fit.overlaps.length
+        ? `${r.fit.overlaps.length}쌍 ⚠`
+        : "없음"
+      : "—",
+    missing: r.fit.missing.length ? `${r.fit.missing.length}개` : "0개",
   }));
   const label = [
     "",
@@ -73,6 +83,9 @@ export function formatComparison(rows: readonly ComparisonRow[], perDay: number)
     "절전 전류",
     `수명 (하루 ${perDay}장)`,
     "미확인 가정",
+    "부품 점유 면적",
+    "부품 겹침",
+    "치수 없는 부품",
   ];
   const w0 = Math.max(...label.map(width));
   const lines = [
@@ -83,6 +96,9 @@ export function formatComparison(rows: readonly ComparisonRow[], perDay: number)
       ["sleep", 3],
       ["life", 4],
       ["assumptions", 5],
+      ["area", 6],
+      ["overlap", 7],
+      ["missing", 8],
     ].map(
       ([k, i]) =>
         `${pad(label[i as number] ?? "", w0)}  ${cols.map((c) => pad(String(c[k as keyof typeof c]), 30)).join("")}`,

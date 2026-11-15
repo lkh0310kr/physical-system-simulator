@@ -55,3 +55,36 @@ describe("analyzeFit", () => {
     expect(r.size).toEqual([0, 0, 0]);
   });
 });
+
+describe("analyzeLoadedFit on a real assembly mistake", () => {
+  it("flags a sensor placed inside the battery (the mistake made while building the camera examples)", async () => {
+    const { loadSystemProject } = await import("./project.ts");
+    const { createRegistry } = await import("./registry.ts");
+    const { loadLibrary } = await import("./loader.ts");
+    const lib = loadLibrary({
+      models: [
+        { id: "model.cell", name: "Cell", category: "x", body: { size: [19.75, 26.02, 3.8] } },
+        { id: "model.sensor", name: "Sensor", category: "x", body: { size: [5.725, 6.285, 2] } },
+      ],
+    });
+    if (!lib.ok) throw new Error("fixture");
+    const r = loadSystemProject(
+      {
+        name: "bad",
+        instances: [
+          { id: "bat", model: "model.cell" },
+          { id: "sensor", model: "model.sensor" },
+        ],
+        // 센서 중심 z=3.4 mm → 바닥이 2.4 mm로 배터리(0~3.8 mm) 안에 파고든다
+        assembly: { bat: { position: [0, 0, 1.9] }, sensor: { position: [10, 0, 3.4] } },
+      },
+      () => undefined,
+      () => lib.value ?? createRegistry(),
+    );
+    if (!r.ok) throw new Error(JSON.stringify(r.issues));
+    const { analyzeLoadedFit } = await import("./fit.ts");
+    const fit = analyzeLoadedFit(r.value);
+    expect(fit.overlaps.map((o) => `${o.a}×${o.b}`)).toEqual(["bat×sensor"]);
+    expect(fit.overlaps[0]?.volume).toBeGreaterThan(0);
+  });
+});

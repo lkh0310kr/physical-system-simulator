@@ -23,11 +23,16 @@ import resistance from "./capabilities/resistance.json" with { type: "json" };
 import switching from "./capabilities/switching.json" with { type: "json" };
 import arduinoUno from "./models/arduino-uno.json" with { type: "json" };
 import atmega328p from "./models/atmega328p.json" with { type: "json" };
+import esp32C6Chip from "./models/esp32-c6-qfn32.json" with { type: "json" };
 import esp32P4Camera from "./models/esp32-p4-c6-camera-node.json" with { type: "json" };
+import esp32P4Chip from "./models/esp32-p4-qfn104.json" with { type: "json" };
 import esp32Camera from "./models/esp32-s3-camera-node.json" with { type: "json" };
+import esp32S3Chip from "./models/esp32-s3-qfn56.json" with { type: "json" };
 import led from "./models/led.json" with { type: "json" };
 import liIonCell from "./models/li-ion-cell.json" with { type: "json" };
 import lipo1317 from "./models/lipo-adafruit-1317.json" with { type: "json" };
+import ov2640Sensor from "./models/ov2640-sensor.json" with { type: "json" };
+import ov5640Sensor from "./models/ov5640-sensor.json" with { type: "json" };
 import potentiometerModel from "./models/potentiometer.json" with { type: "json" };
 import pushbutton from "./models/pushbutton.json" with { type: "json" };
 import resistor from "./models/resistor.json" with { type: "json" };
@@ -74,6 +79,11 @@ export const standardLibrary: LibraryInput = {
     esp32P4Camera,
     liIonCell,
     lipo1317,
+    esp32S3Chip,
+    esp32C6Chip,
+    esp32P4Chip,
+    ov2640Sensor,
+    ov5640Sensor,
     resistor,
     pushbutton,
     toggleSwitch,
