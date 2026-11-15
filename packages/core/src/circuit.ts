@@ -36,6 +36,18 @@ export type CircuitElement =
       /** [A] 접지로 흐르는 방향이 +. */
       readonly current: number;
     }
+  /**
+   * 두 Port 사이의 이상 전류원: `current`가 a에서 b로 흐르도록 강제한다 (전류는 a에서 빠져 b로 들어간다).
+   * 모터의 역기전력은 "저항 ∥ 전류원(= −e/R)"의 노턴 등가로 표현한다.
+   */
+  | {
+      readonly kind: "source";
+      readonly id: string;
+      readonly a: string;
+      readonly b: string;
+      /** [A] a → b 방향이 +. */
+      readonly current: number;
+    }
   /** 구간 선형 다이오드: 순방향 전압을 넘으면 `onResistance`로 도통, 아니면 차단. 전류 방향 anode → cathode. */
   | {
       readonly kind: "diode";

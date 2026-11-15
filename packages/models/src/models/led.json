@@ -3,7 +3,7 @@
   "id": "model.led",
   "name": "LED",
   "category": "electronics/output",
-  "description": "5mm 단색 LED",
+  "description": "5mm 단색 LED. 절대 최대 전류를 넘겨 지속하면 소손(개방)된다.",
   "propertySchema": {
     "forwardVoltage": {
       "type": "number",
@@ -25,6 +25,20 @@
       "min": 0,
       "default": 10,
       "description": "도통 시 직렬 저항"
+    },
+    "absoluteMaxCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 30,
+      "description": "절대 최대 순방향 전류. 넘긴 채로 burnTime 지속하면 소손. 5 mm 일반 LED의 흔한 값(가정, 특정 제품 데이터시트 아님)"
+    },
+    "burnTime": {
+      "type": "number",
+      "unit": "ms",
+      "min": 0,
+      "default": 200,
+      "description": "절대 최대 전류를 넘긴 채 이만큼 지속되면 소손. 열 모델을 시간 임계값으로 단순화한 가정"
     }
   },
   "properties": {
@@ -50,6 +64,7 @@
     }
   ],
   "metadata": {
-    "fidelity": "approximate"
+    "fidelity": "approximate",
+    "assumptions": ["absoluteMaxCurrent", "burnTime", "maxCurrent(정격 20 mA)"]
   }
 }

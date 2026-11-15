@@ -24,6 +24,13 @@ export type NodeElement =
     }
   | { readonly kind: "load"; readonly id: string; readonly node: number; readonly current: number }
   | {
+      readonly kind: "source";
+      readonly id: string;
+      readonly a: number;
+      readonly b: number;
+      readonly current: number;
+    }
+  | {
       readonly kind: "diode";
       readonly id: string;
       readonly anode: number;
@@ -135,6 +142,10 @@ export function createCircuitSolver() {
         case "load":
           inject(e.node, 0, -e.current);
           break;
+        case "source":
+          // a에서 빠져 b로 들어가는 전류
+          inject(e.b, e.a, e.current);
+          break;
         case "diode":
           if (diodeOn.get(e.id)) {
             const g = 1 / e.onResistance;
@@ -160,6 +171,9 @@ export function createCircuitSolver() {
           currents.set(e.id, (e.voltage - at(v, e.node)) / e.resistance);
           break;
         case "load":
+          currents.set(e.id, e.current);
+          break;
+        case "source":
           currents.set(e.id, e.current);
           break;
         case "diode": {

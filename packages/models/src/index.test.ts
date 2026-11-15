@@ -23,8 +23,23 @@ describe("standard library", () => {
       "model.ov2640-sensor",
       "model.ov5640-sensor",
       "model.xiao-esp32s3-sense",
+      "model.tt-motor",
+      "model.robot-chassis-2wd",
+      "model.ultrasonic-rcwl-1601",
+      "model.h-bridge",
+      "model.avoider-controller",
+      "model.pid-controller",
+      "model.photoresistor",
+      "model.line-sensor",
+      "model.steering-mixer",
+      "model.servo-sg92r",
+      "model.signal-generator",
+      "model.line-floor",
+      "model.wall",
       "model.resistor",
+      "model.multimeter",
       "model.pushbutton",
+      "model.tactile-12mm",
       "model.toggle-switch",
       "model.potentiometer",
       "model.atmega328p",
@@ -117,7 +132,7 @@ describe("behavior.led", () => {
   const properties = { forwardVoltage: 2, maxCurrent: 0.02, dynamicResistance: 10 };
   const brightness = (current: number) =>
     ledBehavior.step(
-      {},
+      { overload: 0, burnt: false },
       {},
       {
         time: 0,
@@ -129,7 +144,9 @@ describe("behavior.led", () => {
     ).outputs.brightness;
 
   it("contributes a diode from A to C", () => {
-    expect(ledBehavior.circuit?.({}, { properties, config: {} })).toEqual([
+    expect(
+      ledBehavior.circuit?.({ overload: 0, burnt: false }, { properties, config: {} }),
+    ).toEqual([
       { kind: "diode", id: "diode", anode: "A", cathode: "C", forwardVoltage: 2, onResistance: 10 },
     ]);
   });

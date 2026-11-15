@@ -1,0 +1,67 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.avoider-controller",
+  "name": "Obstacle-avoiding controller (software)",
+  "category": "control/logic",
+  "description": "거리 신호로 좌·우 모터 명령을 내는 반응형 제어기. 마이크로컨트롤러 펌웨어를 동작 모델로 추상화한 것이다(카메라 노드와 같은 방식).",
+  "propertySchema": {
+    "threshold": {
+      "type": "number",
+      "unit": "m",
+      "min": 0,
+      "default": 0.4,
+      "description": "이 거리보다 가까우면 피한다"
+    },
+    "cruise": {
+      "type": "number",
+      "min": -1,
+      "max": 1,
+      "default": 0.8,
+      "description": "직진 명령"
+    },
+    "turnCmd": {
+      "type": "number",
+      "min": 0,
+      "max": 1,
+      "default": 0.35,
+      "description": "제자리 회전 명령 크기"
+    },
+    "turnTime": {
+      "type": "number",
+      "unit": "s",
+      "min": 0,
+      "default": 0.5,
+      "description": "한 번 피할 때 도는 시간"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "distance",
+      "domain": "signal",
+      "direction": "in",
+      "description": "장애물까지 거리 [m]"
+    },
+    {
+      "name": "left",
+      "domain": "signal",
+      "direction": "out",
+      "description": "왼쪽 모터 명령"
+    },
+    {
+      "name": "right",
+      "domain": "signal",
+      "direction": "out",
+      "description": "오른쪽 모터 명령"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.avoider"
+    }
+  ],
+  "metadata": {
+    "fidelity": "ideal",
+    "assumptions": ["제어 규칙은 단순한 예시 — 실제 펌웨어가 아님"]
+  }
+}

@@ -32,6 +32,28 @@ export type Vec3 = readonly [number, number, number];
 /** 표면 재질 분류. 렌더러가 분류별 PBR 값을 고른다 (형상 데이터에 셰이더를 넣지 않는다). */
 export const MaterialKindSchema = z.enum(["pcb", "metal", "plastic", "glass", "rubber"]);
 
+/** 세부 형상이 시뮬레이션 신호를 따라 평행 이동하는 방식 (플런저가 눌리는 모습 등). 표시 전용. */
+export const TranslateMotionSchema = z.strictObject({
+  /** 이 부품 Instance의 출력 신호 이름 (0~1). 예: "plunger" */
+  signal: z.string().min(1),
+  axis: z.enum(["x", "y", "z"]),
+  /** 신호가 1일 때 이동하는 거리. 음수면 반대 방향. 실제 이동이 작으면 눈에 보이게 과장해도 되고, 과장은 Model 설명에 적는다. */
+  distance: LengthSchema,
+});
+
+/** 신호(라디안)를 따라 자기 중심을 축으로 도는 방식 (바퀴·팬). */
+export const RotateMotionSchema = z.strictObject({
+  signal: z.string().min(1),
+  axis: z.enum(["x", "y", "z"]),
+  rotate: z.literal(true),
+  /** 신호 1당 회전 각도 [rad]. 기본 1 (신호가 rad이면 그대로). */
+  scale: z.number().default(1),
+  /** 회전 중심 (body 중심 기준 mm). 생략하면 이 형상의 중심. 여러 형상이 한 바퀴처럼 같이 돌게 할 때 쓴다. */
+  pivot: Vec3Schema.optional(),
+});
+
+export const MotionSchema = z.union([RotateMotionSchema, TranslateMotionSchema]);
+
 /**
  * 부품 안의 세부 형상 (보드, 커넥터, 렌즈 통 등). 표시 전용이며 케이스·간섭 계산은 `body` 박스를 쓴다.
  * 위치는 body 중심 기준 mm, `axis`는 원기둥의 축(기본 z).
@@ -44,6 +66,7 @@ export const PartShapeSchema = z.discriminatedUnion("shape", [
     size: Vec3Schema,
     material: MaterialKindSchema.default("plastic"),
     color: z.string().optional(),
+    motion: MotionSchema.optional(),
   }),
   z.strictObject({
     name: z.string().min(1),
@@ -54,6 +77,7 @@ export const PartShapeSchema = z.discriminatedUnion("shape", [
     axis: z.enum(["x", "y", "z"]).default("z"),
     material: MaterialKindSchema.default("plastic"),
     color: z.string().optional(),
+    motion: MotionSchema.optional(),
   }),
 ]);
 
@@ -107,9 +131,12 @@ export const PlacementSchema = z.strictObject({
   position: Vec3Schema,
   /** x·y·z 축 회전 [도] (z → y → x 순서로 적용). 생략하면 0. */
   rotation: z.tuple([z.number(), z.number(), z.number()]).optional(),
+  /** 이 부품이 따라 움직이는 부품(Instance ID). 3D에서 부모의 위치·방향 신호(x, y, heading)를 같이 받는다. 예: 차체 위의 모터·배터리. */
+  parent: z.string().optional(),
 });
 
 export type Body = z.output<typeof BodySchema>;
+export type Motion = z.output<typeof MotionSchema>;
 export type PinLocation = z.output<typeof PinLocationSchema>;
 export type PartShape = z.output<typeof PartShapeSchema>;
 export type MaterialKind = z.output<typeof MaterialKindSchema>;

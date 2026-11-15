@@ -1,0 +1,35 @@
+{
+  "$schema": "../schemas/system.schema.json",
+  "name": "Tactile switch → LED (mechanism drives the circuit)",
+  "description": "실제 12 mm 택트 스위치(Adafruit 1119 형상, Omron B3F 접점·프리트래블)를 3D에서 눌러 보는 예제. 플런저가 0.3 mm 작동점까지 내려가야 접점이 닫혀 LED가 켜진다. 3D에서 스위치를 클릭해 누른다(실행 중).",
+  "instances": [
+    {
+      "id": "bat",
+      "model": "model.lipo-adafruit-1317"
+    },
+    {
+      "id": "r1",
+      "model": "model.resistor",
+      "properties": {
+        "resistance": "220Ω"
+      }
+    },
+    {
+      "id": "led1",
+      "model": "model.led"
+    },
+    {
+      "id": "sw",
+      "model": "model.tactile-12mm"
+    }
+  ],
+  "connections": [["bat:+", "r1:1"], ["r1:2", "led1:A"], ["led1:C", "sw:1"], ["sw:2", "bat:-"]],
+  "assembly": {
+    "bat": {
+      "position": [0, 0, 1.9]
+    },
+    "sw": {
+      "position": [0, 30, 6]
+    }
+  }
+}

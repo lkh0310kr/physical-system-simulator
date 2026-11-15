@@ -56,6 +56,15 @@ export const SystemSchema = z
         });
       }
     }
+    for (const [id, placed] of Object.entries(s.assembly ?? {})) {
+      if (placed.parent !== undefined && !s.instances.some((i) => i.id === placed.parent)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["assembly", id, "parent"],
+          message: `없는 Instance를 부모로 지정했다: ${placed.parent}`,
+        });
+      }
+    }
     const seen = new Set<string>();
     s.instances.forEach((inst, i) => {
       if (seen.has(inst.id))

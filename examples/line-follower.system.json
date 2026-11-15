@@ -1,0 +1,146 @@
+{
+  "$schema": "../schemas/system.schema.json",
+  "name": "Line-following robot (PID steering)",
+  "description": "선 센서가 바닥의 사인 곡선에서 벗어난 거리를 재면 PID가 조향을 만들고 믹서가 좌우 모터 명령으로 바꾼다. 모터는 Adafruit 3777 값, 센서·믹서·차체는 가정. kp를 `physisim tune --minimize pid.ise`로 찾아 보자.",
+  "instances": [
+    {
+      "id": "bat",
+      "model": "model.li-ion-cell",
+      "properties": {
+        "capacity": 2000
+      }
+    },
+    {
+      "id": "dl",
+      "model": "model.h-bridge"
+    },
+    {
+      "id": "dr",
+      "model": "model.h-bridge"
+    },
+    {
+      "id": "ml",
+      "model": "model.tt-motor"
+    },
+    {
+      "id": "mr",
+      "model": "model.tt-motor"
+    },
+    {
+      "id": "car",
+      "model": "model.robot-chassis-2wd"
+    },
+    {
+      "id": "eye",
+      "model": "model.line-sensor"
+    },
+    {
+      "id": "pid",
+      "model": "model.pid-controller",
+      "properties": {
+        "kp": 4,
+        "ki": 0,
+        "kd": 0.2,
+        "target": 0,
+        "outMin": -1,
+        "outMax": 1
+      }
+    },
+    {
+      "id": "mix",
+      "model": "model.steering-mixer",
+      "properties": {
+        "cruise": 0.6,
+        "gain": 0.8
+      }
+    },
+    {
+      "id": "floor",
+      "model": "model.line-floor"
+    }
+  ],
+  "connections": [
+    ["bat:+", "dl:VM"],
+    ["bat:+", "dr:VM"],
+    ["bat:-", "dl:GND"],
+    ["bat:-", "dr:GND"],
+    ["dl:A", "ml:A"],
+    ["dl:B", "ml:B"],
+    ["dr:A", "mr:A"],
+    ["dr:B", "mr:B"],
+    ["ml:shaft", "car:left"],
+    ["mr:shaft", "car:right"],
+    ["car:x", "eye:x"],
+    ["car:y", "eye:y"],
+    ["car:heading", "eye:heading"],
+    ["eye:offset", "pid:measurement"],
+    ["pid:output", "mix:steer"],
+    ["mix:left", "dl:cmd"],
+    ["mix:right", "dr:cmd"]
+  ],
+  "layout": {
+    "instances": {
+      "bat": {
+        "x": 0,
+        "y": 0
+      },
+      "eye": {
+        "x": 200,
+        "y": -200
+      },
+      "pid": {
+        "x": 420,
+        "y": -200
+      },
+      "mix": {
+        "x": 640,
+        "y": -200
+      },
+      "car": {
+        "x": 860,
+        "y": -200
+      },
+      "floor": {
+        "x": 1080,
+        "y": -200
+      },
+      "dl": {
+        "x": 300,
+        "y": 80
+      },
+      "dr": {
+        "x": 520,
+        "y": 80
+      },
+      "ml": {
+        "x": 760,
+        "y": 80
+      },
+      "mr": {
+        "x": 980,
+        "y": 80
+      }
+    }
+  },
+  "assembly": {
+    "car": {
+      "position": [0, 0, 33]
+    },
+    "bat": {
+      "position": [-30, 0, 50],
+      "rotation": [0, 0, 90],
+      "parent": "car"
+    },
+    "ml": {
+      "position": [0, -58, 33],
+      "parent": "car"
+    },
+    "mr": {
+      "position": [0, 58, 33],
+      "parent": "car"
+    },
+    "floor": {
+      "position": [1000, 0, -1]
+    }
+  }
+}

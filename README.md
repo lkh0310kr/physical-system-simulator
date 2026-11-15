@@ -17,6 +17,16 @@ PHYSISIM_PROJECT=./my-project pnpm dev      # 다른 폴더 열기
 - 왼쪽 `추가`로 부품, `코드`로 Arduino 스케치(.ino) 편집·시리얼 출력 — 실제 펌웨어를 컴파일해 실행한다
 - 에디터에서 고치면 파일에 저장되고, 에이전트가 파일을 고치면 화면에 바로 반영된다
 
+## 데모 (웹 에디터에서 `3D` → `실행`)
+
+| 열 주소 | 무엇을 보나 |
+|---|---|
+| `?system=camera-case-xiao-s3-sense.system.json` | 실제 카메라 보드 + 배터리에 맞춘 케이스(`케이스`, 단면, 분해, 출력 배치, STL/3MF 내려받기) |
+| `?system=tactile-led.system.json` | 12 mm 택트 스위치 플런저를 클릭해 누르면 접점이 닫혀 LED가 켜진다 |
+| `?system=robot-avoid.system.json` | 초음파 센서로 벽 앞에서 돌아 피하는 2륜 로봇 (카메라가 따라간다) |
+| `?system=line-follower.system.json` | PID 조향으로 바닥 사인 곡선을 따라가는 로봇 |
+| `?system=motor-pid.system.json` | PID 모터 속도 제어 (`스코프`로 파형 보기) |
+
 ## CLI
 
 ```bash
@@ -25,6 +35,9 @@ pnpm physisim run examples/blink-led.system.json --duration 2s
 pnpm physisim watch examples/blink-led.system.json         # 파일이 바뀔 때마다 다시 실행
 pnpm physisim case examples/camera-case-xiao-s3-sense.system.json            # 케이스 STL/3MF + BOM (out/)
 pnpm physisim report examples/camera-case-a2-ov2640.system.json --press btn@1s   # 촬영 지연·에너지·배터리 수명
+pnpm physisim sweep examples/blink-led.system.json --set r1.resistance=100,220,1000 --watch led1.brightness   # 값 바꿔 비교
+pnpm physisim tune examples/motor-pid.system.json --range ctrl.ki=0.05..5 --minimize ctrl.ise --stat final      # 제약 하 최적값 탐색
+pnpm physisim check my-part.model.json                     # 새 부품 정의 검증 + 사람이 확인할 항목
 ```
 
 ## 문서

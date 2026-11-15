@@ -57,6 +57,12 @@ function TwoTerminal({
   );
 }
 
+/** 보드 폭에 들어가게 이름을 줄인다 (글자당 약 7px). 전체 이름은 툴팁으로 남긴다. */
+export function fitLabel(name: string, width: number): string {
+  const max = Math.max(4, Math.floor((width - 16) / 7));
+  return name.length <= max ? name : `${name.slice(0, max - 1)}…`;
+}
+
 function Board({ symbol, name }: { symbol: PartSymbol; name: string }) {
   return (
     <>
@@ -67,7 +73,8 @@ function Board({ symbol, name }: { symbol: PartSymbol; name: string }) {
         </text>
       ))}
       <text x={symbol.width / 2} y={symbol.height - 18} className="board-name">
-        {name}
+        <title>{name}</title>
+        {fitLabel(name, symbol.width)}
       </text>
     </>
   );

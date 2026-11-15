@@ -1,0 +1,59 @@
+{
+  "$schema": "../schemas/system.schema.json",
+  "name": "Motor speed control (PID)",
+  "description": "PID가 TT 모터의 각속도를 목표(15 rad/s)에 맞춘다: 측정(모터 omega) → PID → H-브리지 → 모터. kp·ki 값을 바꿔 보거나 `physisim tune`으로 이득을 찾는다. 모터는 Adafruit 3777 값.",
+  "instances": [
+    {
+      "id": "bat",
+      "model": "model.li-ion-cell",
+      "properties": {
+        "capacity": 2000
+      }
+    },
+    {
+      "id": "drv",
+      "model": "model.h-bridge"
+    },
+    {
+      "id": "m",
+      "model": "model.tt-motor"
+    },
+    {
+      "id": "ctrl",
+      "model": "model.pid-controller",
+      "properties": {
+        "kp": 0.2,
+        "ki": 0.8,
+        "target": 15
+      }
+    }
+  ],
+  "connections": [
+    ["bat:+", "drv:VM"],
+    ["bat:-", "drv:GND"],
+    ["drv:A", "m:A"],
+    ["drv:B", "m:B"],
+    ["m:omega", "ctrl:measurement"],
+    ["ctrl:output", "drv:cmd"]
+  ],
+  "layout": {
+    "instances": {
+      "bat": {
+        "x": 0,
+        "y": 0
+      },
+      "ctrl": {
+        "x": 200,
+        "y": -160
+      },
+      "drv": {
+        "x": 220,
+        "y": 40
+      },
+      "m": {
+        "x": 460,
+        "y": 40
+      }
+    }
+  }
+}

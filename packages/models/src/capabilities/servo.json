@@ -1,0 +1,11 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.servo",
+  "name": "Servo",
+  "description": "명령 각도를 따라 출력축을 돌리는 위치 제어 모터 (내부에 위치 루프가 있다). 속도 한계가 있고 전원이 모자라면 움직이지 않는다.",
+  "outputs": {
+    "angle": { "type": "number", "unit": "rad", "description": "출력축 각도 (중앙이 0)" },
+    "moving": { "type": "boolean", "description": "지금 목표를 향해 움직이는 중인지" }
+  },
+  "defaultBehavior": "behavior.servo"
+}

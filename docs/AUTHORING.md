@@ -120,3 +120,35 @@ Model에 `body`(박스 크기, mm)와 `mounts`를 쓰고, System의 `assembly`�
 - 제작사 CAD가 있으면 `tools/step-to-glb.py`로 glb를 만들어 `apps/web/public/meshes/`에 두고 Model `body.mesh`에 파일 이름을 쓴다. 메시를 못 읽으면 `parts`, 그것도 없으면 박스로 대신 그린다. 메시는 `body.size` 박스 안에 들어와야 한다(테스트가 확인).
 - Port가 닿는 물리 지점은 Model `body.pins`(`port`, `position` mm, 보드에 적힌 `label`)로 적는다. 연결(connections)의 두 끝이 모두 pins를 가지면 3D에서 케이블로 보인다. XIAO 보드는 위키 핀맵 그림과 STEP 뒷면 패드 위치가 일치하는 BAT± 패드를 쓴다.
 - `body.mesh`가 있으면 `case`가 박스뿐 아니라 실제 형상으로도 케이스 간섭을 검사한다 (`--meshes <폴더>`, 기본 `apps/web/public/meshes`). 파일을 못 읽으면 경고하고 박스로만 검사한다.
+
+## 파라미터 스윕 (에이전트용)
+
+값을 바꿔 가며 같은 시뮬레이션을 반복해 비교한다: `pnpm physisim sweep <system.json> --set r1.resistance=100,220,1000 --watch led1.brightness,r1.current --duration 2s`. `--set`은 여러 번 쓰면 모든 조합을 돈다. 표는 신호별 최종·최대 값을 보여 준다(LED가 탔는지는 `led1.burnt`를 watch).
+
+## 자동 탐색 (에이전트용)
+
+제약을 지키면서 목표가 가장 좋아지는 값을 찾는다: `pnpm physisim tune <system.json> --range r1.resistance=50..2000 --maximize led1.brightness --require led1.burnt=false --require "r1.current<=0.02"`. 거친 격자 후 가장 좋은 점 주변을 다시 훑고, 제안과 평가한 값(제약 ○/×)을 보여 준다. 제약 만족 값이 없으면 종료 코드 1. 제안은 파일을 고치지 않는다 — 에이전트가 값을 확인하고 직접 반영한다.
+
+## 새 부품 검증·승인 (에이전트용)
+
+에이전트가 부품(Model/Capability)을 쓰면 먼저 `pnpm physisim check <파일.json>`으로 스키마·교차 참조를 검증한다. 통과해도 "사람이 확인할 것"(출처 없음, 미확인 가정 수, 치수 없음)이 함께 나오고, 이 명령은 파일을 고치지 않는다. 사람이 값과 출처를 확인한 뒤 System의 `library`에 추가하는 것이 승인이다.
+
+## 기구 동작 (플런저)
+
+`capability.switching`에 `travel`(mm)을 주면 누름이 즉시가 아니라 플런저 이동으로 접점을 움직인다(`operatingTravel`에서 닫히고 80% 지점에서 열림, `pressTime`에 걸쳐 이동). 출력 `plunger`(0~1)를 세부 형상의 `motion`(`{signal:"plunger", axis:"z", distance:-1}`)에 연결하면 3D에서 플런저가 눌린다. 예: `model.tactile-12mm`, `examples/tactile-led.system.json`.
+
+## 기계 연결과 움직임 (모터·바퀴)
+
+- Port의 `domain`이 `mechanical`이면 회전축이다. 두 축을 `connections`로 이으면 같은 각속도를 공유하는 하나의 기계 Net이 된다(강체 결합). 예: `["ml:shaft", "car:left"]`.
+- 모터 Model(`model.tt-motor`)은 전기 단자 A·B와 축 `shaft`를 가진다: 전압 → 전류 → 토크, 역기전력이 속도를 제한한다. 차체(`model.robot-chassis-2wd`)는 `left`·`right` 축의 속도로 `x`·`y`·`heading`·`speed`를 출력한다(오른쪽 모터 극성을 뒤집으면 제자리 회전).
+- 3D에서 움직이게 하려면 System `assembly`에서 차체에 붙는 부품(모터·배터리)에 `"parent": "car"`를 쓴다. 차체의 `x/y/heading` 신호로 함께 움직이고, 카메라가 따라간다. 예: `examples/robot-drive.system.json`.
+
+## 신호 선 (제어 블록)
+
+Port `domain`이 `signal`이면 제어 신호 선이다. `direction`(`in`/`out`)이 필요하다: 출력 Port의 이름이 Behavior 출력 이름이고, 입력 Port의 이름이 `step`의 `inputs` 키다. 한 선에는 출력이 하나여야 하고, 값은 한 스텝(기본 1 ms) 늦게 전달된다. 예: `["sonar:distance", "ctrl:distance"]`. 출력이 아직 없는 첫 스텝에는 입력 키가 없다. 데모: `examples/robot-avoid.system.json` (센서 → 제어기 → H-브리지 → 모터 → 바퀴 → 차체 → 센서).
+- 세부 형상의 `motion`은 평행 이동(`{signal, axis, distance}`)이나 회전(`{signal, axis, rotate: true, scale, pivot}`)이다. 회전은 신호(rad)를 따라 `pivot`을 중심으로 돈다 — 바퀴 여러 형상이 같은 `pivot`을 쓰면 한 몸으로 돈다. 차체(`model.robot-chassis-2wd`)는 `leftAngle`·`rightAngle`을 내보내 바퀴가 모터를 따라 돈다.
+
+## PID 제어와 이득 탐색
+
+`model.pid-controller`는 `setpoint`(선택)·`measurement` 신호를 받아 `output`을 낸다(`target` 속성이 기본 목표). 오차 제곱 적분 `ise`도 신호로 나온다. 예: `examples/motor-pid.system.json`(모터 속도 제어). 이득은 탐색으로 고른다: `pnpm physisim tune examples/motor-pid.system.json --range ctrl.ki=0.05..5 --minimize ctrl.ise --stat final --duration 3s`. 누적 지표(ISE)는 `--stat final`로 마지막 값을 본다.
+- 선 추종 데모: `examples/line-follower.system.json` — 바닥 사인 곡선에서 벗어난 거리(`model.line-sensor`의 `offset`)를 PID가 조향으로, `model.steering-mixer`가 좌우 모터 명령으로 바꾼다. 이득 탐색: `pnpm physisim tune examples/line-follower.system.json --range pid.kp=0.3..10 --minimize pid.ise --stat final --duration 6s`.

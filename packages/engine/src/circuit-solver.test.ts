@@ -73,4 +73,14 @@ describe("circuit solver", () => {
     const s = solve(3, [{ kind: "resistor", id: "r", a: 1, b: 2, resistance: 100 }]);
     expect(s.voltages.every(Number.isFinite)).toBe(true);
   });
+
+  it("forces a current source's current from a to b (node 0 → node 1 raises V1 by I·R)", () => {
+    const solver = createCircuitSolver();
+    const r = solver.solve(2, [
+      { kind: "resistor", id: "r", a: 1, b: 0, resistance: 10 },
+      { kind: "source", id: "i", a: 0, b: 1, current: 0.5 },
+    ]);
+    expect(r.voltages[1]).toBeCloseTo(5, 6);
+    expect(r.currents.get("i")).toBe(0.5);
+  });
 });

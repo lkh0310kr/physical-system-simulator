@@ -1,0 +1,26 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.multimeter",
+  "name": "Multimeter (DC voltage)",
+  "category": "electronics/instrument",
+  "description": "디지털 멀티미터의 DC 전압 측정. 입력 저항이 유한해서 부하 효과가 있다. 전류·저항 측정은 아직 없다.",
+  "propertySchema": {
+    "inputResistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 1,
+      "default": 10000000,
+      "description": "입력 저항. 일반 디지털 멀티미터의 흔한 값 10 MΩ (가정, 특정 제품 아님)"
+    }
+  },
+  "properties": {},
+  "ports": [
+    { "name": "V", "domain": "electrical", "description": "측정 + (빨간 리드)" },
+    { "name": "COM", "domain": "electrical", "description": "측정 − (검은 리드)" }
+  ],
+  "capabilities": [{ "capability": "capability.measurement" }],
+  "metadata": {
+    "fidelity": "approximate",
+    "assumptions": ["inputResistance"]
+  }
+}

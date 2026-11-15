@@ -1,0 +1,106 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.ultrasonic-rcwl-1601",
+  "name": "Ultrasonic distance sensor (Adafruit 4007, RCWL-1601, HC-SR04 compatible)",
+  "category": "electronics/sensor",
+  "description": "초음파 거리 센서. 신호 입력 x·y·heading(달려 있는 차체의 자세)으로 센서에서 앞쪽 평면 벽(x = wallX)까지 거리를 재서 `distance` 신호로 낸다. 환경은 벽 하나뿐인 단순 모델이다.",
+  "propertySchema": {
+    "wallX": {
+      "type": "number",
+      "unit": "m",
+      "default": 1.0,
+      "description": "벽의 위치(월드 x). 환경 가정"
+    },
+    "mountOffset": {
+      "type": "number",
+      "unit": "m",
+      "default": 0.1,
+      "description": "차체 중심에서 센서까지 앞쪽 거리. 가정"
+    },
+    "maxRange": {
+      "type": "number",
+      "unit": "m",
+      "min": 0,
+      "default": 4.5,
+      "description": "최대 측정 거리 450 cm (제품 페이지)"
+    },
+    "minRange": {
+      "type": "number",
+      "unit": "m",
+      "min": 0,
+      "default": 0.02,
+      "description": "최소 측정 거리 2 cm (제품 페이지의 측정 범위·사각지대 2~3 cm)"
+    },
+    "supplyCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 2.2,
+      "description": "동작 전류 2.2 mA (제품 페이지)"
+    },
+    "minSupply": {
+      "type": "number",
+      "unit": "V",
+      "default": 3,
+      "description": "동작 전압 하한 3 V (제품 페이지: 3~5.5 V)"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "VCC",
+      "domain": "electrical",
+      "description": "3~5.5 V"
+    },
+    {
+      "name": "GND",
+      "domain": "electrical",
+      "ground": true
+    },
+    {
+      "name": "x",
+      "domain": "signal",
+      "direction": "in",
+      "description": "차체 x 위치 [m]"
+    },
+    {
+      "name": "y",
+      "domain": "signal",
+      "direction": "in",
+      "description": "차체 y 위치 [m]"
+    },
+    {
+      "name": "heading",
+      "domain": "signal",
+      "direction": "in",
+      "description": "차체 방향 [rad]"
+    },
+    {
+      "name": "distance",
+      "domain": "signal",
+      "direction": "out",
+      "description": "측정 거리 [m]"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.ranging"
+    }
+  ],
+  "metadata": {
+    "fidelity": "approximate",
+    "source": "https://www.adafruit.com/product/4007 (전압 3~5.5 V, 전류 2.2 mA, 측정 범위 2~450 cm, 40 kHz, 사각지대 2~3 cm, 정확도 ±2 %, 분해능 1 mm, 평면 벽 400~450 cm)",
+    "assumptions": [
+      "벽 하나뿐인 환경(wallX)",
+      "센서 부착 위치(mountOffset)",
+      "정확도 ±2 %·빔 각도는 모델링하지 않음(이상 측정)",
+      "형상 치수 미확인 — 3D에서 자리표시"
+    ],
+    "bom": {
+      "vendor": "Adafruit",
+      "name": "Ultrasonic Distance Sensor - 3V or 5V - HC-SR04 compatible [RCWL-1601]",
+      "mpn": "4007",
+      "url": "https://www.adafruit.com/product/4007"
+    }
+  }
+}

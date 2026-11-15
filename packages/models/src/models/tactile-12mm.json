@@ -1,0 +1,102 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.tactile-12mm",
+  "name": "Tactile switch 12 mm (Adafruit 1119 / Omron B3F-40XX)",
+  "category": "electronics/input",
+  "description": "12 mm 정사각 택트 스위치. 플런저가 눌리는 거리(travel)를 따라 접점이 닫히고 열린다 — 누름이 즉시가 아니라 기구 동작으로 회로를 구동한다. 3D 플런저 이동은 눈에 보이게 1 mm로 과장했다.",
+  "ports": [
+    {
+      "name": "1",
+      "domain": "electrical"
+    },
+    {
+      "name": "2",
+      "domain": "electrical"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.switching",
+      "config": {
+        "travel": 0.5,
+        "operatingTravel": 0.3,
+        "pressTime": 20,
+        "closedResistance": 0.1
+      }
+    }
+  ],
+  "metadata": {
+    "fidelity": "approximate",
+    "source": "Omron B3F 데이터시트 (omronfs.omron.com/en_US/ecb/products/pdf/en-b3f.pdf): B3F-4000 접점 저항 ≤100 mΩ, 바운스 ≤5 ms, 작동력 1.27±0.49 N, 해제력 ≥0.29 N, 프리트래블 0.3 +0.2/−0.1 mm, 수명 300만 회(1.27 N). 형상: github.com/adafruit/Adafruit_CAD_Parts 1119 STEP (MIT) — 몸체 12×12 mm, 높이 6 mm(플런저 포함), 다리 포함 8.96 mm",
+    "assumptions": [
+      "travel(전체 이동 0.5 mm): 문서에 총 이동 거리 없음",
+      "pressTime(손가락 누름 20 ms)",
+      "접점 히스테리시스(해제 지점 = 작동 거리의 80%)",
+      "3D 플런저 이동 1 mm는 표시용 과장",
+      "다리(핀) 형상 생략",
+      "Adafruit 상품이 정확히 B3F-4000인지는 상품 설명의 'switch-omron:B3F-40XX' 표기에 근거"
+    ],
+    "bom": {
+      "vendor": "Adafruit",
+      "name": "Tactile Switch Buttons (12mm square, 6mm tall) x 10 pack",
+      "mpn": "1119",
+      "url": "https://www.adafruit.com/product/1119"
+    }
+  },
+  "body": {
+    "size": [12.92, 12, 8.96],
+    "color": "#c3c9d1",
+    "parts": [
+      {
+        "name": "cover",
+        "shape": "box",
+        "position": [0, 0, 0.23],
+        "size": [12, 12, 3.5],
+        "material": "metal",
+        "color": "#c3c9d1"
+      },
+      {
+        "name": "plunger",
+        "shape": "cylinder",
+        "position": [0, 0, 3.105],
+        "diameter": 7.1,
+        "length": 2.25,
+        "axis": "z",
+        "material": "plastic",
+        "color": "#e6e2d3",
+        "motion": {
+          "signal": "plunger",
+          "axis": "z",
+          "distance": -1
+        }
+      },
+      {
+        "name": "plunger-cap",
+        "shape": "cylinder",
+        "position": [0, 0, 4.355],
+        "diameter": 6.6,
+        "length": 0.25,
+        "axis": "z",
+        "material": "plastic",
+        "color": "#e6e2d3",
+        "motion": {
+          "signal": "plunger",
+          "axis": "z",
+          "distance": -1
+        }
+      }
+    ]
+  },
+  "mounts": [
+    {
+      "name": "plunger",
+      "position": [0, 0, 4.48],
+      "normal": [0, 0, 1],
+      "description": "플런저 윗면",
+      "opening": {
+        "shape": "round",
+        "diameter": 7.1
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.signal-source",
+  "name": "Signal Source",
+  "description": "시간에 따라 변하는 신호(사인·사각·삼각파)를 내보낸다. 다른 블록의 시험 입력으로 쓴다.",
+  "outputs": {
+    "out": { "type": "number", "description": "offset + amplitude × 파형(주파수 × t)" }
+  },
+  "defaultBehavior": "behavior.signal-source"
+}

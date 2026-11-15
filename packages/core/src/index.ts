@@ -12,6 +12,7 @@ export * from "./issues.ts";
 export * from "./json-schema.ts";
 export * from "./loader.ts";
 export * from "./mechanical.ts";
+export * from "./mechanics.ts";
 export * from "./model.ts";
 export * from "./project.ts";
 export * from "./property.ts";

@@ -114,3 +114,12 @@ describe("route", () => {
     ]);
   });
 });
+
+describe("symbolFor without ports", () => {
+  it("draws a part with no ports (e.g. a wall) as a small named box, not a two-terminal glyph", () => {
+    const sym = symbolFor(ModelSchema.parse({ id: "model.wall", name: "Wall", category: "x" }));
+    expect(sym.kind).toBe("board");
+    expect(sym.pins).toEqual([]);
+    expect(sym.width).toBeGreaterThanOrEqual(120);
+  });
+});

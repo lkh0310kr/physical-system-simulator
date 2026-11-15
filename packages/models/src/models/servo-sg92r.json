@@ -1,0 +1,126 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.servo-sg92r",
+  "name": "Micro servo (TowerPro SG92R, Adafruit 169)",
+  "category": "electromechanical/servo",
+  "description": "마이크로 서보. 명령 각도(`command`, rad)를 따라 혼이 돌고, 속도는 제품 값(60°당 0.1초 @4.8 V)을 넘지 않는다. 3D에서 혼이 돈다.",
+  "propertySchema": {
+    "range": {
+      "type": "number",
+      "min": 0.1,
+      "default": 3.14159,
+      "description": "총 가동 각도 [rad] (중앙 ±90°로 가정 — 제품 페이지에 없음)"
+    },
+    "speed": {
+      "type": "number",
+      "min": 0.01,
+      "default": 10.47198,
+      "description": "최대 속도 [rad/s]: 제품 값 0.1 s / 60° (4.8 V) = 600°/s ≈ 10.47 rad/s"
+    },
+    "minSupply": {
+      "type": "number",
+      "unit": "V",
+      "default": 3,
+      "description": "동작 전압 하한 3 V (제품 페이지: 4.8 V 정격, 3~6 V)"
+    },
+    "idleCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 10,
+      "description": "정지 전류 — 제품 페이지에 없는 가정"
+    },
+    "movingCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 200,
+      "description": "이동 중 전류 — 제품 페이지에 없는 가정"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "VCC",
+      "domain": "electrical",
+      "description": "3~6 V"
+    },
+    {
+      "name": "GND",
+      "domain": "electrical",
+      "ground": true
+    },
+    {
+      "name": "command",
+      "domain": "signal",
+      "direction": "in",
+      "description": "목표 각도 [rad]"
+    },
+    {
+      "name": "angle",
+      "domain": "signal",
+      "direction": "out",
+      "description": "출력축 각도 [rad]"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.servo"
+    }
+  ],
+  "metadata": {
+    "fidelity": "approximate",
+    "source": "https://www.adafruit.com/product/169 (23×11×29 mm, 9 g, 4.8 V 정격(3~6 V), 0.1 s/60°, 토크 2.5 kg·cm, 데드밴드 1 µs)",
+    "assumptions": [
+      "총 가동 각도 180°",
+      "전류(정지 10 mA·이동 200 mA)",
+      "토크 한계·부하에 따른 속도 저하는 모델링하지 않음",
+      "혼·축 위치와 모양은 제품 데이터가 아닌 표시용"
+    ],
+    "bom": {
+      "vendor": "Adafruit",
+      "name": "Micro servo [TowerPro SG92R]",
+      "mpn": "169",
+      "url": "https://www.adafruit.com/product/169"
+    }
+  },
+  "body": {
+    "size": [23, 11, 29],
+    "mass": 9,
+    "parts": [
+      {
+        "name": "housing",
+        "shape": "box",
+        "position": [0, 0, -3.5],
+        "size": [23, 11, 22],
+        "material": "plastic",
+        "color": "#2b5fb0"
+      },
+      {
+        "name": "shaft",
+        "shape": "cylinder",
+        "position": [5.5, 0, 8.5],
+        "diameter": 5,
+        "length": 6,
+        "axis": "z",
+        "material": "plastic",
+        "color": "#e6e2d3"
+      },
+      {
+        "name": "horn",
+        "shape": "box",
+        "position": [15.5, 0, 13],
+        "size": [20, 4, 2],
+        "material": "plastic",
+        "color": "#e6e2d3",
+        "motion": {
+          "signal": "angle",
+          "axis": "z",
+          "rotate": true,
+          "scale": 1,
+          "pivot": [5.5, 0, 13]
+        }
+      }
+    ]
+  }
+}

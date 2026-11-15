@@ -1,0 +1,66 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.photoresistor",
+  "name": "Photo cell (CdS photoresistor, Adafruit 161)",
+  "category": "electronics/sensor",
+  "description": "CdS 광저항. 밝을수록 저항이 내려간다(밝을 때 약 1 kΩ, 어두울 때 약 10 kΩ). 밝기 `light`(0~1)를 인스펙터에서 바꿔 본다.",
+  "propertySchema": {
+    "light": {
+      "type": "number",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "description": "밝기 0(어두움)~1(밝음). 환경 입력"
+    },
+    "darkResistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 1,
+      "default": 10000,
+      "description": "어두울 때 저항 약 10 kΩ (제품 페이지, 2019-12 개정 범위 1~10 kΩ)"
+    },
+    "lightResistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 1,
+      "default": 1000,
+      "description": "밝을 때 저항 약 1 kΩ (제품 페이지)"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "1",
+      "domain": "electrical"
+    },
+    {
+      "name": "2",
+      "domain": "electrical"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.photoresistance"
+    }
+  ],
+  "metadata": {
+    "fidelity": "approximate",
+    "source": "https://www.adafruit.com/product/161 (밝을 때 ~1 kΩ, 어두울 때 ~10 kΩ, 4.46×5×2.09 mm, 0.25 g)",
+    "assumptions": [
+      "밝기 0~1 사이의 저항 곡선(로그 보간)은 가정",
+      "조도(lux)와 밝기의 대응은 모델링하지 않음",
+      "응답 시간·온도 특성 무시"
+    ],
+    "bom": {
+      "vendor": "Adafruit",
+      "name": "Photo cell (CdS photoresistor)",
+      "mpn": "161",
+      "url": "https://www.adafruit.com/product/161"
+    }
+  },
+  "body": {
+    "size": [4.46, 5, 2.09],
+    "mass": 0.25,
+    "color": "#c9a24a"
+  }
+}

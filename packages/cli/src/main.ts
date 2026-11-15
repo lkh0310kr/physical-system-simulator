@@ -7,6 +7,7 @@ import { formatIssues, parseQuantity, type Registry } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
 import { writeCase } from "./case.ts";
 import { describeModel, searchModels } from "./catalog.ts";
+import { checkModelFile, formatReview } from "./check-model.ts";
 import { compareSystems, formatComparison } from "./compare.ts";
 import { formatTime, formatValue, unitOf } from "./format.ts";
 import { analyzeCaptures, capacityMah, formatReport, parsePress } from "./report.ts";
@@ -17,6 +18,8 @@ import {
   type RunResult,
   runLoaded,
 } from "./simulate.ts";
+import { formatSweep, parseAxis, sweepSystem } from "./sweep.ts";
+import { formatTune, parseConstraint, parseRange, tuneSystem } from "./tune.ts";
 import { watchSystem } from "./watch.ts";
 
 const USAGE = `사용법:
@@ -26,6 +29,9 @@ const USAGE = `사용법:
   physisim report <system.json> --press btn@1s [--duration 4s] [--node node] [--battery bat] [--per-day 10,100]
   physisim compare <a.json> <b.json> ... --press btn@1s [--duration 4s] [--per-day 100]   같은 조건에서 비교
   physisim case <system.json> [--process fdm] [--profile <profile.json>] [--out out] [--meshes <dir>]   케이스 STL/3MF + BOM (검증 통과 시에만 파일 생성)
+  physisim sweep <system.json> --set r1.resistance=100,220,470 [--set …] --watch led1.brightness,r1.current [--duration 1s]   속성 값을 바꿔 가며 비교
+  physisim tune <system.json> --range r1.resistance=50..2000 --maximize led1.brightness --require led1.burnt=false [--require r1.current<=0.02] [--stat final|max|min]   제약을 지키는 최적값 찾기
+  physisim check <model-or-capability.json>                    새 부품 정의 검증 + 사람이 확인할 항목 (파일은 안 고침)
   physisim watch <system.json> [run 옵션]                       파일이 바뀔 때마다 다시 실행`;
 
 function seconds(text: string, name: string): number {
@@ -46,6 +52,13 @@ async function main(argv: string[]): Promise<number> {
       limit: { type: "string", default: "40" },
       system: { type: "string" },
       press: { type: "string", multiple: true },
+      set: { type: "string", multiple: true },
+      range: { type: "string" },
+      stat: { type: "string" },
+      maximize: { type: "string" },
+      minimize: { type: "string" },
+      require: { type: "string", multiple: true },
+      watch: { type: "string" },
       node: { type: "string", default: "node" },
       battery: { type: "string", default: "bat" },
       "per-day": { type: "string", default: "10,100,1000" },
@@ -62,7 +75,9 @@ async function main(argv: string[]): Promise<number> {
     values.help ||
     !command ||
     !file ||
-    !["validate", "run", "watch", "report", "compare", "case"].includes(command)
+    !["validate", "run", "watch", "report", "compare", "case", "sweep", "tune", "check"].includes(
+      command,
+    )
   ) {
     console.log(USAGE);
     return values.help ? 0 : 2;
@@ -103,6 +118,80 @@ async function main(argv: string[]): Promise<number> {
     return 0;
   }
 
+  if (command === "check") {
+    const review = checkModelFile(file);
+    if (!review.ok) {
+      console.error(`✗ ${formatIssues(review.issues)}`);
+      return 1;
+    }
+    console.log(formatReview(review.value));
+    return 0;
+  }
+
+  if (command === "tune") {
+    const range = parseRange(values.range ?? "");
+    const reqs = (values.require ?? []).map(parseConstraint);
+    const bad = [range, ...reqs].flatMap((r) => (r.ok ? [] : r.issues));
+    const signal = values.maximize ?? values.minimize;
+    if (bad.length || !range.ok || !signal) {
+      console.error(
+        `✗ ${bad.length ? formatIssues(bad) : "--range 와 --maximize(또는 --minimize)가 필요하다"}`,
+      );
+      return 2;
+    }
+    const stat = ["final", "max", "min"].includes(values.stat ?? "")
+      ? (values.stat as "final" | "max" | "min")
+      : undefined;
+    const goal = {
+      signal,
+      direction: values.maximize ? ("max" as const) : ("min" as const),
+      ...(stat ? { stat } : {}),
+    };
+    const presses = (values.press ?? []).map((p) => parsePress(p, (t) => seconds(t, "press")));
+    const result = await tuneSystem(
+      file,
+      range.value,
+      goal,
+      reqs.flatMap((r) => (r.ok ? [r.value] : [])),
+      { duration, dt, presses },
+    );
+    if (!result.ok) {
+      console.error(`✗ ${formatIssues(result.issues)}`);
+      return 1;
+    }
+    console.log(formatTune(range.value, goal, result.value));
+    return result.value.best ? 0 : 1;
+  }
+
+  if (command === "sweep") {
+    const axes = (values.set ?? []).map(parseAxis);
+    const bad = axes.flatMap((a) => (a.ok ? [] : a.issues));
+    if (bad.length || axes.length === 0) {
+      console.error(
+        `✗ ${bad.length ? formatIssues(bad) : "--set 이 필요하다 (예: --set r1.resistance=100,220,470)"}`,
+      );
+      return 2;
+    }
+    const watch = (values.watch ?? "").split(",").filter(Boolean);
+    if (watch.length === 0) {
+      console.error("✗ --watch 가 필요하다 (예: --watch led1.brightness)");
+      return 2;
+    }
+    const presses = (values.press ?? []).map((p) => parsePress(p, (t) => seconds(t, "press")));
+    const result = await sweepSystem(
+      file,
+      axes.flatMap((a) => (a.ok ? [a.value] : [])),
+      watch,
+      { duration, dt, presses },
+    );
+    if (!result.ok) {
+      console.error(`✗ ${formatIssues(result.issues)}`);
+      return 1;
+    }
+    console.log(formatSweep(result.value, watch));
+    return 0;
+  }
+
   const loaded = loadSystemFile(file);
   if (!loaded.ok) {
     console.error(`✗ ${file}\n${formatIssues(loaded.issues)}`);
@@ -116,9 +205,16 @@ async function main(argv: string[]): Promise<number> {
   }
 
   if (command === "case") {
-    const profile = resolveProfile(
-      values.profile ? JSON.parse(readFileSync(values.profile, "utf8")) : values.process,
-    );
+    let profileInput: unknown = values.process;
+    if (values.profile) {
+      try {
+        profileInput = JSON.parse(readFileSync(values.profile, "utf8"));
+      } catch (e) {
+        console.error(`✗ --profile ${values.profile}: ${(e as Error).message}`);
+        return 2;
+      }
+    }
+    const profile = resolveProfile(profileInput as string | undefined);
     if (!profile.ok) {
       console.error(`✗ ${profile.message}`);
       return 2;

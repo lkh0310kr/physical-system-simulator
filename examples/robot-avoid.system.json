@@ -1,0 +1,127 @@
+{
+  "$schema": "../schemas/system.schema.json",
+  "name": "Obstacle-avoiding 2-wheel robot",
+  "description": "초음파 센서 → 제어기 → H-브리지 → TT 모터 → 바퀴 → 차체 → (다시 센서). 로봇이 1 m 앞 벽에 다가가면 40 cm 앞에서 제자리 회전으로 피한다. 전기·기계·신호가 한 시스템에서 연결된다. 모터는 Adafruit 3777, 센서는 Adafruit 4007 제품 값, 차체·제어기·드라이버는 가정.",
+  "instances": [
+    {
+      "id": "bat",
+      "model": "model.li-ion-cell",
+      "properties": {
+        "capacity": 2000
+      }
+    },
+    {
+      "id": "dl",
+      "model": "model.h-bridge"
+    },
+    {
+      "id": "dr",
+      "model": "model.h-bridge"
+    },
+    {
+      "id": "ml",
+      "model": "model.tt-motor"
+    },
+    {
+      "id": "mr",
+      "model": "model.tt-motor"
+    },
+    {
+      "id": "car",
+      "model": "model.robot-chassis-2wd"
+    },
+    {
+      "id": "sonar",
+      "model": "model.ultrasonic-rcwl-1601"
+    },
+    {
+      "id": "ctrl",
+      "model": "model.avoider-controller"
+    },
+    {
+      "id": "wall",
+      "model": "model.wall"
+    }
+  ],
+  "connections": [
+    ["bat:+", "dl:VM"],
+    ["bat:+", "dr:VM"],
+    ["bat:+", "sonar:VCC"],
+    ["bat:-", "dl:GND"],
+    ["bat:-", "dr:GND"],
+    ["bat:-", "sonar:GND"],
+    ["dl:A", "ml:A"],
+    ["dl:B", "ml:B"],
+    ["dr:A", "mr:A"],
+    ["dr:B", "mr:B"],
+    ["ml:shaft", "car:left"],
+    ["mr:shaft", "car:right"],
+    ["car:x", "sonar:x"],
+    ["car:y", "sonar:y"],
+    ["car:heading", "sonar:heading"],
+    ["sonar:distance", "ctrl:distance"],
+    ["ctrl:left", "dl:cmd"],
+    ["ctrl:right", "dr:cmd"]
+  ],
+  "assembly": {
+    "car": {
+      "position": [0, 0, 33]
+    },
+    "bat": {
+      "position": [-30, 0, 50],
+      "rotation": [0, 0, 90],
+      "parent": "car"
+    },
+    "ml": {
+      "position": [0, -58, 33],
+      "parent": "car"
+    },
+    "mr": {
+      "position": [0, 58, 33],
+      "parent": "car"
+    },
+    "wall": {
+      "position": [1010, 0, 100]
+    }
+  },
+  "layout": {
+    "instances": {
+      "bat": {
+        "x": 0,
+        "y": 0
+      },
+      "ctrl": {
+        "x": 200,
+        "y": 0
+      },
+      "sonar": {
+        "x": 440,
+        "y": 0
+      },
+      "car": {
+        "x": 700,
+        "y": 0
+      },
+      "wall": {
+        "x": 960,
+        "y": 0
+      },
+      "dl": {
+        "x": 60,
+        "y": 300
+      },
+      "dr": {
+        "x": 300,
+        "y": 300
+      },
+      "ml": {
+        "x": 560,
+        "y": 300
+      },
+      "mr": {
+        "x": 800,
+        "y": 300
+      }
+    }
+  }
+}

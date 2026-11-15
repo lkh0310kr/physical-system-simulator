@@ -1,0 +1,58 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.h-bridge",
+  "name": "H-bridge motor driver (generic)",
+  "category": "electronics/driver",
+  "description": "일반 H-브리지: 신호 `cmd`(−1~1)로 모터 단자 A·B를 PWM 듀티로 구동한다. 특정 제품(TB6612 등) 데이터가 아닌 일반 모델이다.",
+  "propertySchema": {
+    "onResistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 0.001,
+      "default": 0.5,
+      "description": "출력 단자의 도통 저항(상·하측 합). 일반 모터 드라이버의 흔한 값 (가정, 특정 제품 아님)"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "VM",
+      "domain": "electrical",
+      "description": "모터 전원"
+    },
+    {
+      "name": "GND",
+      "domain": "electrical",
+      "ground": true
+    },
+    {
+      "name": "A",
+      "domain": "electrical",
+      "description": "모터 +"
+    },
+    {
+      "name": "B",
+      "domain": "electrical",
+      "description": "모터 −"
+    },
+    {
+      "name": "cmd",
+      "domain": "signal",
+      "direction": "in",
+      "description": "−1(역방향)~1(정방향)"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.h-bridge"
+    }
+  ],
+  "metadata": {
+    "fidelity": "approximate",
+    "assumptions": [
+      "onResistance",
+      "PWM 스위칭 손실·데드타임 무시",
+      "특정 드라이버 제품 아님(TB6612 등으로 교체 필요)"
+    ]
+  }
+}

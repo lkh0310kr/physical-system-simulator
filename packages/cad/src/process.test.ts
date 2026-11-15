@@ -17,6 +17,11 @@ describe("process profile", () => {
     expect(r.ok && r.value.minWall).toBe(fdmProfile.minWall);
   });
 
+  it("does not treat inherited object properties as a process name", () => {
+    for (const name of ["constructor", "toString", "__proto__"])
+      expect(resolveProfile(name).ok).toBe(false);
+  });
+
   it("unknown process name is reported with the available ones", () => {
     const r = resolveProfile("sla");
     expect(!r.ok && r.message).toContain("fdm");

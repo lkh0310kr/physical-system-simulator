@@ -1,0 +1,90 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.tt-motor",
+  "name": "DC Gearbox Motor — TT Motor 200RPM (Adafruit 3777)",
+  "category": "electromechanical/motor",
+  "description": "3~6 V 기어드 DC 모터(기어비 1:48). 출력축 기준 등가 모델: 권선 저항·역기전력은 제품 페이지의 측정값(6 V: 무부하 160 mA @ 250 RPM, 정지 1.5 A)에서, 토크 상수는 정지 토크 0.8 kg·cm와 정지 전류에서 유도했다. 기어박스 손실 때문에 토크 상수가 역기전력 상수보다 훨씬 작다.",
+  "propertySchema": {
+    "resistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 0.01,
+      "default": 4,
+      "description": "권선 저항 = 6 V / 정지 전류 1.5 A (유도)"
+    },
+    "emfConstant": {
+      "type": "number",
+      "min": 0,
+      "default": 0.205,
+      "description": "역기전력 상수 [V·s/rad] (출력축 기준) = (6 V − 0.16 A × 4 Ω) / (250 RPM = 26.2 rad/s) (유도)"
+    },
+    "torqueConstant": {
+      "type": "number",
+      "min": 0,
+      "default": 0.0523,
+      "description": "토크 상수 [N·m/A] (출력축 기준, 기어박스 손실 포함) = 정지 토크 0.8 kg·cm (0.0785 N·m) / 정지 전류 1.5 A (유도)"
+    },
+    "friction": {
+      "type": "number",
+      "min": 0,
+      "default": 0.00032,
+      "description": "점성 마찰 [N·m·s/rad] = 무부하 손실 토크(0.0523 × 0.16 A) / 26.2 rad/s (유도)"
+    },
+    "inertia": {
+      "type": "number",
+      "min": 0,
+      "default": 2e-5,
+      "description": "회전 관성 [kg·m²] (출력축 기준). 가정"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "A",
+      "domain": "electrical",
+      "description": "+ 전압이면 정회전 (축 각속도 +)"
+    },
+    {
+      "name": "B",
+      "domain": "electrical"
+    },
+    {
+      "name": "shaft",
+      "domain": "mechanical",
+      "description": "출력축"
+    },
+    {
+      "name": "omega",
+      "domain": "signal",
+      "direction": "out",
+      "description": "축 각속도 [rad/s] (제어기 측정용)"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.dc-motor"
+    }
+  ],
+  "metadata": {
+    "fidelity": "approximate",
+    "source": "https://www.adafruit.com/product/3777 (정격 3~6 V, 무부하 150 mA ±10%, 6 V 정지 토크 0.8 kg·cm, 기어비 1:48, 70×22×18 mm, 30.6 g; Adafruit 측정: 4.5 V 155 mA @ 185 RPM 무부하·1.2 A 정지, 6 V 160 mA @ 250 RPM 무부하·1.5 A 정지) 형상: github.com/adafruit/Adafruit_CAD_Parts 3777 STEP (MIT) — 외곽 70.6×36.6(양쪽 축 포함)×22.4 mm. 긴 방향이 x, 축이 y.",
+    "assumptions": [
+      "inertia(회전자·기어 관성)",
+      "마찰을 전부 점성으로 단순화(실제는 쿨롱 마찰 포함)",
+      "인덕턴스 무시",
+      "정지 토크 0.8 kg·cm가 6 V 값이라는 전제로 토크 상수 유도"
+    ],
+    "bom": {
+      "vendor": "Adafruit",
+      "name": "DC Gearbox Motor - TT Motor - 200RPM - 3 to 6VDC",
+      "mpn": "3777",
+      "url": "https://www.adafruit.com/product/3777"
+    }
+  },
+  "body": {
+    "size": [70.6, 36.6, 22.4],
+    "mass": 30.6,
+    "mesh": "tt-motor.glb",
+    "color": "#d9c34a"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.steering-mixer",
+  "name": "Steering mixer (block)",
+  "category": "control/block",
+  "description": "직진 명령에 조향 신호를 섞어 왼쪽·오른쪽 모터 명령을 만든다.",
+  "propertySchema": {
+    "cruise": {
+      "type": "number",
+      "min": -1,
+      "max": 1,
+      "default": 0.6,
+      "description": "직진 명령"
+    },
+    "gain": {
+      "type": "number",
+      "min": 0,
+      "default": 0.6,
+      "description": "조향 신호 1당 좌우 차이"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "steer",
+      "domain": "signal",
+      "direction": "in",
+      "description": "조향 (+면 왼쪽으로)"
+    },
+    {
+      "name": "left",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "right",
+      "domain": "signal",
+      "direction": "out"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.steering-mix"
+    }
+  ],
+  "metadata": {
+    "fidelity": "ideal"
+  }
+}

@@ -163,10 +163,10 @@
 - [x] P6-T3 PWM 출력: `analogWrite` → 평균 전압으로 LED 밝기
 
 
-- [x] P6-T1b 센서 Model: 포토레지스터, 초음파 센서
-- [x] P6-T3 모터 드라이버, DC 모터(전기적 모델), 서보
-- [ ] P6-T4 고장 모델: 과전류 LED 소손, 과전압 경고 (State·이벤트로 표현)
-- [ ] P6-T5 계측기 Model: 멀티미터, 오실로스코프(trace 뷰)
+- [x] P6-T1c 센서 Model: 포토레지스터(Adafruit 161 끝값, 밝기 0~1 로그 보간), 초음파 센서(P7-T11, Adafruit 4007)
+- [x] P6-T3b 모터 드라이버(H-브리지), 서보(Adafruit 169 SG92R 속도), 신호 발생기 (DC 모터는 P7-T9)
+- [x] P6-T4 고장 모델: 과전류 LED 소손(절대 최대 전류 초과 지속 → 개방, 3D에서 탄 색·"소손" 표시). 과전압 경고는 후속
+- [x] P6-T5 계측기: 멀티미터 DC 전압(입력 저항 부하 효과 포함), 웹 스코프 패널(신호 선택, 최근 5초 파형). 전류·저항 측정은 후속
 - [ ] P6-T6 비선형 소자 Solver (다이오드 Newton-Raphson) 또는 SPICE 연동
 - [ ] P6-T7 두 번째 MCU (ESP32 또는 Pico)로 Capability 재사용·override 검증
 
@@ -182,20 +182,20 @@
 
 **7a 조립 + 실시간 연동 (첫 마일스톤, 사용자 결정)** — 카메라 제품을 3D에 실치수로 조립하고, 같은 시뮬레이션이 3D에 보이게 한다.
 
-- [ ] P7-T1 기구 스키마: Model `body`(크기·질량·형상 참조)와 `mounts`(장착점), System `assembly`(3D 위치·회전). 단위 mm
+- [x] P7-T1 기구 스키마: Model `body`(크기·질량·형상 참조)와 `mounts`(장착점), System `assembly`(3D 위치·회전). 단위 mm
 - [x] P7-T2 3D 뷰어(`apps/web`): three.js + react-three-fiber, 조립 렌더링, 궤도 카메라, 2D 캔버스와 전환
 - [x] P7-T3 실시간 연동: 같은 Worker 시뮬레이션 상태(절전·촬영·전송, 전류, LED)를 3D 부품 색·발광으로 표시, 3D에서 버튼 클릭 → 회로 실행
 - [x] P7-T4 크기·간섭 검사: 외곽 상자, 부품 간 겹침, 케이스 안에 들어가는지, 케이스별 부피
 - [x] P7-T5 카메라 제품 조립: 실치수(데이터시트 패키지 크기)로 Case A/B 조립, 비교 표에 크기·부피 추가
-- [ ] P7-T6 glTF/STL 형상 불러오기 (실제 CAD 내보내기)
+- [x] P7-T6 제작사 CAD(STEP) → glb 변환(`tools/step-to-glb.py`)과 뷰어 로딩 (STL 직접 가져오기는 후속)
 
 **7b 움직이는 기구 (Rapier 도입)**
 
 - [ ] P7-T7 물리 엔진 어댑터(Rapier, Domain Solver 인터페이스 뒤)와 결정론 검증
-- [ ] P7-T8 관절·스프링: 버튼 스프링, 힌지, 슬라이더 — 기구 상태가 회로(스위치)를 구동
-- [ ] P7-T9 전기↔기계 결합: 모터 토크·역기전력, 모터 → 바퀴
-- [ ] P7-T10 도메인 Solver 간 co-simulation 스텝 조정
-- [ ] P7-T11 데모: 초음파 센서로 장애물을 피하는 2륜 로봇
+- [ ] P7-T8 관절·스프링: 버튼 플런저 ✓(이동 거리·작동점·히스테리시스가 접점을 구동, 3D 플런저 이동, Omron B3F 값), 힌지·슬라이더는 후속
+- [x] P7-T9 전기↔기계 결합: 기계 Net(축 각속도 공유), 모터 토크·역기전력, 모터 → 바퀴 → 2륜 차체 위치·방향, 3D에서 차체와 부착 부품이 움직이고 카메라가 따라감
+- [ ] P7-T10 도메인 Solver 간 co-simulation 스텝 조정 (현재: 회로 → 기계 → Behavior 순서로 매 스텝 한 번씩, 신호 선은 1 스텝 지연. 충돌·접촉이 필요한 Rapier 도입 시 재검토)
+- [x] P7-T11 데모: 초음파 센서로 장애물을 피하는 2륜 로봇 (`examples/robot-avoid.system.json`: 센서 4007·모터 3777 제품 값, 신호 선으로 센서→제어기→드라이버, 3D에서 달리고 피함)
 - [ ] P7-T12 계층 Composition: System을 Model로 감싸 Port 노출
 
 🔶 결정 게이트
@@ -243,13 +243,21 @@
 
 ---
 
+## Phase 7e — 케이스 완성도
+
+- [x] P7-T28 스냅 돌기·홈(`snapBump`, 프로필 설정)과 뚜껑 닫힘 충돌 검사(`lid-clash`)
+- [ ] P7-T29 나사 기둥(보드 고정이 필요한 보드용), 보드 지지 리브
+- [ ] P7-T30 실제 출력·맞춤 후 프로필 보정 (사람 작업)
+
+---
+
 ## Phase 8 — Control & Agent v2
 
-- [ ] P8-T1 Control 도메인 Model: PID 컨트롤러 (블록 Behavior)
-- [ ] P8-T2 라인트레이서 데모 (PID 게인 튜닝)
-- [ ] P8-T3 Agent 분석 tool: 실행 결과 비교, 파라미터 스윕
-- [ ] P8-T4 Agent 개선 제안 루프 (예: PID 게인 자동 탐색)
-- [ ] P8-T5 Agent의 Model 작성 + 스키마 검증 + 사용자 승인 흐름
+- [x] P8-T1 Control 도메인 Model: 신호 도메인(출력→입력 신호 선, 한 스텝 지연), 반응형 제어기, PID 블록(적분 와인드업 방지, 측정값 미분, ISE 지표)
+- [x] P8-T2 라인트레이서 데모 (`examples/line-follower.system.json`: 선 센서 → PID → 조향 믹서 → H-브리지 → 모터 → 차체, `tune`으로 kp 탐색)
+- [x] P8-T3 Agent 분석 tool: 파라미터 스윕(`physisim sweep`), 실행 결과 비교(`compare`)
+- [x] P8-T4 Agent 개선 제안 루프: `physisim tune`(범위 탐색 + 제약 + 목표, 제안과 근거 표). PID 게인 탐색은 P8-T1(PID Model) 이후
+- [x] P8-T5 Agent의 Model 작성 + 스키마 검증(`physisim check`: 오류 + 사람이 확인할 항목) + 사용자 승인(library에 추가)
 
 🔶 결정 게이트
 - G8-1 PLC(래더 등) 지원 범위
@@ -260,7 +268,7 @@
 ## Phase 9 — Model Editor & 생태계
 
 - [ ] P9-T1 Model Editor UI (Property Schema·Capability 바인딩 편집)
-- [ ] P9-T2 BOM / 부품 리스트 내보내기
+- [x] P9-T2 BOM / 부품 리스트 내보내기 (`physisim case`의 CSV·텍스트, 웹 3D 케이스 뷰의 BOM 다운로드)
 - [ ] P9-T3 Model 패키지 가져오기·내보내기, 버전 관리
 - [ ] P9-T4 System 공유 링크
 

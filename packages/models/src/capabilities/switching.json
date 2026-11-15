@@ -2,7 +2,7 @@
   "$schema": "../../../../schemas/capability.schema.json",
   "id": "capability.switching",
   "name": "Switching",
-  "description": "두 단자를 열거나 닫는다. 눌림 상태는 사람이 바꾼다 (press / release 이벤트).",
+  "description": "두 단자를 열거나 닫는다. 눌림은 사람이 바꾸고(press/release 이벤트), travel을 주면 플런저 이동이 접점을 움직인다.",
   "parameters": {
     "closedResistance": {
       "type": "number",
@@ -22,10 +22,40 @@
       "type": "boolean",
       "default": false,
       "description": "true면 누를 때마다 켜짐/꺼짐이 바뀐다 (토글 스위치). false면 누르는 동안만 닫힌다."
+    },
+    "travel": {
+      "type": "number",
+      "unit": "mm",
+      "min": 0,
+      "default": 0,
+      "description": "플런저 전체 이동 거리. 0이면 기구 동작 없이 누르는 즉시 닫힌다 (이상 스위치). 0보다 크면 플런저가 움직이다가 작동 거리에서 접점이 닫힌다."
+    },
+    "operatingTravel": {
+      "type": "number",
+      "unit": "mm",
+      "min": 0,
+      "default": 0.3,
+      "description": "접점이 닫히는 플런저 이동 거리 (pretravel). travel이 0이면 쓰지 않는다."
+    },
+    "pressTime": {
+      "type": "number",
+      "unit": "ms",
+      "min": 0,
+      "default": 20,
+      "description": "손가락이 플런저를 끝까지 누르는 데 걸리는 시간 (가정). 놓을 때도 같은 시간에 되돌아온다."
     }
   },
   "outputs": {
-    "closed": { "type": "boolean", "description": "지금 닫혀 있는지" }
+    "closed": {
+      "type": "boolean",
+      "description": "지금 닫혀 있는지"
+    },
+    "plunger": {
+      "type": "number",
+      "min": 0,
+      "max": 1,
+      "description": "플런저 위치 (0=올라옴, 1=끝까지 눌림). travel이 0이면 closed와 같다."
+    }
   },
   "defaultBehavior": "behavior.switch"
 }

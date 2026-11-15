@@ -275,6 +275,68 @@
                   },
                   "color": {
                     "type": "string"
+                  },
+                  "motion": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "signal": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "axis": {
+                            "type": "string",
+                            "enum": ["x", "y", "z"]
+                          },
+                          "rotate": {
+                            "type": "boolean",
+                            "const": true
+                          },
+                          "scale": {
+                            "default": 1,
+                            "type": "number"
+                          },
+                          "pivot": {
+                            "type": "array",
+                            "prefixItems": [
+                              {
+                                "type": ["number", "string"]
+                              },
+                              {
+                                "type": ["number", "string"]
+                              },
+                              {
+                                "type": ["number", "string"]
+                              }
+                            ],
+                            "items": false,
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": ["signal", "axis", "rotate"],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "signal": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "axis": {
+                            "type": "string",
+                            "enum": ["x", "y", "z"]
+                          },
+                          "distance": {
+                            "type": ["number", "string"]
+                          }
+                        },
+                        "required": ["signal", "axis", "distance"],
+                        "additionalProperties": false
+                      }
+                    ]
                   }
                 },
                 "required": ["name", "shape", "position", "size"],
@@ -326,6 +388,68 @@
                   },
                   "color": {
                     "type": "string"
+                  },
+                  "motion": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "signal": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "axis": {
+                            "type": "string",
+                            "enum": ["x", "y", "z"]
+                          },
+                          "rotate": {
+                            "type": "boolean",
+                            "const": true
+                          },
+                          "scale": {
+                            "default": 1,
+                            "type": "number"
+                          },
+                          "pivot": {
+                            "type": "array",
+                            "prefixItems": [
+                              {
+                                "type": ["number", "string"]
+                              },
+                              {
+                                "type": ["number", "string"]
+                              },
+                              {
+                                "type": ["number", "string"]
+                              }
+                            ],
+                            "items": false,
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": ["signal", "axis", "rotate"],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "signal": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "axis": {
+                            "type": "string",
+                            "enum": ["x", "y", "z"]
+                          },
+                          "distance": {
+                            "type": ["number", "string"]
+                          }
+                        },
+                        "required": ["signal", "axis", "distance"],
+                        "additionalProperties": false
+                      }
+                    ]
                   }
                 },
                 "required": ["name", "shape", "position", "diameter", "length"],
@@ -437,11 +561,15 @@
           },
           "domain": {
             "type": "string",
-            "enum": ["electrical", "mechanical"]
+            "enum": ["electrical", "mechanical", "signal"]
           },
           "ground": {
             "description": "true면 회로 기준 전위(0V)에 묶인다 (GND 핀).",
             "type": "boolean"
+          },
+          "direction": {
+            "type": "string",
+            "enum": ["in", "out"]
           },
           "description": {
             "type": "string"

@@ -41,9 +41,22 @@ export function useCase(path: string | undefined, enabled: boolean, version: unk
     setState({ status: "loading" });
     fetch(`/api/case?path=${encodeURIComponent(path)}`)
       .then(async (r) => {
-        const body = await r.json();
+        // 서버 오류는 JSON이 아니라 평문일 수 있다 — 진짜 메시지를 가리지 않게 글로 먼저 읽는다
+        const raw = await r.text();
         if (cancelled) return;
-        if (!r.ok) setState({ status: "error", message: body.message ?? `HTTP ${r.status}` });
+        let body: { message?: string } | CaseData | undefined;
+        try {
+          body = JSON.parse(raw);
+        } catch {
+          body = undefined;
+        }
+        if (!r.ok || !body)
+          setState({
+            status: "error",
+            message:
+              (body as { message?: string } | undefined)?.message ??
+              (raw.slice(0, 200) || `HTTP ${r.status}`),
+          });
         else setState({ status: "ready", data: body as CaseData });
       })
       .catch((e: Error) => !cancelled && setState({ status: "error", message: e.message }));

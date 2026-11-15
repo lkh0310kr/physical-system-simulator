@@ -13,7 +13,7 @@ import {
   Float32BufferAttribute,
   type Group,
   Mesh,
-  PCFSoftShadowMap,
+  PCFShadowMap,
   Plane,
   PMREMGenerator,
   TubeGeometry,
@@ -25,10 +25,14 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { Selection } from "../canvas/canvas.tsx";
 import {
+  type AnimatedPose,
   activityOf,
+  animatedPoses,
   buildCables,
   buildScene3d,
   explodeLifts,
+  followPose,
+  gridCell,
   type SceneBox,
   type SceneCable,
   type ScenePart,
@@ -54,8 +58,18 @@ interface Props {
 }
 
 /** z가 위인 좌표계에서 궤도 카메라: 드래그 회전, 휠 확대, 우클릭 이동. 장면 크기에 맞춰 처음 거리를 잡는다. */
-function Orbit({ radius, target }: { radius: number; target: [number, number, number] }) {
+function Orbit({
+  radius,
+  target,
+  follow,
+}: {
+  radius: number;
+  target: [number, number, number];
+  /** 움직이는 부품의 현재 위치. 주어지면 카메라가 같이 움직인다(보는 방향과 거리는 사용자가 정한 그대로). */
+  follow: readonly number[] | undefined;
+}) {
   const { camera, gl } = useThree();
+  const last = useRef<readonly number[] | undefined>(undefined);
   useEffect(() => {
     camera.up.set(0, 0, 1);
     camera.position.set(
@@ -71,9 +85,16 @@ function Orbit({ radius, target }: { radius: number; target: [number, number, nu
     (camera as { userData: { controls?: OrbitControls } }).userData.controls = controls;
     return () => controls.dispose();
   }, [camera, gl, radius, target]);
-  useFrame(() =>
-    (camera as { userData: { controls?: OrbitControls } }).userData.controls?.update(),
-  );
+  useFrame(() => {
+    const controls = (camera as { userData: { controls?: OrbitControls } }).userData.controls;
+    if (follow && last.current) {
+      const d = [0, 1, 2].map((i) => (follow[i] ?? 0) - (last.current?.[i] ?? 0));
+      camera.position.add(new Vector3(...(d as [number, number, number])));
+      controls?.target.add(new Vector3(...(d as [number, number, number])));
+    }
+    last.current = follow;
+    controls?.update();
+  });
   return null;
 }
 
@@ -101,7 +122,17 @@ function PartMaterial({ part, glow }: { part: ScenePart; glow: number }) {
 }
 
 /** 세부 형상 하나. 원기둥은 three의 기본 y축을 요청한 축으로 눕힌다. */
-function Shape({ part, glow }: { part: ScenePart; glow: number }) {
+function Shape({
+  part,
+  glow,
+  signals,
+  id,
+}: {
+  part: ScenePart;
+  glow: number;
+  signals: Readonly<Record<string, unknown>>;
+  id: string;
+}) {
   const geometry = useMemo(
     () =>
       part.kind === "box"
@@ -109,7 +140,16 @@ function Shape({ part, glow }: { part: ScenePart; glow: number }) {
         : new CylinderGeometry(part.diameter / 2, part.diameter / 2, part.length, 40),
     [part],
   );
-  const rotation: [number, number, number] =
+  // 신호를 따라 움직이는 부품: 평행 이동(눌리는 플런저) 또는 축 회전(바퀴)
+  const m = part.motion;
+  const value = m ? Number(signals[`${id}.${m.signal}`] ?? 0) : 0;
+  const moved = m?.kind === "translate" ? value * m.distance : 0;
+  const position: [number, number, number] = [
+    part.position[0] + (m?.kind === "translate" && m.axis === "x" ? moved : 0),
+    part.position[1] + (m?.kind === "translate" && m.axis === "y" ? moved : 0),
+    part.position[2] + (m?.kind === "translate" && m.axis === "z" ? moved : 0),
+  ];
+  const shapeRotation: [number, number, number] =
     part.kind === "cylinder"
       ? part.axis === "z"
         ? [Math.PI / 2, 0, 0]
@@ -117,8 +157,34 @@ function Shape({ part, glow }: { part: ScenePart; glow: number }) {
           ? [0, 0, Math.PI / 2]
           : [0, 0, 0]
       : [0, 0, 0];
+  if (m?.kind === "rotate") {
+    // 회전 중심에 둔 그룹을 돌리고, 형상은 그 안에서 중심과의 차이만큼 떨어져 있다
+    const pivot = m.pivot ?? part.position;
+    const spin: [number, number, number] = [
+      m.axis === "x" ? value * m.scale : 0,
+      m.axis === "y" ? value * m.scale : 0,
+      m.axis === "z" ? value * m.scale : 0,
+    ];
+    return (
+      <group position={[pivot[0], pivot[1], pivot[2]]} rotation={spin}>
+        <mesh
+          geometry={geometry}
+          position={[
+            part.position[0] - pivot[0],
+            part.position[1] - pivot[1],
+            part.position[2] - pivot[2],
+          ]}
+          rotation={shapeRotation}
+          castShadow
+          receiveShadow
+        >
+          <PartMaterial part={part} glow={glow} />
+        </mesh>
+      </group>
+    );
+  }
   return (
-    <mesh geometry={geometry} position={part.position} rotation={rotation} castShadow receiveShadow>
+    <mesh geometry={geometry} position={position} rotation={shapeRotation} castShadow receiveShadow>
       <PartMaterial part={part} glow={glow} />
     </mesh>
   );
@@ -160,11 +226,19 @@ function Part({
   box,
   selected,
   activity,
+  burnt,
+  signals,
+  pose,
   pressable,
   onSelect,
   onPress,
 }: {
   box: SceneBox;
+  signals: Readonly<Record<string, unknown>>;
+  /** 움직이는 부품의 현재 자세 (없으면 정적 배치). */
+  pose: AnimatedPose | undefined;
+  /** 소손된 부품(고장): 어둡게 탄 색으로 보인다. */
+  burnt: boolean;
   selected: boolean;
   /** 0~1: 시뮬레이션에서 이 부품이 "살아 있는" 정도 (발광 세기). */
   activity: number;
@@ -175,15 +249,17 @@ function Part({
   const geometry = useMemo(() => new BoxGeometry(...box.size), [box.size]);
   const edges = useMemo(() => new EdgesGeometry(geometry), [geometry]);
   const rotation = box.rotation.map((d) => (d * Math.PI) / 180) as [number, number, number];
-  const glb = useGlb(box.mesh);
+  const glbSource = useGlb(box.mesh);
+  // 렌더마다 장면을 복제하면 프레임마다 객체가 새로 만들어진다 — 원본이 바뀔 때만 복제
+  const glb = useMemo(() => glbSource?.clone(), [glbSource]);
   const detailed = glb !== undefined || box.parts.length > 0;
   const [hover, setHover] = useState(false);
   const glow = activity + (hover ? 0.3 : 0);
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: three.js 객체이지 DOM 요소가 아니다 — r3f의 이벤트는 레이캐스트 이벤트다.
     <group
-      position={box.position}
-      rotation={rotation}
+      position={pose?.position ?? box.position}
+      rotation={[rotation[0], rotation[1], rotation[2] + (pose?.heading ?? 0)]}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
@@ -206,15 +282,17 @@ function Part({
       }}
     >
       {glb ? (
-        <primitive object={glb.clone()} />
+        <primitive object={glb} />
       ) : detailed ? (
-        box.parts.map((p) => <Shape key={p.name} part={p} glow={glow * 0.35} />)
+        box.parts.map((p) => (
+          <Shape key={p.name} part={p} glow={glow * 0.35} signals={signals} id={box.id} />
+        ))
       ) : (
         <mesh geometry={geometry} castShadow receiveShadow>
           {/* 실치수는 채운 면, 자리표시(치수 가정)는 투명하게 — 가정을 실물처럼 보이게 하지 않는다.
               살아 있는 부품은 강조색으로 발광한다 (강조색은 살아 있는 것에만). */}
           <meshStandardMaterial
-            color={selected ? ACCENT : (box.color ?? REAL)}
+            color={burnt ? "#3a2724" : selected ? ACCENT : (box.color ?? REAL)}
             emissive={ACCENT}
             emissiveIntensity={glow * 1.2}
             transparent={!box.real}
@@ -240,10 +318,12 @@ function LabelProjector({
   boxes,
   labels,
   lifts,
+  poses,
 }: {
   boxes: readonly SceneBox[];
   labels: RefObject<(HTMLElement | null)[]>;
   lifts: ReadonlyMap<string, number>;
+  poses: ReadonlyMap<string, AnimatedPose>;
 }) {
   const { camera, gl } = useThree();
   const v = useMemo(() => new Vector3(), []);
@@ -253,11 +333,8 @@ function LabelProjector({
     boxes.forEach((b, i) => {
       const el = labels.current?.[i];
       if (!el) return;
-      v.set(
-        b.position[0],
-        b.position[1],
-        b.position[2] + b.size[2] / 2 + (lifts.get(b.id) ?? 0),
-      ).project(camera);
+      const p = poses.get(b.id)?.position ?? b.position;
+      v.set(p[0], p[1], p[2] + b.size[2] / 2 + (lifts.get(b.id) ?? 0)).project(camera);
       const visible = v.z < 1;
       el.style.display = visible ? "block" : "none";
       el.style.transform = `translate(${((v.x + 1) / 2) * w}px, ${((1 - v.y) / 2) * h}px) translate(-50%, -140%)`;
@@ -271,8 +348,13 @@ function Cable({
   cable,
   fromLift,
   toLift,
+  fromPose,
+  toPose,
 }: {
   cable: SceneCable;
+  /** 끝점 부품의 움직임 (없으면 정적 배치). */
+  fromPose: AnimatedPose | undefined;
+  toPose: AnimatedPose | undefined;
   fromLift: number;
   toLift: number;
 }) {
@@ -297,17 +379,19 @@ function Cable({
       p[1] ?? 0,
       (p[2] ?? 0) + l,
     ];
-    const from = up(cable.from, fromLift);
-    const to = up(cable.to, toLift);
+    const fromC = followPose(cable.fromCenter, cable.fromCenter, fromPose);
+    const toC = followPose(cable.toCenter, cable.toCenter, toPose);
+    const from = up(followPose(cable.from, cable.fromCenter, fromPose), fromLift);
+    const to = up(followPose(cable.to, cable.toCenter, toPose), toLift);
     const a = new Vector3(...from);
     const b = new Vector3(...to);
-    const a1 = exit(from, up(cable.fromCenter, fromLift), cable.fromHalf);
-    const b1 = exit(to, up(cable.toCenter, toLift), cable.toHalf);
+    const a1 = exit(from, up(fromC, fromLift), cable.fromHalf);
+    const b1 = exit(to, up(toC, toLift), cable.toHalf);
     const mid = a1.clone().add(b1).multiplyScalar(0.5);
     mid.z -= 0.0015;
     const curve = new CatmullRomCurve3([a, a1, mid, b1, b], false, "catmullrom", 0.5);
     return new TubeGeometry(curve, 64, 0.0004, 8, false);
-  }, [cable, fromLift, toLift]);
+  }, [cable, fromLift, toLift, fromPose, toPose]);
   return (
     <mesh geometry={geometry} castShadow>
       <meshStandardMaterial color={cable.ground ? "#16181c" : "#c0392b"} roughness={0.6} />
@@ -446,8 +530,31 @@ export function Viewer3D({
   const caseState = useCase(systemPath, showCase, loaded);
   const all = useMemo(() => buildScene3d(loaded), [loaded]);
   // 케이스를 보는 동안은 치수 없는 자리표시를 숨긴다 — 케이스에 들어가지 않는 가정 크기가 섞여 보이지 않게
-  const cablesAll = useMemo(() => buildCables(loaded, buildScene3d(loaded)), [loaded]);
   const boxes = useMemo(() => (showCase ? all.filter((b) => b.real) : all), [all, showCase]);
+  const parents = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(loaded.doc.assembly ?? {}).map(([id, p]) => [id, p.parent]),
+      ),
+    [loaded],
+  );
+  const poses = useMemo(() => animatedPoses(boxes, parents, signals), [boxes, parents, signals]);
+  // 스스로 자세 신호(x·y·heading)를 내는 부품이 있으면 카메라가 따라간다
+  const followPos = useMemo(
+    () =>
+      boxes
+        .filter((b) => typeof signals[`${b.id}.x`] === "number")
+        .map((b) => poses.get(b.id)?.position)[0],
+    [boxes, signals, poses],
+  );
+  // 케이블은 표시 중인 부품 사이만, 이미 만든 장면 데이터로 계산한다
+  const cablesAll = useMemo(
+    () =>
+      buildCables(loaded, boxes).filter(
+        (c) => boxes.some((b) => b.id === c.fromId) && boxes.some((b) => b.id === c.toId),
+      ),
+    [loaded, boxes],
+  );
   const lifts = useMemo(() => explodeLifts(boxes, explode), [boxes, explode]);
   const lidLift = Math.max(0, ...lifts.values()) + 0.008 * explode;
   const bounds = useMemo(() => sceneBounds(boxes), [boxes]);
@@ -465,7 +572,8 @@ export function Viewer3D({
   const extent = bounds
     ? Math.max(bounds[1][0] - bounds[0][0], bounds[1][1] - bounds[0][1], 0.04)
     : 0.04;
-  const gridSize = Math.ceil((extent * 3) / 0.01) * 0.01;
+  const cell = gridCell(extent);
+  const gridSize = Math.ceil((extent * 3) / cell) * cell;
   const floor = bounds ? bounds[0][2] : 0;
   const targetKey = center.join(",");
   // biome-ignore lint/correctness/useExhaustiveDependencies: 값이 같으면 같은 target 배열을 쓰도록 키로 고정한다.
@@ -482,7 +590,7 @@ export function Viewer3D({
       <Canvas
         className="view3d"
         camera={{ fov: 40, near: 0.001, far: 5 }}
-        shadows={{ type: PCFSoftShadowMap }}
+        shadows={{ type: PCFShadowMap }}
         gl={{ localClippingEnabled: true, toneMapping: ACESFilmicToneMapping }}
         onPointerMissed={() => onSelect?.(undefined)}
       >
@@ -508,12 +616,12 @@ export function Viewer3D({
           <shadowMaterial opacity={0.35} />
         </mesh>
         <gridHelper
-          args={[gridSize, Math.round(gridSize / 0.01), "#8a94a0", "#3a414b"]}
+          args={[gridSize, Math.round(gridSize / cell), "#8a94a0", "#3a414b"]}
           rotation={[Math.PI / 2, 0, 0]}
           position={[center[0], center[1], floor]}
         />
-        <Orbit radius={radius} target={target} />
-        <LabelProjector boxes={boxes} labels={labels} lifts={lifts} />
+        <Orbit radius={radius} target={target} follow={followPos} />
+        <LabelProjector boxes={boxes} labels={labels} lifts={lifts} poses={poses} />
         {!printView &&
           boxes.map((b) => (
             <group key={b.id} position={[0, 0, lifts.get(b.id) ?? 0]}>
@@ -522,6 +630,9 @@ export function Viewer3D({
                 box={b}
                 selected={selection?.kind === "part" && selection.id === b.id}
                 activity={activityOf(b.id, signals)}
+                burnt={signals[`${b.id}.burnt`] === true}
+                signals={signals}
+                pose={poses.get(b.id)}
                 pressable={running && b.switchable}
                 onSelect={() => onSelect?.({ kind: "part", id: b.id })}
                 onPress={(event) => onPress?.(b.id, event)}
@@ -535,6 +646,8 @@ export function Viewer3D({
               cable={c}
               fromLift={lifts.get(c.fromId) ?? 0}
               toLift={lifts.get(c.toId) ?? 0}
+              fromPose={poses.get(c.fromId)}
+              toPose={poses.get(c.toId)}
             />
           ))}
         {data && !printView && <CaseSolid mesh={data.base} color="#9aa5b4" clip={clip} />}
@@ -553,6 +666,7 @@ export function Viewer3D({
             }}
           >
             {b.real ? b.id : `${b.id} · 가정 크기`}
+            {signals[`${b.id}.burnt`] === true ? " · 소손" : ""}
           </span>
         ))}
       <div className="float case-bar">

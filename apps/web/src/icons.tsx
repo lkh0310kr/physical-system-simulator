@@ -61,6 +61,12 @@ export const CodeIcon = () => (
   </Icon>
 );
 
+export const ScopeIcon = () => (
+  <Icon label="스코프">
+    <path d="M2 11 5 6l2.5 4L10 4.5 14 9" />
+  </Icon>
+);
+
 export const CloseIcon = () => (
   <Icon label="닫기">
     <path d="M4 4l8 8M12 4l-8 8" />
