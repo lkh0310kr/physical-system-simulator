@@ -12,7 +12,7 @@
 | 1 | Model System | LED·GPIO·Arduino UNO Model을 JSON으로 정의·검증 | Modelica, Fritzing parts |
 | 2 | Instance & Composition | "UNO + 저항 + LED" System 문서를 로드·검증 | Wokwi `diagram.json`, Modelica connector |
 | 3 | Simulation Engine MVP | **CLI에서 LED Blink 시뮬레이션** (헤드리스) | Falstad(MNA 알고리즘), FMI |
-| 4 | Agent v1 (MCP) | **"UNO로 LED 제어 회로 만들고 돌려줘"를 Agent가 수행** | MCP, Constructa Copilot |
+| 4 | Agent v1 (파일 기반) | **에이전트가 파일을 고치면 `physisim watch`에 자동 반영** | Codex CLI, Claude Code |
 | 5 | 2D System Editor | 브라우저에서 부품 배치·배선·실행 | Tinkercad, wokwi-elements |
 | 6 | Electronics 확장 | 버튼·센서·모터 드라이버, 계측기, 과전압 고장 | BenchTwin, ngspice-WASM, avr8js |
 | 7 | Mechanical & Physics | 모터→바퀴→차체 이동, 3D 뷰어 (스펙 §9.1 폐루프) | Constructa, BenchTwin 로봇, Rapier, URDF |
@@ -104,22 +104,22 @@
 
 ---
 
-## Phase 4 — Agent v1 (`@physisim/agent`)
+## Phase 4 — Agent v1: 파일 기반 (`@physisim/cli`)
 
-**목표**: 스펙 §10 — AI Agent가 Model 탐색 → 구성 → 실행 → 분석을 API로 수행.
+**목표**: 스펙 §10.1 — AI 코딩 에이전트가 파일을 수정하면 PhysiSim이 감지해 자동 반영한다. 전용 프로토콜(MCP)은 만들지 않는다.
 
-- [ ] P4-T1 MCP 서버 골격 (stdio)
-- [ ] P4-T2 탐색 tool: `search_models`, `get_model`, `get_capability`
-- [ ] P4-T3 구성 tool: `create_system`, `add_instance`, `connect`, `validate_system`
-- [ ] P4-T4 실행·분석 tool: `run_simulation`, `get_trace`, 요약 통계
-- [ ] P4-T5 tool 입력은 Zod → JSON Schema, 오류는 Agent가 고칠 수 있는 형태로 반환
-- [ ] P4-T6 시나리오 테스트: "Arduino UNO로 LED 제어 회로 구성 후 시뮬레이션" (스크립트화된 tool 호출 시퀀스)
+- [ ] P4-T1 로컬 라이브러리: System 문서의 `library`로 사용자 Model/Capability JSON을 불러와 표준 라이브러리와 함께 검증
+- [ ] P4-T2 `physisim models [검색어] [--json]`: 부품·Port·속성·Capability 탐색
+- [ ] P4-T3 JSON Schema 파일(`schemas/`) 생성과 `$schema` 지원, 최신 상태 테스트
+- [ ] P4-T4 `physisim watch`: System·프로그램·로컬 Model 변경 시 재검증·재실행
+- [ ] P4-T5 `docs/AUTHORING.md`: 에이전트용 작성 가이드, AGENTS.md 연결
+- [ ] P4-T6 시나리오 테스트: 파일 수정 → watch 감지 → 결과 변화
 
 🔶 결정 게이트
-- G4-1 Agent 연동 방식: MCP 서버만 vs 앱 내장 LLM 에이전트도 (스펙 §12 "AI Agent 연동" 미결정)
-- G4-2 Agent가 새 Model을 생성·저장하는 것을 이 Phase에서 허용할지
+- ~~G4-1 Agent 연동 방식~~ → 파일 기반, MCP 보류 (사용자 결정)
+- ~~G4-2 Agent의 새 Model 생성~~ → 로컬 Model/Capability JSON 허용, Behavior 코드는 표준만
 
-**완료 기준**: Claude Code 등 MCP 클라이언트에서 자연어 요청으로 Blink 시스템을 구성·실행 가능.
+**완료 기준**: Codex CLI·Claude Code 등에 "LED를 하나 더 달아줘"라고 하면 파일이 수정되고 `physisim watch`에 새 결과가 나타난다.
 
 ---
 
@@ -138,7 +138,7 @@
 🔶 결정 게이트
 - G5-1 UI 프레임워크 (React / Svelte / Solid …)
 - G5-2 캔버스 방식: React Flow / 자체 SVG / Canvas, 부품 그래픽에 wokwi-elements(MIT) 사용 여부
-- G5-3 저장: 로컬(파일·IndexedDB)만 vs 백엔드(Supabase 등)
+- G5-3 저장: 로컬 파일이 기본(에이전트와 공유, dev 서버가 감시). 백엔드 필요 여부
 
 **완료 기준**: 브라우저에서 Blink 회로를 처음부터 만들고 실행 가능.
 
