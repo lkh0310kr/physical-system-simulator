@@ -1,8 +1,10 @@
+export * from "./arm-parts.ts";
 export * from "./bom.ts";
 export * from "./build.ts";
 export * from "./case.ts";
 export * from "./geometry.ts";
 export * from "./glb.ts";
+export * from "./glb-writer.ts";
 export * from "./mesh-dir.ts";
 export * from "./process.ts";
 export { writeStl } from "./stl.ts";

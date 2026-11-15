@@ -1,5 +1,17 @@
 /** `physisim arm`: 로봇팔 설계 해석과 실제 하드웨어용 Serial 줄 생성. */
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import {
+  armServos,
+  bodyFrameMesh,
+  buildArmParts,
+  DEFAULT_ARM_SPEC,
+  inspect,
+  printLayoutOfArm,
+  write3mf,
+  writeGlb,
+  writeStl,
+} from "@physisim/cad";
 import {
   compileScript,
   coverage,
@@ -63,4 +75,78 @@ export function armLines(scriptPath: string): { text: string; errors: string[] }
         : `# DWELL ${s.seconds}`,
   );
   return { text: out.join("\n"), errors: compiled.errors.map((e) => `${e.line}행: ${e.message}`) };
+}
+
+export interface ArmPartsOutput {
+  readonly files: readonly string[];
+  readonly summary: string;
+}
+
+/**
+ * 출력 가능한 팔 부품을 생성해 STL(부품별)·3MF(한 판)·BOM을 쓴다. `glbDir`가 있으면 3D 뷰어용 glb도 쓴다.
+ * 서보 몸체와 간섭하는 부품이 있으면 아무것도 쓰지 않고 실패한다.
+ */
+export async function writeArmParts(outDir: string, glbDir?: string): Promise<ArmPartsOutput> {
+  const parts = await buildArmParts(DEFAULT_ARM_SPEC);
+  const servos = await armServos(DEFAULT_ARM_SPEC);
+  const problems: string[] = [];
+  for (const p of parts) {
+    const r = inspect(p.solid);
+    if (!r.closed || r.components !== 1)
+      problems.push(`${p.name}: 닫힌 한 덩어리가 아니다 (${r.status}, ${r.components}조각)`);
+    for (const sv of servos) {
+      const v = p.solid.intersect(sv.solid).volume();
+      if (v > 1e-6) problems.push(`${p.name}가 ${sv.joint} 서보와 ${v.toFixed(1)} mm³ 겹친다`);
+    }
+  }
+  if (problems.length)
+    return { files: [], summary: `✗ 검증 실패 — 파일을 쓰지 않았다\n  ${problems.join("\n  ")}` };
+  mkdirSync(outDir, { recursive: true });
+  const layout = printLayoutOfArm(parts);
+  const files: string[] = [];
+  for (const l of layout) {
+    const path = join(outDir, `arm-${l.name}.stl`);
+    writeFileSync(path, writeStl(l.mesh, `arm ${l.name}`));
+    files.push(path);
+  }
+  const threemf = join(outDir, "arm-parts.3mf");
+  writeFileSync(threemf, write3mf(layout.map((l) => ({ name: l.name, mesh: l.mesh }))));
+  files.push(threemf);
+  const volumeCm3 = parts.reduce((s, p) => s + inspect(p.solid).volume, 0) / 1000;
+  const bom = [
+    "수량,품명,비고",
+    "2,MG996R 서보 (Tower Pro),어깨·팔꿈치 — 정지 토크 9.4 kgf·cm (4.8 V) / 11 (6 V)",
+    "3,SG92R 서보 (Adafruit 169),베이스·손목·그리퍼 — 또는 SG90/MG90S급",
+    "1,PCA9685 16채널 서보 드라이버 (Adafruit 815),I2C 주소 기본값은 보드 설명서로 확인",
+    "1,Arduino Uno Rev3 (A000066),Serial 115200, 펌웨어 examples/robot-arm-firmware",
+    "1,외부 5~6 V 3 A 이상 전원,서보 전용 — Uno 5 V 핀으로 구동 금지, GND 공통",
+    "1,1000 µF 이상 전해 커패시터,서보 전원 평활 (PCA9685 V+ 근처, 권장)",
+    "약 20,M3 나사·너트·케이블 타이,서보 고정과 혼 체결 (수량은 가정 — 실물에 맞춰 확인)",
+    `1세트,3D 프린트 부품 6개 (PLA 약 ${(volumeCm3 * 1.24 * 0.4).toFixed(0)} g 가정),충전율 40% 가정`,
+  ];
+  const bomPath = join(outDir, "arm-bom.csv");
+  writeFileSync(bomPath, `${bom.join("\n")}\n`);
+  files.push(bomPath);
+  if (glbDir) {
+    mkdirSync(glbDir, { recursive: true });
+    for (const p of parts) {
+      const path = join(glbDir, `arm-${p.name}.glb`);
+      writeFileSync(path, writeGlb(bodyFrameMesh(p, 150)));
+      files.push(path);
+    }
+  }
+  const lines = parts.map((p) => {
+    const r = inspect(p.solid);
+    return `  ${p.name.padEnd(14)} ${[0, 1, 2].map((i) => ((r.max[i] ?? 0) - (r.min[i] ?? 0)).toFixed(0)).join(" × ")} mm  ${(r.volume / 1000).toFixed(1)} cm³  ${p.label}`;
+  });
+  return {
+    files,
+    summary: [
+      "✓ 로봇팔 부품 (서보 포켓 검증 통과: 몸체와 겹침 없음, 모두 닫힌 한 덩어리)",
+      ...lines,
+      "",
+      "미확인(실물로 확인·보정): 서보 출력축 위치, 혼 나사 구멍 배치, 서보 고정 방식(케이블 타이 슬롯 가정)",
+      ...files.map((f) => `  ${f}`),
+    ].join("\n"),
+  };
 }
