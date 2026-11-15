@@ -13,7 +13,7 @@ import {
   Float32BufferAttribute,
   type Group,
   Mesh,
-  PCFSoftShadowMap,
+  PCFShadowMap,
   Plane,
   PMREMGenerator,
   TubeGeometry,
@@ -590,7 +590,7 @@ export function Viewer3D({
       <Canvas
         className="view3d"
         camera={{ fov: 40, near: 0.001, far: 5 }}
-        shadows={{ type: PCFSoftShadowMap }}
+        shadows={{ type: PCFShadowMap }}
         gl={{ localClippingEnabled: true, toneMapping: ACESFilmicToneMapping }}
         onPointerMissed={() => onSelect?.(undefined)}
       >
