@@ -34,6 +34,20 @@ describe("compareSystems (camera cases under the same press)", async () => {
     expect(b?.report.sleepMicroamps).toBeCloseTo(18.8, 1);
   });
 
+  it("compares occupied area from verified footprints: Case B's two bigger chips cost area", () => {
+    expect(a2?.fit.footprintArea).toBeGreaterThan(0);
+    expect(b?.fit.footprintArea).toBeGreaterThan(a2?.fit.footprintArea ?? 0);
+    // 배터리 19.75×26.02 + S3 7×7 + OV2640 5.725×6.285 (mm²)
+    expect((a2?.fit.footprintArea ?? 0) * 1e6).toBeCloseTo(19.75 * 26.02 + 49 + 5.725 * 6.285, 3);
+  });
+
+  it("finds no overlaps in the shipped assemblies and lists parts without dimensions", () => {
+    for (const row of [a2, a3, b]) {
+      expect(row?.fit.overlaps).toEqual([]);
+      expect([...(row?.fit.missing ?? [])].sort()).toEqual(["btn", "node"]);
+    }
+  });
+
   it("carries each model's unverified assumptions into the table", () => {
     expect(b?.assumptions.some((a) => a.includes("ISP"))).toBe(true);
     const text = formatComparison(r.value, 100);

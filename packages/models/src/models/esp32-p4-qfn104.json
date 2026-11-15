@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.esp32-p4-qfn104",
+  "name": "ESP32-P4 (QFN104 칩)",
+  "category": "electronics/chip",
+  "description": "기구 전용 부품(전기 동작 없음): 3D 조립과 크기 비교에 쓴다. 바닥 면적은 데이터시트 값, 높이는 가정.",
+  "body": {
+    "size": [10, 10, 0.9],
+    "color": "#3a424d"
+  },
+  "metadata": {
+    "fidelity": "ideal",
+    "source": "ESP32-P4 Datasheet v0.7 — QFN104 (10×10 mm) Package. 높이 0.9 mm는 미확인 가정",
+    "assumptions": ["body.size 높이(z)"]
+  }
+}

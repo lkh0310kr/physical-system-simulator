@@ -5,6 +5,7 @@ export * from "./behavior.ts";
 export * from "./capability.ts";
 export * from "./circuit.ts";
 export * from "./compose.ts";
+export * from "./fit.ts";
 export * from "./ids.ts";
 export * from "./instance.ts";
 export * from "./issues.ts";

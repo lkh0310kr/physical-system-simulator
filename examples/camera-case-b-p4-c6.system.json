@@ -5,10 +5,7 @@
   "instances": [
     {
       "id": "bat",
-      "model": "model.li-ion-cell",
-      "properties": {
-        "capacity": 500
-      }
+      "model": "model.lipo-adafruit-1317"
     },
     {
       "id": "node",
@@ -17,6 +14,18 @@
     {
       "id": "btn",
       "model": "model.pushbutton"
+    },
+    {
+      "id": "mcu",
+      "model": "model.esp32-p4-qfn104"
+    },
+    {
+      "id": "sensor",
+      "model": "model.ov5640-sensor"
+    },
+    {
+      "id": "wifi",
+      "model": "model.esp32-c6-qfn32"
     }
   ],
   "connections": [
@@ -39,6 +48,26 @@
         "x": 160,
         "y": -140
       }
+    }
+  },
+  "assembly": {
+    "bat": {
+      "position": [0, 0, 1.9]
+    },
+    "mcu": {
+      "position": [0, 0, 4.35]
+    },
+    "sensor": {
+      "position": [0, -9, 4.8]
+    },
+    "node": {
+      "position": [0, 0, 0.05]
+    },
+    "btn": {
+      "position": [-14, 0, 2]
+    },
+    "wifi": {
+      "position": [0, 9, 4.35]
     }
   }
 }
