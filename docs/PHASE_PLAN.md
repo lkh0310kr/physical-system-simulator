@@ -87,7 +87,7 @@
 **목표**: 스펙 §9 — 시간·이벤트·상태·Behavior 실행을 갖춘 헤드리스 엔진. 스펙 §11대로 CPU 에뮬레이션 대신 단순 Behavior부터.
 
 - [x] P3-T1 시뮬레이션 시계·스케줄러 (결정론적)
-- [ ] P3-T2 Behavior 실행 루프 + Instance State 관리
+- [x] P3-T2 Behavior 실행 루프 + Instance State 관리
 - [ ] P3-T3 표준 Behavior의 회로 기여와 GPIO 이벤트 (저항·LED·GPIO 핀 구동)
 - [x] P3-T4 DC 회로 Solver v0 (노드 해석: 저항·구동원 + 구간 선형 다이오드)
 - [ ] P3-T5 MCU 프로그램 런타임 (JS, `pinMode/digitalWrite/digitalRead/delay/millis`)
