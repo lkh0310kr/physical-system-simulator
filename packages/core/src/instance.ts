@@ -15,9 +15,16 @@ export const InstanceDeclSchema = z.strictObject({
   id: z.string().regex(/^[a-z][a-z0-9_-]*$/, { message: "소문자로 시작하는 이름 (a-z0-9_-)" }),
   model: ModelId,
   /** Model 속성값 override. */
-  properties: z.record(z.string(), PropertyValueSchema).default({}),
+  properties: z
+    .record(z.string(), PropertyValueSchema)
+    .default({})
+    .describe('Model 속성값 override. 숫자 또는 "220Ω" 같은 물리량 문자열.'),
   /** MCU 프로그램 파일 (System 문서 기준 상대 경로). 엔진은 읽지 않고, 실행 도구(CLI 등)가 소스를 넘긴다. */
-  program: z.string().min(1).optional(),
+  program: z
+    .string()
+    .min(1)
+    .optional()
+    .describe("MCU 프로그램 JS 파일 (System 문서 기준 상대 경로). setup/loop, yield delay(ms)."),
 });
 export type InstanceDecl = z.output<typeof InstanceDeclSchema>;
 

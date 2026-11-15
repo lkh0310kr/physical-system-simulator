@@ -5,6 +5,7 @@ import {
   type BuiltSystem,
   buildSystem,
   type Issue,
+  loadLibrary,
   parseSystem,
   type Registry,
   type SystemDoc,
@@ -22,16 +23,46 @@ export interface Loaded {
 
 export type LoadResult = { ok: true; value: Loaded } | { ok: false; issues: readonly Issue[] };
 
-export function loadSystemFile(path: string): LoadResult {
-  let json: unknown;
+function readJson(path: string): { ok: true; value: unknown } | { ok: false; issues: Issue[] } {
   try {
-    json = JSON.parse(readFileSync(path, "utf8"));
+    return { ok: true, value: JSON.parse(readFileSync(path, "utf8")) };
   } catch (e) {
     return { ok: false, issues: [{ path, message: (e as Error).message }] };
   }
-  const doc = parseSystem(json);
+}
+
+/** 표준 라이브러리 + System 문서의 `library` 파일들. 파일당 정의 1개, 종류는 ID 접두어로 구분. */
+function loadRegistry(
+  doc: SystemDoc,
+  baseDir: string,
+): { ok: true; value: Registry } | { ok: false; issues: readonly Issue[] } {
+  const models: unknown[] = [];
+  const capabilities: unknown[] = [];
+  const issues: Issue[] = [];
+  for (const rel of doc.library) {
+    const file = resolve(baseDir, rel);
+    const json = readJson(file);
+    if (!json.ok) {
+      issues.push({ path: rel, message: json.issues[0]?.message ?? "읽을 수 없다" });
+      continue;
+    }
+    const id = (json.value as { id?: unknown } | null)?.id;
+    if (typeof id === "string" && id.startsWith("model.")) models.push(json.value);
+    else if (typeof id === "string" && id.startsWith("capability.")) capabilities.push(json.value);
+    else issues.push({ path: rel, message: '"id"가 "model." 또는 "capability."로 시작해야 한다' });
+  }
+  if (issues.length) return { ok: false, issues };
+  return loadLibrary({ models, capabilities }, createStandardRegistry());
+}
+
+export function loadSystemFile(path: string): LoadResult {
+  const json = readJson(path);
+  if (!json.ok) return json;
+  const doc = parseSystem(json.value);
   if (!doc.ok) return doc;
-  const registry = createStandardRegistry();
+  const lib = loadRegistry(doc.value, dirname(path));
+  if (!lib.ok) return lib;
+  const registry = lib.value;
   const system = buildSystem(registry, doc.value);
   if (!system.ok) return system;
 

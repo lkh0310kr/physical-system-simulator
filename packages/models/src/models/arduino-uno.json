@@ -1,4 +1,5 @@
 {
+  "$schema": "../../../../schemas/model.schema.json",
   "id": "model.arduino-uno",
   "name": "Arduino UNO R3",
   "category": "electronics/board",
@@ -135,7 +136,7 @@
     {
       "capability": "capability.gpio",
       "config": {
-        "pinCount": 20,
+        "pinCount": 14,
         "logicLevel": 5
       }
     }

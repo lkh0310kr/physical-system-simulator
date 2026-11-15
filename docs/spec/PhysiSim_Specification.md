@@ -1,6 +1,6 @@
 # PhysiSim 프로젝트 전체 설계 명세 (Specification)
 
-> **현재 설계 기준:** v0.8 (2026-11-15)  
+> **현재 설계 기준:** v0.9 (2026-11-15)  
 > **프로젝트 유형:** Model-driven Physical Systems Simulator  
 > **개발 방향:** AI Agentic Simulation Platform  
 > **핵심 철학:** Model 중심 설계
@@ -472,6 +472,25 @@ AI Agent는 PhysiSim을 사용하는 지능형 구성 및 실행 주체다.
 
 AI Agent는 필요한 Model을 검색하고 Instance를 생성하며 연결 관계를 구성하고 시뮬레이션을 실행하는 방향을 목표로 한다.
 
+### 10.1 연동 방식 (v0.9): 파일이 인터페이스
+
+PhysiSim 전용 Agent 프로토콜을 만들지 않는다. **AI 코딩 에이전트(Codex CLI, Claude Code 등)가 프로젝트 파일을 직접 수정하고, PhysiSim 도구가 변경을 감지해 자동 반영한다.**
+
+```text
+사용자 ──자연어──▶ 코딩 에이전트 ──파일 수정──▶ system.json / program.js / models/*.json
+                                                        │ 감지
+                                                        ▼
+                                      physisim watch (이후 웹 에디터) → 검증 → 실행 → 결과
+                                                        │
+                       에이전트 ◀──── 오류(위치 포함)·trace ──┘
+```
+
+- 탐색: `physisim models`로 부품·Port·속성을 찾는다.
+- 작성: JSON Schema(`$schema`)와 작성 가이드(`docs/AUTHORING.md`)를 따른다.
+- 검증·실행: `physisim validate|run|watch`. 오류는 파일 내 위치와 함께 돌려준다.
+- 새 부품: System 옆에 Model/Capability JSON을 만들어 `library`로 참조한다. 새 Behavior 코드는 아직 허용하지 않는다.
+- 변경은 git으로 리뷰·되돌린다. MCP는 실행 중 상태 조회 등 필요가 생기면 얇게 추가한다.
+
 ## 11. 기술적 방향 및 초기 개발 원칙
 
 현재 TypeScript 기반 설계를 출발점으로 삼는다.
@@ -516,7 +535,8 @@ AI Agent는 필요한 Model을 검색하고 Instance를 생성하며 연결 관�
 | Simulation Engine 시간 모델 | 혼합: 고정 스텝 + 정확한 시각의 이벤트 | 확정 (v0.8) |
 | 회로 해석 | 직접 구현 (노드 해석 + 구간 선형 다이오드) | 확정 (v0.8) |
 | MCU 사용자 코드 | JS 스크립트 + Arduino식 API (`setup`/`loop`, `delay`는 `yield`) | 확정 (v0.8) |
-| AI Agent 연동 | 미결정 | 대기 |
+| AI Agent 연동 | 파일 기반: 에이전트가 파일을 수정하면 도구가 감지·반영. MCP는 보류 | 확정 (v0.9) |
+| 사용자 Model | System 옆 로컬 Model/Capability JSON 허용 (Behavior 코드는 표준만) | 확정 (v0.9) |
 
 ## 13. 앞으로 결정할 순서
 
@@ -619,6 +639,7 @@ interface ModelCapabilityBinding {
 | 버전 | 날짜 | 변경 내용 |
 |---|---|---|
 | v0.4 | — | 초기 기준선 (Model 구조, Properties, Capability 확정) |
+| v0.9 | 2026-11-15 | Phase 4 결정: 파일 기반 Agent 연동(§10.1), 로컬 사용자 Model 허용, MCP 보류 |
 | v0.8 | 2026-11-15 | Phase 3 결정: 혼합 시간 모델, 직접 구현 회로 해석, JS Arduino식 MCU 프로그램. §9.1 실행 모델 |
 | v0.7 | 2026-11-15 | Phase 2 결정: Instance 바인딩별 State, Port·핀-핀 연결·Net 해석, layout 섹션, 계층 Composition은 Phase 7로 |
 | v0.6 | 2026-11-15 | Phase 1 결정: 자체 단위 시스템, Behavior = 순수 함수 + 이벤트 훅, 바인딩당 Behavior 1개 |

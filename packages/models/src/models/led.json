@@ -1,4 +1,5 @@
 {
+  "$schema": "../../../../schemas/model.schema.json",
   "id": "model.led",
   "name": "LED",
   "category": "electronics/output",

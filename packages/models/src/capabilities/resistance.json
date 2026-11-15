@@ -1,4 +1,5 @@
 {
+  "$schema": "../../../../schemas/capability.schema.json",
   "id": "capability.resistance",
   "name": "Resistance",
   "description": "두 단자 사이의 전기 저항.",
