@@ -1,6 +1,6 @@
 # PhysiSim 프로젝트 전체 설계 명세 (Specification)
 
-> **현재 설계 기준:** v0.9 (2026-11-15)  
+> **현재 설계 기준:** v0.10 (2026-11-15)  
 > **프로젝트 유형:** Model-driven Physical Systems Simulator  
 > **개발 방향:** AI Agentic Simulation Platform  
 > **핵심 철학:** Model 중심 설계
@@ -537,6 +537,8 @@ PhysiSim 전용 Agent 프로토콜을 만들지 않는다. **AI 코딩 에이전
 | MCU 사용자 코드 | JS 스크립트 + Arduino식 API (`setup`/`loop`, `delay`는 `yield`) | 확정 (v0.8) |
 | AI Agent 연동 | 파일 기반: 에이전트가 파일을 수정하면 도구가 감지·반영. MCP는 보류 | 확정 (v0.9) |
 | 사용자 Model | System 옆 로컬 Model/Capability JSON 허용 (Behavior 코드는 표준만) | 확정 (v0.9) |
+| 웹 UI | React + Vite, 캔버스는 직접 SVG, 부품 그래픽은 자체 라인아트 | 확정 (v0.10) |
+| 웹 저장 | 로컬 파일 + dev 서버 (양방향 반영), 백엔드 없음, 시뮬레이션은 Web Worker | 확정 (v0.10) |
 
 ## 13. 앞으로 결정할 순서
 
@@ -639,6 +641,7 @@ interface ModelCapabilityBinding {
 | 버전 | 날짜 | 변경 내용 |
 |---|---|---|
 | v0.4 | — | 초기 기준선 (Model 구조, Properties, Capability 확정) |
+| v0.10 | 2026-11-15 | Phase 5 결정: React+Vite, 직접 SVG 캔버스, 자체 라인아트 부품, 로컬 파일 + dev 서버 |
 | v0.9 | 2026-11-15 | Phase 4 결정: 파일 기반 Agent 연동(§10.1), 로컬 사용자 Model 허용, MCP 보류 |
 | v0.8 | 2026-11-15 | Phase 3 결정: 혼합 시간 모델, 직접 구현 회로 해석, JS Arduino식 MCU 프로그램. §9.1 실행 모델 |
 | v0.7 | 2026-11-15 | Phase 2 결정: Instance 바인딩별 State, Port·핀-핀 연결·Net 해석, layout 섹션, 계층 Composition은 Phase 7로 |
