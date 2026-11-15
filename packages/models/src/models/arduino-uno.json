@@ -111,15 +111,18 @@
     },
     {
       "name": "GND.1",
-      "domain": "electrical"
+      "domain": "electrical",
+      "ground": true
     },
     {
       "name": "GND.2",
-      "domain": "electrical"
+      "domain": "electrical",
+      "ground": true
     },
     {
       "name": "GND.3",
-      "domain": "electrical"
+      "domain": "electrical",
+      "ground": true
     }
   ],
   "components": [

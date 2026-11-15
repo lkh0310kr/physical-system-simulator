@@ -30,5 +30,10 @@
   ],
   "metadata": {
     "fidelity": "ideal"
-  }
+  },
+  "capabilities": [
+    {
+      "capability": "capability.resistance"
+    }
+  ]
 }

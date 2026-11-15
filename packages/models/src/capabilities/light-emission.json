@@ -1,10 +1,7 @@
 {
   "id": "capability.light-emission",
   "name": "Light Emission",
-  "description": "전류에 따라 빛을 낸다.",
-  "inputs": {
-    "current": { "type": "number", "unit": "A", "default": 0 }
-  },
+  "description": "흐르는 전류에 비례해 빛을 낸다.",
   "outputs": {
     "brightness": { "type": "number", "min": 0, "max": 1, "description": "0(꺼짐) ~ 1(최대)" }
   },
