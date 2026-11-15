@@ -16,6 +16,8 @@ export const InstanceDeclSchema = z.strictObject({
   model: ModelId,
   /** Model 속성값 override. */
   properties: z.record(z.string(), PropertyValueSchema).default({}),
+  /** MCU 프로그램 파일 (System 문서 기준 상대 경로). 엔진은 읽지 않고, 실행 도구(CLI 등)가 소스를 넘긴다. */
+  program: z.string().min(1).optional(),
 });
 export type InstanceDecl = z.output<typeof InstanceDeclSchema>;
 
