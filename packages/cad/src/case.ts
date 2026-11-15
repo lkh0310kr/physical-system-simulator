@@ -158,7 +158,80 @@ export function caseInputOf(loaded: LoadedSystem): CaseInput {
   return { parts, openings, problems };
 }
 
+/**
+ * 같은 벽에서 구멍 사이 벽이 minWall보다 얇은 구멍들은 하나의 직사각 구멍으로 합친다 (얇은 벽은 출력 중 부러진다).
+ * 합친 구멍은 두 구멍의 바깥 범위(부품 쪽 치수 기준)를 감싼다.
+ */
+export function mergeOpenings(
+  openings: readonly CaseOpening[],
+  profile: ProcessProfile,
+): { openings: CaseOpening[]; merged: string[] } {
+  let list = [...openings];
+  const merged: string[] = [];
+  const oc = profile.openingClearance;
+  const extent = (o: CaseOpening) => {
+    const [u, v] = [0, 1, 2].filter((k) => k !== o.axis) as [number, number];
+    return {
+      u: [(o.position[u] ?? 0) - o.size[0] / 2, (o.position[u] ?? 0) + o.size[0] / 2],
+      v: [(o.position[v] ?? 0) - o.size[1] / 2, (o.position[v] ?? 0) + o.size[1] / 2],
+      uAxis: u,
+      vAxis: v,
+    };
+  };
+  for (;;) {
+    let pair: [number, number] | undefined;
+    outer: for (let i = 0; i < list.length; i++) {
+      for (let j = i + 1; j < list.length; j++) {
+        const a = list[i];
+        const b = list[j];
+        if (!a || !b || a.axis !== b.axis || a.sign !== b.sign) continue;
+        const ea = extent(a);
+        const eb = extent(b);
+        const gap = (x: number[], y: number[]) =>
+          Math.max((x[0] ?? 0) - (y[1] ?? 0), (y[0] ?? 0) - (x[1] ?? 0));
+        const web = Math.max(gap(ea.u, eb.u), gap(ea.v, eb.v)) - 2 * oc;
+        if (web + 1e-9 < profile.minWall) {
+          pair = [i, j];
+          break outer;
+        }
+      }
+    }
+    if (!pair) break;
+    const a = list[pair[0]] as CaseOpening;
+    const b = list[pair[1]] as CaseOpening;
+    const ea = extent(a);
+    const eb = extent(b);
+    const u = [Math.min(ea.u[0] ?? 0, eb.u[0] ?? 0), Math.max(ea.u[1] ?? 0, eb.u[1] ?? 0)] as const;
+    const v = [Math.min(ea.v[0] ?? 0, eb.v[0] ?? 0), Math.max(ea.v[1] ?? 0, eb.v[1] ?? 0)] as const;
+    const pos: [number, number, number] = [0, 0, 0];
+    pos[ea.uAxis] = (u[0] + u[1]) / 2;
+    pos[ea.vAxis] = (v[0] + v[1]) / 2;
+    // 축 방향 시작점은 더 안쪽(공동에 가까운) 구멍에 맞춘다
+    pos[a.axis] =
+      a.sign > 0
+        ? Math.min(a.position[a.axis] ?? 0, b.position[a.axis] ?? 0)
+        : Math.max(a.position[a.axis] ?? 0, b.position[a.axis] ?? 0);
+    const mergedOpening: CaseOpening = {
+      part: a.part === b.part ? a.part : `${a.part}+${b.part}`,
+      mount: `${a.mount}+${b.mount}`,
+      position: pos,
+      axis: a.axis,
+      sign: a.sign,
+      shape: "rect",
+      size: [u[1] - u[0], v[1] - v[0]],
+    };
+    merged.push(`${a.part}.${a.mount}, ${b.part}.${b.mount}`);
+    list = list.filter((_, k) => k !== pair?.[0] && k !== pair?.[1]);
+    list.push(mergedOpening);
+  }
+  return { openings: list, merged };
+}
+
 export interface CaseGeometry {
+  /** 실제로 뚫은 개구부 (가까운 구멍은 합쳐진 것). */
+  readonly openings: readonly CaseOpening[];
+  /** 합쳐진 구멍들의 원래 이름 쌍. */
+  readonly merged: readonly string[];
   /** 공동(부품이 들어가는 빈 공간) 범위. */
   readonly cavity: { readonly min: Vec3; readonly max: Vec3 };
   /** 케이스 바깥 범위. */
@@ -215,7 +288,8 @@ export async function generateCase(
   const uncut = { base, lid };
   const cutters: { opening: CaseOpening; solid: Solid }[] = [];
   const oc = profile.openingClearance;
-  for (const o of input.openings) {
+  const { openings, merged } = mergeOpenings(input.openings, profile);
+  for (const o of openings) {
     const a = o.axis;
     const others = [0, 1, 2].filter((k) => k !== a) as [number, number];
     const outerFace = o.sign > 0 ? outer.max[a] : outer.min[a];
@@ -242,7 +316,7 @@ export async function generateCase(
     lid = lid.subtract(solid);
     cutters.push({ opening: o, solid });
   }
-  return { cavity, outer, base, lid, uncut, cutters };
+  return { cavity, outer, base, lid, uncut, cutters, openings, merged };
 }
 
 export interface PrintLayout {

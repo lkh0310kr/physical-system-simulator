@@ -5,7 +5,7 @@ import { type LoadedSystem, loadSystemProject } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
 import { describe, expect, it } from "vitest";
 import { buildCase } from "./build.ts";
-import { type CaseInput, generateCase, printLayout } from "./case.ts";
+import { type CaseInput, generateCase, mergeOpenings, printLayout } from "./case.ts";
 import { inspect } from "./geometry.ts";
 import { meshDirReader } from "./mesh-dir.ts";
 import { fdmProfile, resolveProfile } from "./process.ts";
@@ -55,6 +55,7 @@ describe("case generator", () => {
       "node.button-a",
       "node.button-b",
       "node.lens",
+      "node.microsd",
       "node.usb-c",
     ]);
     const lens = r.input.openings.find((o) => o.mount === "lens");
@@ -179,5 +180,35 @@ describe("exact mesh interference", () => {
     const g = await generateCase(input, fdmProfile);
     const issues = await validateCase(input, g, fdmProfile, { readMesh });
     expect(issues.some((i) => i.code === "mesh-interference")).toBe(true);
+  });
+});
+
+describe("opening spacing", () => {
+  it("merges USB-C and microSD into one opening because the web between them is thinner than the minimum wall", async () => {
+    const r = await buildCase(sample, fdmProfile);
+    expect(r.geometry.merged).toEqual(["node.usb-c, node.microsd"]);
+    expect(r.geometry.openings.map((o) => o.mount).sort()).toEqual([
+      "button-a",
+      "button-b",
+      "lens",
+      "usb-c+microsd",
+    ]);
+    expect(r.issues.some((i) => i.code === "opening-spacing")).toBe(false);
+    expect(r.issues.some((i) => i.code === "opening-merged")).toBe(true);
+  });
+
+  it("keeps openings that are far enough apart", () => {
+    const mk = (mount: string, x: number) => ({
+      part: "p",
+      mount,
+      position: [x, 0, 0] as const,
+      axis: 2 as const,
+      sign: 1 as const,
+      shape: "round" as const,
+      size: [2, 2] as const,
+    });
+    const r = mergeOpenings([mk("a", 0), mk("b", 10)], fdmProfile);
+    expect(r.merged).toEqual([]);
+    expect(r.openings).toHaveLength(2);
   });
 });

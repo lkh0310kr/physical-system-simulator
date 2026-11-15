@@ -166,6 +166,35 @@ export async function validateCase(
       );
   }
 
+  for (const m of g.merged)
+    warn("opening-merged", `가까운 구멍을 하나로 합쳤다: ${m} (사이 벽이 최소 벽 두께보다 얇음)`);
+
+  // 4b. 같은 벽의 구멍끼리 사이 벽이 minWall 이상인가
+  const faceRect = (o: CaseGeometry["openings"][number]) => {
+    const [u, v] = [0, 1, 2].filter((k) => k !== o.axis) as [number, number];
+    const w = o.size[0] + 2 * profile.openingClearance;
+    const h = o.size[1] + 2 * profile.openingClearance;
+    return {
+      u: [(o.position[u] ?? 0) - w / 2, (o.position[u] ?? 0) + w / 2] as const,
+      v: [(o.position[v] ?? 0) - h / 2, (o.position[v] ?? 0) + h / 2] as const,
+    };
+  };
+  for (const [i, a] of g.openings.entries()) {
+    for (const b of g.openings.slice(i + 1)) {
+      if (a.axis !== b.axis || a.sign !== b.sign) continue;
+      const ra = faceRect(a);
+      const rb = faceRect(b);
+      const gap = (x: readonly [number, number], y: readonly [number, number]) =>
+        Math.max(x[0] - y[1], y[0] - x[1]);
+      const web = Math.max(gap(ra.u, rb.u), gap(ra.v, rb.v));
+      if (web + 1e-9 < profile.minWall)
+        err(
+          "opening-spacing",
+          `${a.part}.${a.mount}와 ${b.part}.${b.mount} 사이 벽 ${Math.max(0, web).toFixed(2)} mm < 최소 ${profile.minWall} mm`,
+        );
+    }
+  }
+
   // 5. 출력 크기: 각 부품이 한 번에 출력되는가 (축을 돌려 맞추는 것 허용)
   const fits = (dims: number[]) => {
     const a = [...dims].sort((x, y) => x - y);

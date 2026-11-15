@@ -33,16 +33,16 @@
     "assumptions": [
       "STEP 높이 14.0 mm (사양표는 15 mm) — 케이스는 STEP 기준",
       "USB-C 개구부 12.4×6.5 mm = 플러그 오버몰드 최대 크기 가정 (USB Type-C 규격, 재확인 안 함)",
-      "버튼 접근 구멍 지름 2.2 mm = 클립·핀 도구 가정, 두 버튼 중 어느 쪽이 BOOT인지 미확인",
+      "버튼 접근 구멍 지름 1.8 mm = 클립·핀 도구 가정, 두 버튼 중 어느 쪽이 BOOT인지 미확인",
       "STEP의 카메라는 JUSHUO AFC01-S24FCA FPC 모듈 — 현행 출하 OV5640 모듈과 같은지 미확인",
-      "microSD 소켓 접근 개구부 없음 (카드는 케이스를 닫기 전에 넣어야 함)",
       "bootTime",
       "captureTime",
       "connectTime",
       "connectCurrent(RX 하한)",
       "imageBytes",
       "throughput(실험실 iperf)",
-      "센서 전원 완전 차단"
+      "센서 전원 완전 차단",
+      "microSD 개구부는 소켓 단면 크기 — 카드를 손톱으로 밀어 빼는 여유는 미확인"
     ],
     "bom": {
       "vendor": "Seeed Studio",
@@ -238,7 +238,7 @@
       "description": "보드 가장자리 택트 버튼 (+y쪽), 윗면",
       "opening": {
         "shape": "round",
-        "diameter": 2.2
+        "diameter": 1.8
       }
     },
     {
@@ -248,7 +248,18 @@
       "description": "보드 가장자리 택트 버튼 (−y쪽), 윗면",
       "opening": {
         "shape": "round",
-        "diameter": 2.2
+        "diameter": 1.8
+      }
+    },
+    {
+      "name": "microsd",
+      "position": [12.18, 0.815, 0.695],
+      "normal": [1, 0, 0],
+      "description": "microSD 소켓 끝면 (STEP 소켓 단면 12.1×1.65 mm)",
+      "opening": {
+        "shape": "rect",
+        "width": 12.1,
+        "height": 1.65
       }
     }
   ],
