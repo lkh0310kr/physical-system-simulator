@@ -34,7 +34,7 @@ import {
   type ScenePart,
   sceneBounds,
 } from "./scene.ts";
-import { type CaseMesh, downloadUrl, useCase } from "./use-case.ts";
+import { type CaseData, type CaseMesh, downloadUrl, useCase } from "./use-case.ts";
 
 const ACCENT = "#2f6bff";
 const REAL = "#e4e8ee";
@@ -315,6 +315,62 @@ function Cable({
   );
 }
 
+/** 서버가 준 메시(mm)를 장면 단위(m)의 BufferGeometry로. */
+function meshGeometry(mesh: CaseMesh): BufferGeometry {
+  const g = new BufferGeometry();
+  g.setAttribute(
+    "position",
+    new Float32BufferAttribute(
+      mesh.positions.map((v) => v / 1000),
+      3,
+    ),
+  );
+  g.setIndex(mesh.indices);
+  g.computeVertexNormals();
+  return g;
+}
+
+/** 출력 배치: 베드(바닥) 위에 베이스와 뒤집은 뚜껑을 장면 중심에 놓는다. */
+function PrintPlate({
+  data,
+  center,
+  floor,
+}: {
+  data: CaseData;
+  center: readonly number[];
+  floor: number;
+}) {
+  const parts = useMemo(
+    () => [meshGeometry(data.print.base), meshGeometry(data.print.lid)],
+    [data],
+  );
+  // 두 부품을 합친 x·y 중심이 장면 중심에 오도록 옮긴다
+  const offset = useMemo(() => {
+    const xs: number[] = [];
+    const ys: number[] = [];
+    for (const m of [data.print.base, data.print.lid])
+      for (let i = 0; i < m.positions.length; i += 3) {
+        xs.push(m.positions[i] ?? 0);
+        ys.push(m.positions[i + 1] ?? 0);
+      }
+    const mid = (a: number[]) =>
+      (a.reduce((x, y) => Math.min(x, y), Infinity) +
+        a.reduce((x, y) => Math.max(x, y), -Infinity)) /
+      2;
+    return [(center[0] ?? 0) - mid(xs) / 1000, (center[1] ?? 0) - mid(ys) / 1000, floor];
+  }, [data, center, floor]);
+  return (
+    <group position={[offset[0] ?? 0, offset[1] ?? 0, offset[2] ?? 0]}>
+      {parts.map((g, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: 고정 두 개(베이스, 뚜껑)
+        <mesh key={i} geometry={g} castShadow receiveShadow>
+          <meshPhysicalMaterial color={i === 0 ? "#9aa5b4" : "#b8c1cd"} roughness={0.5} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 function Environment() {
   const { gl, scene } = useThree();
   useEffect(() => {
@@ -384,6 +440,8 @@ export function Viewer3D({
   const [section, setSection] = useState(false);
   /** 분해 보기 0~1: 뚜껑과 부품을 위로 벌려 안쪽 구성을 보여 준다. */
   const [explode, setExplode] = useState(0);
+  /** 출력 배치 보기: 부품은 숨기고 베이스·뚜껑을 출력 자세로 나란히 보여 준다. */
+  const [printView, setPrintView] = useState(false);
   const labels = useRef<(HTMLElement | null)[]>([]);
   const caseState = useCase(systemPath, showCase, loaded);
   const all = useMemo(() => buildScene3d(loaded), [loaded]);
@@ -456,41 +514,47 @@ export function Viewer3D({
         />
         <Orbit radius={radius} target={target} />
         <LabelProjector boxes={boxes} labels={labels} lifts={lifts} />
-        {boxes.map((b) => (
-          <group key={b.id} position={[0, 0, lifts.get(b.id) ?? 0]}>
-            <Part
-              key={b.id}
-              box={b}
-              selected={selection?.kind === "part" && selection.id === b.id}
-              activity={activityOf(b.id, signals)}
-              pressable={running && b.switchable}
-              onSelect={() => onSelect?.({ kind: "part", id: b.id })}
-              onPress={(event) => onPress?.(b.id, event)}
+        {!printView &&
+          boxes.map((b) => (
+            <group key={b.id} position={[0, 0, lifts.get(b.id) ?? 0]}>
+              <Part
+                key={b.id}
+                box={b}
+                selected={selection?.kind === "part" && selection.id === b.id}
+                activity={activityOf(b.id, signals)}
+                pressable={running && b.switchable}
+                onSelect={() => onSelect?.({ kind: "part", id: b.id })}
+                onPress={(event) => onPress?.(b.id, event)}
+              />
+            </group>
+          ))}
+        {!printView &&
+          cablesAll.map((c) => (
+            <Cable
+              key={c.id}
+              cable={c}
+              fromLift={lifts.get(c.fromId) ?? 0}
+              toLift={lifts.get(c.toId) ?? 0}
             />
-          </group>
-        ))}
-        {cablesAll.map((c) => (
-          <Cable
-            key={c.id}
-            cable={c}
-            fromLift={lifts.get(c.fromId) ?? 0}
-            toLift={lifts.get(c.toId) ?? 0}
-          />
-        ))}
-        {data && <CaseSolid mesh={data.base} color="#9aa5b4" clip={clip} />}
-        {data && <CaseSolid mesh={data.lid} color="#b8c1cd" clip={clip} lift={lidLift} />}
+          ))}
+        {data && !printView && <CaseSolid mesh={data.base} color="#9aa5b4" clip={clip} />}
+        {data && printView && <PrintPlate data={data} center={center} floor={floor} />}
+        {data && !printView && (
+          <CaseSolid mesh={data.lid} color="#b8c1cd" clip={clip} lift={lidLift} />
+        )}
       </Canvas>
-      {boxes.map((b, i) => (
-        <span
-          key={b.id}
-          className="part-label"
-          ref={(el) => {
-            labels.current[i] = el;
-          }}
-        >
-          {b.real ? b.id : `${b.id} · 가정 크기`}
-        </span>
-      ))}
+      {!printView &&
+        boxes.map((b, i) => (
+          <span
+            key={b.id}
+            className="part-label"
+            ref={(el) => {
+              labels.current[i] = el;
+            }}
+          >
+            {b.real ? b.id : `${b.id} · 가정 크기`}
+          </span>
+        ))}
       <div className="float case-bar">
         <span className="seg">
           <button
@@ -512,6 +576,15 @@ export function Viewer3D({
               onChange={(e) => setExplode(Number(e.target.value))}
             />
           }
+          {showCase && (
+            <button
+              type="button"
+              className={printView ? "on" : ""}
+              onClick={() => setPrintView((v) => !v)}
+            >
+              출력 배치
+            </button>
+          )}
           {showCase && (
             <button
               type="button"

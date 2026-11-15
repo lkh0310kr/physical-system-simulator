@@ -74,10 +74,11 @@ export async function handleCase(
   });
   const g = result.geometry;
   if (!download) {
-    const pack = (solid: typeof g.base) => {
-      const m = meshOf(solid);
-      return { positions: Array.from(m.positions), indices: Array.from(m.indices) };
-    };
+    const packMesh = (m: ReturnType<typeof meshOf>) => ({
+      positions: Array.from(m.positions),
+      indices: Array.from(m.indices),
+    });
+    const pack = (solid: typeof g.base) => packMesh(meshOf(solid));
     return json(res, 200, {
       ok: result.ok,
       issues: result.issues,
@@ -85,6 +86,10 @@ export async function handleCase(
       cavity: g.cavity,
       base: pack(g.base),
       lid: pack(g.lid),
+      print: {
+        base: packMesh(printLayout(g).base),
+        lid: packMesh(printLayout(g).lid),
+      },
       process: profile.value.name,
     });
   }
