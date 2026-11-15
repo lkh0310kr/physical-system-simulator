@@ -96,6 +96,11 @@ function printRun(
       );
     }
     if (entries.length > limit) console.log(`  … ${entries.length - limit}개 더 (--limit, --json)`);
+    for (const [id, lines] of Object.entries(result.serial)) {
+      console.log(`\n  ${id} 시리얼`);
+      for (const l of lines.slice(-limit))
+        console.log(`  ${formatTime(l.time).padStart(9)}  ${l.text}`);
+    }
   }
   for (const [id, message] of Object.entries(result.programErrors))
     console.error(`✗ ${id} 프로그램 오류: ${message}`);

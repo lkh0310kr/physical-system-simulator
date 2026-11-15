@@ -18,7 +18,8 @@
     "test:watch": "vitest",
     "prepare": "simple-git-hooks",
     "physisim": "node packages/cli/src/main.ts",
-    "schemas": "node scripts/generate-schemas.ts"
+    "schemas": "node scripts/generate-schemas.ts",
+    "dev": "pnpm --filter @physisim/web dev"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.7",

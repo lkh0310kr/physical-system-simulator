@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { convert, parseQuantity, parseUnit, sameDimension, toSI, UnitError } from "./units.ts";
+import {
+  convert,
+  formatQuantity,
+  parseQuantity,
+  parseUnit,
+  sameDimension,
+  toSI,
+  UnitError,
+} from "./units.ts";
 
 describe("units", () => {
   it("applies SI prefixes to base units", () => {
@@ -44,5 +52,15 @@ describe("units", () => {
     expect(parseQuantity("3.3V").value).toBeCloseTo(3.3);
     expect(parseQuantity("2").unit.dimension.every((d) => d === 0)).toBe(true);
     expect(() => parseQuantity("V")).toThrow(UnitError);
+  });
+});
+
+describe("formatQuantity", () => {
+  it("picks a metric prefix and keeps three significant digits", () => {
+    expect(formatQuantity(3 / 255, "A")).toBe("11.8 mA");
+    expect(formatQuantity(4700, "Ω")).toBe("4.7 kΩ");
+    expect(formatQuantity(16e6, "Hz")).toBe("16 MHz");
+    expect(formatQuantity(0, "A")).toBe("0 A");
+    expect(formatQuantity(0.58823, "")).toBe("0.588");
   });
 });

@@ -155,6 +155,16 @@ describe("createSimulation", () => {
     expect(currents.map((c) => Math.round(c * 1000))).toEqual([0, 0, 20, 20]);
   });
 
+  it("exposes port voltages from the last circuit solve", () => {
+    const sim = simulate(circuit);
+    sim.dispatch("bat", "capability.supply", { type: "on" });
+    sim.run(0.001);
+    expect(sim.voltage("bat:+")).toBeCloseTo(6, 3);
+    expect(sim.voltage("r2:1")).toBeCloseTo(4, 3); // 6V × 200/300
+    expect(sim.voltage("bat:-")).toBe(0);
+    expect(sim.voltage("nobody:x")).toBe(0);
+  });
+
   it("is deterministic", () => {
     const trace = () => {
       const sim = simulate(circuit);

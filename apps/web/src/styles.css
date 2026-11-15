@@ -1,0 +1,585 @@
+/* 디자인 토큰 — docs/DESIGN.md: 차분한 회색 공간, 2톤 객체, 강조색은 "살아 있는 것"에만. */
+:root {
+  --bg: #eef1f5;
+  --grid: #dfe4eb;
+  --grid-major: #d2d8e1;
+  --surface: rgb(255 255 255 / 0.88);
+  --surface-line: rgb(29 35 43 / 0.08);
+  --ink: #1d232b;
+  --muted: #6b7480;
+  --faint: #a9b1bb;
+  --part: #ffffff;
+  --part-dark: #2b3138;
+  --line: #1d232b;
+  --accent: #2f6bff;
+  --accent-glow: rgb(47 107 255 / 0.35);
+  --danger: #d6453d;
+  --radius: 14px;
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.06), 0 8px 24px rgb(16 24 40 / 0.08);
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15181d;
+    --grid: #1e2228;
+    --grid-major: #262b33;
+    --surface: rgb(32 36 43 / 0.9);
+    --surface-line: rgb(255 255 255 / 0.07);
+    --ink: #e7ebf0;
+    --muted: #8a94a0;
+    --faint: #59616c;
+    --part: #2a2f37;
+    --part-dark: #101318;
+    --line: #c9d1da;
+    --accent: #5b8cff;
+    --accent-glow: rgb(91 140 255 / 0.4);
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.35);
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font: 13px / 1.4 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* 떠 있는 컨트롤 */
+.float {
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--surface-line);
+  border-radius: 999px;
+  background: var(--surface);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+}
+
+.round {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: 50%;
+  background: var(--surface);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.round:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.round.active {
+  color: var(--accent);
+}
+
+.tool {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.tool span {
+  color: var(--muted);
+}
+
+.panel {
+  border: 1px solid var(--surface-line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.issues {
+  max-width: 520px;
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.issues b {
+  color: var(--danger);
+  font-family: var(--font);
+}
+
+select.bare {
+  border: 0;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+}
+
+/* 캔버스 */
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+
+.canvas:active {
+  cursor: grabbing;
+}
+
+.grid-line {
+  fill: none;
+  stroke: var(--grid);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.grid-line.major {
+  stroke: var(--grid-major);
+}
+
+.wire {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+
+.wire.live {
+  stroke: var(--accent);
+  stroke-width: 2;
+  opacity: 1;
+}
+
+.part {
+  cursor: default;
+}
+
+.part .lead {
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.part .body {
+  fill: var(--part);
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.part .lit {
+  fill: var(--accent);
+  pointer-events: none;
+}
+
+.part .glow {
+  fill: var(--accent-glow);
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+.part .mark {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+.part .board {
+  fill: var(--part-dark);
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.part .pin {
+  fill: var(--bg);
+  stroke: var(--line);
+  stroke-width: 1.2;
+}
+
+.part .pin-label {
+  fill: #c9d1da;
+  font-size: 8px;
+  font-family: var(--mono);
+  dominant-baseline: middle;
+}
+
+.part .board-name {
+  fill: #e7ebf0;
+  font-size: 13px;
+  font-weight: 600;
+  text-anchor: middle;
+  letter-spacing: 0.02em;
+}
+
+.part .part-id {
+  fill: var(--muted);
+  font-size: 11px;
+}
+
+.part .selection {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.transport {
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.round.primary {
+  width: 44px;
+  height: 44px;
+}
+
+.round.primary.active {
+  color: var(--accent);
+  box-shadow:
+    var(--shadow),
+    0 0 0 4px var(--accent-glow);
+}
+
+.time {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  min-width: 84px;
+  justify-content: center;
+}
+
+.issues {
+  color: var(--danger);
+}
+
+.wire-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 10;
+  cursor: pointer;
+}
+
+.wire.selected {
+  stroke-dasharray: 5 4;
+  opacity: 1;
+}
+
+.wire.pending {
+  stroke: var(--accent);
+  stroke-dasharray: 4 4;
+  pointer-events: none;
+}
+
+.part {
+  cursor: move;
+}
+
+.part .pin {
+  cursor: crosshair;
+}
+
+.part .pin:hover,
+.wiring .part .pin {
+  stroke: var(--accent);
+}
+
+.part .pin:hover {
+  r: 5;
+}
+
+/* 왼쪽 도구 */
+.tools {
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.parts-panel {
+  position: absolute;
+  z-index: 11;
+  top: 50%;
+  left: 64px;
+  transform: translateY(-50%);
+  width: 260px;
+  max-height: 70vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.parts-panel input {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  margin-bottom: 6px;
+  border: 1px solid var(--surface-line);
+  border-radius: 8px;
+  background: transparent;
+  outline: none;
+}
+
+.parts-panel .category {
+  margin: 8px 0 2px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.parts-panel button.item {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.parts-panel button.item:hover {
+  background: var(--surface-line);
+}
+
+.parts-panel .id {
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.selection-tools {
+  top: 16px;
+  right: 16px;
+}
+
+/* 인스펙터 */
+.inspector {
+  position: absolute;
+  z-index: 10;
+  top: 64px;
+  right: 16px;
+  width: 260px;
+  max-height: calc(100vh - 160px);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inspector header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+button.icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-name {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.field input:not([type="checkbox"]),
+.field select {
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--surface-line);
+  border-radius: 8px;
+  background: transparent;
+  outline: none;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--accent);
+}
+
+.field input.invalid {
+  border-color: var(--danger);
+}
+
+.field-error {
+  color: var(--danger);
+  font-size: 11px;
+}
+
+.field-help {
+  color: var(--faint);
+  font-size: 11px;
+}
+
+.reset {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.outputs {
+  border-top: 1px solid var(--surface-line);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.output {
+  display: flex;
+  justify-content: space-between;
+}
+
+.output .value {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 코드 패널 */
+.code-panel {
+  position: absolute;
+  z-index: 11;
+  top: 72px;
+  bottom: 84px;
+  left: 64px;
+  width: min(480px, calc(100vw - 96px));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+
+.code-panel header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-panel .tabs {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  overflow: auto;
+}
+
+.code-panel .tabs button {
+  border: 0;
+  border-radius: 8px;
+  padding: 4px 10px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.code-panel .tabs button.on {
+  background: var(--surface-line);
+}
+
+.code-panel .code {
+  flex: 2;
+  min-height: 0;
+  resize: none;
+  padding: 10px 12px;
+  border: 1px solid var(--surface-line);
+  border-radius: 10px;
+  background: transparent;
+  font: 12.5px / 1.55 var(--mono);
+  outline: none;
+  tab-size: 2;
+}
+
+.code-panel .code:focus {
+  border-color: var(--accent);
+}
+
+.code-panel .serial {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--surface-line);
+  font: 12px / 1.5 var(--mono);
+  white-space: pre-wrap;
+}
+
+.code-panel .create {
+  display: flex;
+  gap: 12px;
+}
+
+.code-panel .empty {
+  padding: 12px 4px;
+}
+
+.warn {
+  color: var(--danger);
+  font-size: 12px;
+}

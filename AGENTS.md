@@ -101,7 +101,7 @@ Model(정의) / Behavior(실행 로직) / Instance(런타임 객체)를 분리�
 | Modelica / FMI | Port(Connector)·acausal 연결, replaceable, 도메인 간 co-simulation |
 | ngspice(WASM) / Falstad CircuitJS | 회로 해석(MNA) |
 | Rapier / MuJoCo / URDF·SDF | 강체 물리, 관절, 기계 모델 기술 포맷 |
-| MCP | Agent tool 인터페이스 |
+| Codex CLI / Claude Code | 파일 기반 Agent 연동의 실제 사용자 (스펙 §10.1) |
 
 - 코드를 **복사**할 때는 라이선스를 확인하고, MIT/Apache-2.0/BSD/ISC가 아니면 §2에 따라 질문한다. 출처는 파일 상단 주석과 `docs/references.md`에 남긴다.
 - GPL 프로젝트(Falstad, SimulIDE 등)는 **알고리즘·설계만 참고**하고 코드는 가져오지 않는다.
@@ -119,7 +119,7 @@ Model(정의) / Behavior(실행 로직) / Instance(런타임 객체)를 분리�
 - **Headless 우선**: 코어 패키지는 DOM·브라우저 API에 의존하지 않는다. UI·CLI·Agent는 코어를 소비만 한다.
 - **Agent 친화**: 공개 API는 JSON 직렬화 가능하고, Zod 스키마로부터 JSON Schema를 뽑을 수 있어야 한다.
 
-## 6. 저장소 구조 (목표 — Phase 0에서 생성)
+## 6. 저장소 구조
 
 ```text
 physical-system-simulator/
@@ -129,14 +129,14 @@ physical-system-simulator/
 │   ├── core/        # Model·Capability·Behavior·Instance 스키마, Registry
 │   ├── engine/      # 시간·이벤트·상태·Behavior 실행·Solver
 │   ├── models/      # 표준 Model/Capability/Behavior 라이브러리
-│   ├── agent/       # MCP 서버
-│   └── cli/         # physisim CLI
+│   └── cli/         # physisim CLI (validate/run/watch/models)
 ├── examples/        # System 예제 (사용법 문서 역할)
+├── schemas/         # 생성된 JSON Schema (pnpm schemas)
 └── apps/
-    └── web/         # 에디터·뷰어 (Phase 5+)
+    └── web/         # 웹 에디터 (Vite + React, pnpm dev)
 ```
 
-의존 방향: `engine → core`, `models → core`, `agent → engine, models`, `cli → engine, models`, `web → *`. 역방향·순환 의존 금지.
+의존 방향: `engine → core`, `models → core`, `cli → engine, models`, `web → core, engine, models`. 역방향·순환 의존 금지.
 
 ## 7. 명령어 (Phase 0 이후)
 

@@ -107,6 +107,21 @@ describe("loadProgram", () => {
     expect(sim.time).toBeCloseTo(0.02);
   });
 
+  it("collects Serial output line by line with the time each line started", () => {
+    const { sim, program } = setup(`
+      let n = 0;
+      function setup() { Serial.begin(9600); Serial.print("boot"); Serial.println(" ok"); }
+      function* loop() { Serial.println("tick " + n++); yield delay(10); }
+    `);
+    sim.run(0.025);
+    expect(program.serial).toEqual([
+      { time: 0, text: "boot ok" },
+      { time: 0, text: "tick 0" },
+      { time: 0.01, text: "tick 1" },
+      { time: 0.02, text: "tick 2" },
+    ]);
+  });
+
   it("reports syntax errors and yields of anything but delay", () => {
     expect(setup("function loop( {").program.error).toBeInstanceOf(SyntaxError);
     const { sim, program } = setup("function* loop() { yield 5; }");

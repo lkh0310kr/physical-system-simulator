@@ -12,6 +12,7 @@
  * - `delay`는 `yield`와 함께 써야 시뮬레이션 시간을 양보한다. 실제로 기다리지 않는다.
  * - `loop`가 `delay` 없이 끝나면 `loopInterval` 뒤에 다시 호출된다 (무한 루프 방지).
  * - GPIO 제어는 대상 Instance의 `capability.gpio` Behavior에 `pinMode`/`digitalWrite` 이벤트로 전달된다.
+ * - `Serial.print/println`은 시각과 함께 줄 단위로 `serial`에 쌓인다 (최근 `MAX_SERIAL_LINES`줄).
  * - 스크립트는 같은 프로세스에서 실행된다. 신뢰할 수 없는 코드는 Worker 등으로 격리해서 돌려야 한다.
  */
 import type { Simulation } from "./simulation.ts";
@@ -23,10 +24,20 @@ export interface ProgramOptions {
   readonly loopInterval?: number;
 }
 
+export interface SerialLine {
+  /** 줄이 시작된 시각 [s]. */
+  readonly time: number;
+  readonly text: string;
+}
+
 export interface Program {
   /** 프로그램이 던진 오류. 오류가 나면 프로그램은 멈추고 시뮬레이션은 계속된다. */
   readonly error: Error | undefined;
+  /** 시리얼 출력 (마지막 줄은 아직 끝나지 않았을 수 있다). */
+  readonly serial: readonly SerialLine[];
 }
+
+export const MAX_SERIAL_LINES = 1000;
 
 interface Delay {
   readonly delayMs: number;
@@ -60,6 +71,23 @@ export function loadProgram(
   const capability = options.capability ?? "capability.gpio";
   const loopInterval = options.loopInterval ?? 0.001;
   let error: Error | undefined;
+  const serial: { time: number; text: string }[] = [];
+  let lineOpen = false;
+  /** 시리얼 쓰기: 줄바꿈마다 줄을 닫고, 다음 글자가 오면 그 시각으로 새 줄을 연다. */
+  const write = (text: string) => {
+    const parts = text.split("\n");
+    parts.forEach((part, i) => {
+      const endsLine = i < parts.length - 1;
+      if (!lineOpen && (part || endsLine)) {
+        serial.push({ time: sim.time, text: "" });
+        if (serial.length > MAX_SERIAL_LINES) serial.shift();
+        lineOpen = true;
+      }
+      const last = serial[serial.length - 1];
+      if (last && part) last.text += part;
+      if (endsLine) lineOpen = false;
+    });
+  };
 
   const pins = () =>
     (sim.state(instance, capability) as { pins?: Record<string, { pin: number; level: boolean }> })
@@ -76,6 +104,11 @@ export function loadProgram(
       }),
     digitalRead: (pin: number) => (Object.values(pins()).find((p) => p.pin === pin)?.level ? 1 : 0),
     delay: (ms: number): Delay => ({ delayMs: ms }),
+    Serial: {
+      begin: (_baud?: number) => {},
+      print: (v: unknown) => write(String(v)),
+      println: (v: unknown = "") => write(`${String(v)}\n`),
+    },
     millis: () => Math.floor(sim.time * 1000),
     micros: () => Math.floor(sim.time * 1_000_000),
   };
@@ -84,7 +117,7 @@ export function loadProgram(
   try {
     entries = compile(source, api);
   } catch (e) {
-    return { error: e as Error };
+    return { error: e as Error, serial };
   }
 
   const fail = (e: unknown) => {
@@ -132,5 +165,6 @@ export function loadProgram(
     get error() {
       return error;
     },
+    serial,
   };
 }

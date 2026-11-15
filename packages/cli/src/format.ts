@@ -1,22 +1,8 @@
 /** 사람이 읽는 출력 형식. */
-import type { PropertyValue, Registry, SystemDoc } from "@physisim/core";
-
-const PREFIXES: [number, string][] = [
-  [1e9, "G"],
-  [1e6, "M"],
-  [1e3, "k"],
-  [1, ""],
-  [1e-3, "m"],
-  [1e-6, "µ"],
-  [1e-9, "n"],
-];
+import { formatQuantity, type PropertyValue, type Registry, type SystemDoc } from "@physisim/core";
 
 /** SI 값을 접두어 붙여 표시 (0.0118, "A" → "11.8 mA"). */
-export function withPrefix(value: number, unit: string): string {
-  if (value === 0) return `0 ${unit}`;
-  const [scale, prefix] = PREFIXES.find(([s]) => Math.abs(value) >= s * 0.9995) ?? [1e-9, "n"];
-  return `${Number((value / scale).toPrecision(3))} ${prefix}${unit}`;
-}
+export const withPrefix = formatQuantity;
 
 /** 신호 `instance.output`의 단위를 Capability outputs 정의에서 찾는다. */
 export function unitOf(registry: Registry, doc: SystemDoc, signal: string): string | undefined {

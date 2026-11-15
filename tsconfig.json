@@ -1,9 +1,23 @@
 {
   "files": [],
   "references": [
-    { "path": "packages/core" },
-    { "path": "packages/models" },
-    { "path": "packages/engine" },
-    { "path": "packages/cli" }
+    {
+      "path": "packages/core"
+    },
+    {
+      "path": "packages/models"
+    },
+    {
+      "path": "packages/engine"
+    },
+    {
+      "path": "packages/cli"
+    },
+    {
+      "path": "apps/web"
+    },
+    {
+      "path": "apps/web/tsconfig.node.json"
+    }
   ]
 }

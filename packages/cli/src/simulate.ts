@@ -1,84 +1,35 @@
 /** System 파일을 읽어 검증·실행한다. 출력 형식과 무관한 부분이라 테스트와 다른 도구에서 재사용한다. */
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { type LoadedSystem, loadSystemProject, type Result } from "@physisim/core";
 import {
-  type BuiltSystem,
-  buildSystem,
-  type Issue,
-  loadLibrary,
-  parseSystem,
-  type Registry,
-  type SystemDoc,
-} from "@physisim/core";
-import { createSimulation, loadProgram, recordTrace, type Trace } from "@physisim/engine";
+  createSimulation,
+  loadProgram,
+  recordTrace,
+  type SerialLine,
+  type Trace,
+} from "@physisim/engine";
 import { createStandardRegistry } from "@physisim/models";
 
-export interface Loaded {
-  readonly registry: Registry;
-  readonly doc: SystemDoc;
-  readonly system: BuiltSystem;
-  /** Instance ID → 프로그램 소스. */
-  readonly programs: ReadonlyMap<string, string>;
-}
+export type Loaded = LoadedSystem;
+export type LoadResult = Result<Loaded>;
 
-export type LoadResult = { ok: true; value: Loaded } | { ok: false; issues: readonly Issue[] };
-
-function readJson(path: string): { ok: true; value: unknown } | { ok: false; issues: Issue[] } {
+/** System 파일과 그 문서가 참조하는 라이브러리·프로그램 파일을 디스크에서 읽는다. */
+export function loadSystemFile(path: string): LoadResult {
+  let json: unknown;
   try {
-    return { ok: true, value: JSON.parse(readFileSync(path, "utf8")) };
+    json = JSON.parse(readFileSync(path, "utf8"));
   } catch (e) {
     return { ok: false, issues: [{ path, message: (e as Error).message }] };
   }
-}
-
-/** 표준 라이브러리 + System 문서의 `library` 파일들. 파일당 정의 1개, 종류는 ID 접두어로 구분. */
-function loadRegistry(
-  doc: SystemDoc,
-  baseDir: string,
-): { ok: true; value: Registry } | { ok: false; issues: readonly Issue[] } {
-  const models: unknown[] = [];
-  const capabilities: unknown[] = [];
-  const issues: Issue[] = [];
-  for (const rel of doc.library) {
-    const file = resolve(baseDir, rel);
-    const json = readJson(file);
-    if (!json.ok) {
-      issues.push({ path: rel, message: json.issues[0]?.message ?? "읽을 수 없다" });
-      continue;
-    }
-    const id = (json.value as { id?: unknown } | null)?.id;
-    if (typeof id === "string" && id.startsWith("model.")) models.push(json.value);
-    else if (typeof id === "string" && id.startsWith("capability.")) capabilities.push(json.value);
-    else issues.push({ path: rel, message: '"id"가 "model." 또는 "capability."로 시작해야 한다' });
-  }
-  if (issues.length) return { ok: false, issues };
-  return loadLibrary({ models, capabilities }, createStandardRegistry());
-}
-
-export function loadSystemFile(path: string): LoadResult {
-  const json = readJson(path);
-  if (!json.ok) return json;
-  const doc = parseSystem(json.value);
-  if (!doc.ok) return doc;
-  const lib = loadRegistry(doc.value, dirname(path));
-  if (!lib.ok) return lib;
-  const registry = lib.value;
-  const system = buildSystem(registry, doc.value);
-  if (!system.ok) return system;
-
-  const programs = new Map<string, string>();
-  const issues: Issue[] = [];
-  doc.value.instances.forEach((inst, i) => {
-    if (!inst.program) return;
-    const file = resolve(dirname(path), inst.program);
+  const read = (rel: string) => {
     try {
-      programs.set(inst.id, readFileSync(file, "utf8"));
-    } catch (e) {
-      issues.push({ path: `instances[${i}].program`, message: (e as Error).message });
+      return readFileSync(resolve(dirname(path), rel), "utf8");
+    } catch {
+      return undefined;
     }
-  });
-  if (issues.length) return { ok: false, issues };
-  return { ok: true, value: { registry, doc: doc.value, system: system.value, programs } };
+  };
+  return loadSystemProject(json, read, createStandardRegistry);
 }
 
 export interface RunOptions {
@@ -92,6 +43,8 @@ export interface RunResult {
   readonly trace: Trace;
   /** Instance ID → 프로그램 오류 메시지. */
   readonly programErrors: Readonly<Record<string, string>>;
+  /** Instance ID → 시리얼 출력 줄. */
+  readonly serial: Readonly<Record<string, readonly SerialLine[]>>;
   /** 실제 걸린 시간 [ms]. */
   readonly wallMs: number;
 }
@@ -112,5 +65,8 @@ export function runLoaded(loaded: Loaded, options: RunOptions): RunResult {
   const programErrors = Object.fromEntries(
     programs.flatMap(([id, p]) => (p.error ? [[id, p.error.message]] : [])),
   );
-  return { trace, programErrors, wallMs: performance.now() - started };
+  const serial = Object.fromEntries(
+    programs.filter(([, p]) => p.serial.length).map(([id, p]) => [id, p.serial]),
+  );
+  return { trace, programErrors, serial, wallMs: performance.now() - started };
 }
