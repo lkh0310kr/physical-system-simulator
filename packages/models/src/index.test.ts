@@ -22,6 +22,7 @@ describe("standard library", () => {
       "model.esp32-p4-qfn104",
       "model.ov2640-sensor",
       "model.ov5640-sensor",
+      "model.xiao-esp32s3-sense",
       "model.resistor",
       "model.pushbutton",
       "model.toggle-switch",

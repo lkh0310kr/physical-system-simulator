@@ -235,6 +235,41 @@
           },
           "description": {
             "type": "string"
+          },
+          "opening": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "shape": {
+                    "type": "string",
+                    "const": "round"
+                  },
+                  "diameter": {
+                    "type": ["number", "string"]
+                  }
+                },
+                "required": ["shape", "diameter"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "shape": {
+                    "type": "string",
+                    "const": "rect"
+                  },
+                  "width": {
+                    "type": ["number", "string"]
+                  },
+                  "height": {
+                    "type": ["number", "string"]
+                  }
+                },
+                "required": ["shape", "width", "height"],
+                "additionalProperties": false
+              }
+            ]
           }
         },
         "required": ["name", "position"],

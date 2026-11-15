@@ -41,6 +41,16 @@ export const BodySchema = z.strictObject({
   color: z.string().optional(),
 });
 
+/**
+ * 케이스 벽에 뚫어야 하는 개구부 (렌즈, 커넥터, 버튼 접근 구멍).
+ * `round`는 지름, `rect`는 법선에 수직인 두 축의 크기: 법선이 ±x면 (y, z), ±y면 (x, z), ±z면 (x, y).
+ * 크기는 통과해야 하는 **부품 쪽 치수**이고, 틈새는 공정 프로필이 더한다.
+ */
+export const OpeningSchema = z.discriminatedUnion("shape", [
+  z.strictObject({ shape: z.literal("round"), diameter: LengthSchema }),
+  z.strictObject({ shape: z.literal("rect"), width: LengthSchema, height: LengthSchema }),
+]);
+
 /** 다른 부품과 맞물리는 장착점 (카메라 렌즈 위치, 배터리 고정 위치 등). body 중심 기준 좌표. */
 export const MountSchema = z.strictObject({
   name: z.string().regex(/^[a-z][a-z0-9-]*$/, { message: "소문자 kebab-case 이름" }),
@@ -48,6 +58,8 @@ export const MountSchema = z.strictObject({
   /** 장착점이 향하는 방향 (단위 벡터). 생략하면 +z. */
   normal: z.tuple([z.number(), z.number(), z.number()]).optional(),
   description: z.string().optional(),
+  /** 있으면 케이스가 이 점에서 법선 방향으로 벽을 뚫는다. 법선은 축 방향이어야 한다. */
+  opening: OpeningSchema.optional(),
 });
 
 export const PlacementSchema = z.strictObject({
@@ -58,6 +70,7 @@ export const PlacementSchema = z.strictObject({
 });
 
 export type Body = z.output<typeof BodySchema>;
+export type Opening = z.output<typeof OpeningSchema>;
 export type Mount = z.output<typeof MountSchema>;
 export type Placement3D = z.output<typeof PlacementSchema>;
 

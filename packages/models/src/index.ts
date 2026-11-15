@@ -37,6 +37,7 @@ import potentiometerModel from "./models/potentiometer.json" with { type: "json"
 import pushbutton from "./models/pushbutton.json" with { type: "json" };
 import resistor from "./models/resistor.json" with { type: "json" };
 import toggleSwitch from "./models/toggle-switch.json" with { type: "json" };
+import xiaoSense from "./models/xiao-esp32s3-sense.json" with { type: "json" };
 
 export { type DigitalIoEvent, type DigitalIoState, pinPort } from "./behaviors/digital-io.ts";
 export { parseRails, type Rail } from "./behaviors/power-supply.ts";
@@ -84,6 +85,7 @@ export const standardLibrary: LibraryInput = {
     esp32P4Chip,
     ov2640Sensor,
     ov5640Sensor,
+    xiaoSense,
     resistor,
     pushbutton,
     toggleSwitch,

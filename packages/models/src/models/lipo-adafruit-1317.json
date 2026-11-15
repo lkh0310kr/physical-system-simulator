@@ -62,7 +62,13 @@
   "metadata": {
     "fidelity": "approximate",
     "source": "https://www.adafruit.com/product/1317 (용량 150 mAh, 3.7 V 공칭, 4.2 V 만충, 3.0 V 종지, 19.75×26.02×3.8 mm, 4.65 g). 내부 저항 0.15 Ω은 미확인 가정",
-    "assumptions": ["internalResistance"]
+    "assumptions": ["internalResistance"],
+    "bom": {
+      "vendor": "Adafruit",
+      "name": "Lithium Ion Polymer Battery 3.7V 150mAh",
+      "mpn": "1317",
+      "url": "https://www.adafruit.com/product/1317"
+    }
   },
   "body": {
     "size": [19.75, 26.02, 3.8],
