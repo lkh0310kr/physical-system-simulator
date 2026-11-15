@@ -46,7 +46,7 @@
 
 - [x] P1-T1 물리량·단위 표현 (Quantity, 단위 변환·차원 검사)
 - [x] P1-T2 Property Schema + 값 검증 (타입·단위·min/max)
-- [ ] P1-T3 Capability 정의 스키마 (inputs/outputs/parameters, `defaultBehavior`)
+- [x] P1-T3 Capability 정의 스키마 (inputs/outputs/parameters, `defaultBehavior`)
 - [ ] P1-T4 Model 스키마 (Identity/Properties/Components/Capabilities/Metadata) + Capability 바인딩 + Behavior 해석(override → default → 오류)
 - [ ] P1-T5 Registry (Model/Capability/Behavior 등록·조회·참조 무결성 검사, Components 순환 검출)
 - [ ] P1-T6 JSON 로더 + 사람이 읽을 수 있는 검증 오류 메시지
