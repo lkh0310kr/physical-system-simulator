@@ -25,6 +25,17 @@ export type CircuitElement =
        */
       readonly duty?: number;
     }
+  /**
+   * 정전류 부하: Port에서 접지로 `current`를 끌어간다 (MCU·모듈이 상태별로 쓰는 전류 등).
+   * 전원이 이 전류를 감당하지 못해도 전류는 줄지 않는다 — 전압이 떨어질 뿐이다.
+   */
+  | {
+      readonly kind: "load";
+      readonly id: string;
+      readonly port: string;
+      /** [A] 접지로 흐르는 방향이 +. */
+      readonly current: number;
+    }
   /** 구간 선형 다이오드: 순방향 전압을 넘으면 `onResistance`로 도통, 아니면 차단. 전류 방향 anode → cathode. */
   | {
       readonly kind: "diode";

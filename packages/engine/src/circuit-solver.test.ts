@@ -59,6 +59,16 @@ describe("circuit solver", () => {
     expect(Math.abs(solver.solve(2, circuit(0)).currents.get("led") ?? 1)).toBeLessThan(1e-8);
   });
 
+  it("draws a constant current through the source resistance (V = Vs − I·Rs)", () => {
+    const s = solve(2, [
+      { kind: "drive", id: "bat", node: 1, voltage: 4, resistance: 0.5 },
+      { kind: "load", id: "mcu", node: 1, current: 0.2 },
+    ]);
+    expect(s.voltages[1]).toBeCloseTo(4 - 0.2 * 0.5, 9);
+    expect(s.currents.get("bat")).toBeCloseTo(0.2, 9);
+    expect(s.currents.get("mcu")).toBe(0.2);
+  });
+
   it("keeps floating nodes finite", () => {
     const s = solve(3, [{ kind: "resistor", id: "r", a: 1, b: 2, resistance: 100 }]);
     expect(s.voltages.every(Number.isFinite)).toBe(true);

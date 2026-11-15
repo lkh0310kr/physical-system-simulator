@@ -22,6 +22,7 @@ export type NodeElement =
       readonly voltage: number;
       readonly resistance: number;
     }
+  | { readonly kind: "load"; readonly id: string; readonly node: number; readonly current: number }
   | {
       readonly kind: "diode";
       readonly id: string;
@@ -131,6 +132,9 @@ export function createCircuitSolver() {
           conduct(e.node, 0, 1 / e.resistance);
           inject(e.node, 0, e.voltage / e.resistance);
           break;
+        case "load":
+          inject(e.node, 0, -e.current);
+          break;
         case "diode":
           if (diodeOn.get(e.id)) {
             const g = 1 / e.onResistance;
@@ -154,6 +158,9 @@ export function createCircuitSolver() {
           break;
         case "drive":
           currents.set(e.id, (e.voltage - at(v, e.node)) / e.resistance);
+          break;
+        case "load":
+          currents.set(e.id, e.current);
           break;
         case "diode": {
           const vd = at(v, e.anode) - at(v, e.cathode);
