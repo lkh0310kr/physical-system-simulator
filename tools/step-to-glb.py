@@ -4,7 +4,7 @@
   .venv/bin/python tools/step-to-glb.py <in.step> <out.glb> --center X,Y,Z [--deflection 0.05]
 
 STEP(단위 mm, Y가 두께)를 PhysiSim body 좌표계(미터, z가 위, 중심 원점)로 옮겨 쓴다:
-  x = X - cx,  y = -(Z - cz),  z = Y - cy.   색은 STEP의 면/부품 색을 그대로 쓴다.
+  기본 --map X,-Z,Y: x = X-cx, y = -(Z-cz), z = Y-cy.   색은 STEP의 면/부품 색을 그대로 쓴다.
 """
 import argparse, json, struct
 from OCP.TDocStd import TDocStd_Document
@@ -25,8 +25,14 @@ ap = argparse.ArgumentParser()
 ap.add_argument("src"); ap.add_argument("dst")
 ap.add_argument("--center", required=True)
 ap.add_argument("--deflection", type=float, default=0.05)
+ap.add_argument("--map", default="X,-Z,Y", help="PhysiSim x,y,z를 STEP 축으로: 기본 X,-Z,Y (Y가 두께인 STEP). z가 두께인 STEP은 X,Y,Z 등")
 a = ap.parse_args()
 cx, cy, cz = map(float, a.center.split(","))
+C = {"X": cx, "Y": cy, "Z": cz}
+AXES = []
+for tok in a.map.split(","):
+    sign = -1 if tok.startswith("-") else 1
+    AXES.append((sign, tok.lstrip("-")))
 
 app = XCAFApp_Application.GetApplication_s()
 doc = TDocStd_Document(TCollection_ExtendedString("d")); app.InitDocument(doc)
@@ -77,7 +83,8 @@ for label, shape in leaves:
         for n in range(1, tri.NbNodes() + 1):
             p = tri.Node(n).Transformed(trsf)
             X, Y, Z = p.X(), p.Y(), p.Z()
-            pts += [(X - cx) / 1000, -(Z - cz) / 1000, (Y - cy) / 1000]
+            v = {"X": X, "Y": Y, "Z": Z}
+            pts += [sg * (v[ax] - C[ax]) / 1000 for sg, ax in AXES]
         idx = []
         flip = face.Orientation() == TopAbs_REVERSED
         for t in range(1, tri.NbTriangles() + 1):
