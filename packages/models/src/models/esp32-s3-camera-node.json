@@ -3,14 +3,14 @@
   "id": "model.esp32-s3-camera-node",
   "name": "ESP32-S3 Camera Node (Case A)",
   "category": "electronics/camera-node",
-  "description": "ESP32-S3 + OV2640 + Wi-Fi 통합형의 동작 모델. 실제 펌웨어가 아니라 상태별 전류·시간 프로파일이다. 값은 데이터시트급 근사치이므로 실측으로 교체한다.",
+  "description": "ESP32-S3 + OV2640(A-2) + Wi-Fi 통합형의 동작 모델. 전류는 데이터시트 값, 시간·파일 크기는 미확인 가정(실측으로 교체). 센서를 바꾸려면 인스턴스 속성으로 override한다.",
   "propertySchema": {
     "sleepCurrent": {
       "type": "number",
       "unit": "uA",
       "min": 0,
-      "default": 15,
-      "description": "딥슬립 (모듈 + 센서 전원 차단) 전류"
+      "default": 8,
+      "description": "딥슬립 전류. ESP32-S3 칩 8 µA(Datasheet Table 5-10). 센서는 전원 차단 가정이라 0 (OV2640을 켜 두면 +600 µA)"
     },
     "bootTime": {
       "type": "number",
@@ -19,7 +19,13 @@
       "default": 150,
       "description": "깨어나 부팅하는 시간"
     },
-    "bootCurrent": { "type": "number", "unit": "mA", "min": 0, "default": 60 },
+    "bootCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 66,
+      "description": "부팅: 240 MHz 듀얼코어 모뎀슬립 66.2 mA (Table 5-9). 부팅 시간은 미확인 가정"
+    },
     "captureTime": {
       "type": "number",
       "unit": "ms",
@@ -27,7 +33,13 @@
       "default": 250,
       "description": "센서 초기화 + 촬영 + JPEG 인코딩"
     },
-    "captureCurrent": { "type": "number", "unit": "mA", "min": 0, "default": 140 },
+    "captureCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 108,
+      "description": "촬영: 240 MHz 듀얼코어 66 mA + OV2640 압축 활성 140 mW ≈ 42 mA (유도값). OV5640 5MP는 +140 mA. 촬영 시간은 미확인 가정"
+    },
     "connectTime": {
       "type": "number",
       "unit": "ms",
@@ -35,20 +47,32 @@
       "default": 600,
       "description": "Wi-Fi 연결 (고정 IP·빠른 재연결 가정)"
     },
-    "connectCurrent": { "type": "number", "unit": "mA", "min": 0, "default": 120 },
+    "connectCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 88,
+      "description": "Wi-Fi 연결: RX 88 mA (Table 5-7, 하한). 연결 시간 600 ms는 미확인 가정"
+    },
     "imageBytes": {
       "type": "integer",
       "min": 1,
       "default": 90000,
-      "description": "JPEG 한 장의 크기 [byte]"
+      "description": "JPEG 한 장 [byte]. 미확인 가정 (UXGA 약 90 kB)"
     },
     "throughput": {
       "type": "integer",
       "min": 1,
-      "default": 1000000,
-      "description": "실효 전송 속도 [byte/s]"
+      "default": 2500000,
+      "description": "실효 전송 속도 [byte/s]. 2.5 MB/s = ESP-IDF 실험실 iperf TCP TX 20 Mbit/s (실제 HTTP 업로드는 더 느림)"
     },
-    "transmitCurrent": { "type": "number", "unit": "mA", "min": 0, "default": 240 },
+    "transmitCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 283,
+      "description": "Wi-Fi TX 283 mA (802.11n HT20 MCS7 @18.5 dBm, Table 5-7)"
+    },
     "supplyVoltage": {
       "type": "number",
       "unit": "V",
@@ -77,17 +101,29 @@
   },
   "properties": {},
   "ports": [
-    { "name": "VCC", "domain": "electrical", "description": "배터리 +" },
-    { "name": "GND", "domain": "electrical", "ground": true },
+    {
+      "name": "VCC",
+      "domain": "electrical",
+      "description": "배터리 +"
+    },
+    {
+      "name": "GND",
+      "domain": "electrical",
+      "ground": true
+    },
     {
       "name": "WAKE",
       "domain": "electrical",
       "description": "깨우기 버튼 (내부 풀업, 버튼은 GND로)"
     }
   ],
-  "capabilities": [{ "capability": "capability.camera-node" }],
+  "capabilities": [
+    {
+      "capability": "capability.camera-node"
+    }
+  ],
   "metadata": {
     "fidelity": "approximate",
-    "source": "ESP32-S3 datasheet / OV2640 datasheet 근사. 실측 필요"
+    "source": "docs/scenarios/wearable-camera-specs.md — ESP32-S3 Datasheet v2.2 Table 5-7/5-9/5-10, OV2640 Datasheet, OV5640 Datasheet Table 8-3. 미확인 항목은 같은 문서 표 참조"
   }
 }

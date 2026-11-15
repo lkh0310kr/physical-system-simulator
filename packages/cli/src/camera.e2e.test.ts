@@ -3,7 +3,7 @@ import { createSimulation, recordTrace } from "@physisim/engine";
 import { describe, expect, it } from "vitest";
 import { loadSystemFile } from "./simulate.ts";
 
-const file = join(import.meta.dirname, "../../../examples/camera-case-a.system.json");
+const file = join(import.meta.dirname, "../../../examples/camera-case-a2-ov2640.system.json");
 
 /** `presses`: 누르는 시각들. `holdFor`: 누르고 있는 시간 [s]. */
 function run(seconds: number, presses: number[], holdFor = 0.2) {
@@ -38,23 +38,23 @@ describe("E2E: Wearable Camera — Case A (behavior model)", () => {
     expect(at("node.phase", "boot")).toBeCloseTo(1.0, 2);
   });
 
-  it("records one delivered image after about 1.09 s (boot + capture + connect + transmit)", () => {
+  it("records one delivered image after about 1.04 s (boot + capture + connect + transmit)", () => {
     const delivered = at("node.sent", 1);
-    expect(delivered).toBeCloseTo(1.0 + 0.15 + 0.25 + 0.6 + 90000 / 1_000_000, 2);
+    expect(delivered).toBeCloseTo(1.0 + 0.15 + 0.25 + 0.6 + 90000 / 2_500_000, 2);
     expect(trace.final["node.sentBytes"]).toBe(90000);
     expect(trace.final["node.wakes"]).toBe(1);
   });
 
-  it("takes about 0.038 mAh from the battery for one capture", () => {
+  it("takes about 0.03 mAh from the battery for one capture", () => {
     // 상태별 전류 × 시간 (부하 쪽) = 0.1376 C, 배터리 쪽은 × 3.3 / (3.7 × 0.9)
-    const loadCharge = 0.06 * 0.15 + 0.14 * 0.25 + 0.12 * 0.6 + 0.24 * 0.09;
-    const batteryCharge = loadCharge * (3.3 / (3.7 * 0.9)) + 15e-6 * 2 * 0.99; // + 절전 약 2초
+    const loadCharge = 0.066 * 0.15 + 0.108 * 0.25 + 0.088 * 0.6 + 0.283 * (90000 / 2_500_000);
+    const batteryCharge = loadCharge * (3.3 / (3.7 * 0.9)) + 8e-6 * 2 * 0.99; // + 절전 약 2초
     expect(Number(trace.final["bat.charge"])).toBeCloseTo(batteryCharge, 3);
   });
 
   it("draws only microamps while asleep", () => {
     const asleep = run(0.5, []);
-    expect(Number(asleep.final["node.current"])).toBeCloseTo(15e-6 * (3.3 / (3.7 * 0.9)), 8);
+    expect(Number(asleep.final["node.current"])).toBeCloseTo(8e-6 * (3.3 / (3.7 * 0.9)), 8);
   });
 
   it("ignores a button that stays pressed for the whole capture: still one image", () => {

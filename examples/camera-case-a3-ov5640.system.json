@@ -1,0 +1,48 @@
+{
+  "$schema": "../schemas/system.schema.json",
+  "name": "Wearable Camera — Case A-3 (ESP32-S3 + OV5640)",
+  "description": "A-2와 같은 구성에서 센서만 OV5640 5MP로. 촬영 전류 66 mA(MCU) + 140 mA(OV5640 JPEG 5MP, Datasheet Table 8-3). JPEG 크기 450 kB는 미확인 가정.",
+  "instances": [
+    {
+      "id": "bat",
+      "model": "model.li-ion-cell",
+      "properties": {
+        "capacity": 500
+      }
+    },
+    {
+      "id": "node",
+      "model": "model.esp32-s3-camera-node",
+      "properties": {
+        "captureCurrent": "206mA",
+        "imageBytes": 450000
+      }
+    },
+    {
+      "id": "btn",
+      "model": "model.pushbutton"
+    }
+  ],
+  "connections": [
+    ["bat:+", "node:VCC"],
+    ["bat:-", "node:GND"],
+    ["node:WAKE", "btn:1"],
+    ["btn:2", "node:GND"]
+  ],
+  "layout": {
+    "instances": {
+      "bat": {
+        "x": 0,
+        "y": 0
+      },
+      "node": {
+        "x": 160,
+        "y": -20
+      },
+      "btn": {
+        "x": 160,
+        "y": -140
+      }
+    }
+  }
+}

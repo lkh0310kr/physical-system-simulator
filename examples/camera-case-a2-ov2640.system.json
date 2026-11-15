@@ -1,0 +1,44 @@
+{
+  "$schema": "../schemas/system.schema.json",
+  "name": "Wearable Camera — Case A-2 (ESP32-S3 + OV2640)",
+  "description": "버튼 → 깨어남 → 촬영 → Wi-Fi 전송 → 절전. 전류는 데이터시트 값(docs/scenarios/wearable-camera-specs.md), 시간·파일 크기는 미확인 가정.",
+  "instances": [
+    {
+      "id": "bat",
+      "model": "model.li-ion-cell",
+      "properties": {
+        "capacity": 500
+      }
+    },
+    {
+      "id": "node",
+      "model": "model.esp32-s3-camera-node"
+    },
+    {
+      "id": "btn",
+      "model": "model.pushbutton"
+    }
+  ],
+  "connections": [
+    ["bat:+", "node:VCC"],
+    ["bat:-", "node:GND"],
+    ["node:WAKE", "btn:1"],
+    ["btn:2", "node:GND"]
+  ],
+  "layout": {
+    "instances": {
+      "bat": {
+        "x": 0,
+        "y": 0
+      },
+      "node": {
+        "x": 160,
+        "y": -20
+      },
+      "btn": {
+        "x": 160,
+        "y": -140
+      }
+    }
+  }
+}
