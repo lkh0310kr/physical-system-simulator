@@ -6,6 +6,8 @@ export interface PinState {
   readonly pin: number;
   readonly mode: PinMode;
   readonly level: boolean;
+  /** 입력 핀의 내부 풀업. 켜져 있으면 회로에서 logicLevel로 당겨진다. */
+  readonly pullup?: boolean;
 }
 export interface DigitalIoState {
   /** Port 이름 → 핀 상태. pinMode로 설정된 핀만 있다. */
@@ -14,7 +16,10 @@ export interface DigitalIoState {
 
 /** 이벤트: `{ type: "pinMode", payload: { pin, mode } }`, `{ type: "digitalWrite", payload: { pin, level } }`. */
 export type DigitalIoEvent =
-  | { readonly type: "pinMode"; readonly payload: { readonly pin: number; readonly mode: PinMode } }
+  | {
+      readonly type: "pinMode";
+      readonly payload: { readonly pin: number; readonly mode: PinMode; readonly pullup?: boolean };
+    }
   | {
       readonly type: "digitalWrite";
       readonly payload: { readonly pin: number; readonly level: boolean };
@@ -46,21 +51,37 @@ export const digitalIo = defineBehavior<DigitalIoState>({
     const prev: PinState = s.pins[port] ?? { pin: e.payload.pin, mode: "input", level: false };
     const next: PinState =
       e.type === "pinMode"
-        ? { ...prev, mode: e.payload.mode }
+        ? { ...prev, mode: e.payload.mode, pullup: e.payload.pullup === true }
         : { ...prev, level: e.payload.level };
     const state = { pins: { ...s.pins, [port]: next } };
     return { state, outputs: outputsOf(state) };
   },
   circuit: (s, ctx) =>
-    Object.entries(s.pins)
-      .filter(([, p]) => p.mode === "output")
-      .map(([port, p]) => ({
-        kind: "drive" as const,
-        id: port,
-        port,
-        voltage: p.level ? numberOf(ctx.config, "logicLevel") : 0,
-        resistance: numberOf(ctx.config, "outputResistance"),
-      })),
+    Object.entries(s.pins).flatMap(([port, p]) => {
+      if (p.mode === "output") {
+        return [
+          {
+            kind: "drive" as const,
+            id: port,
+            port,
+            voltage: p.level ? numberOf(ctx.config, "logicLevel") : 0,
+            resistance: numberOf(ctx.config, "outputResistance"),
+          },
+        ];
+      }
+      // 입력 + 풀업: 약한 저항으로 logicLevel에 당긴다. 아무것도 안 달려 있으면 HIGH, 스위치가 GND에 이으면 LOW.
+      return p.pullup
+        ? [
+            {
+              kind: "drive" as const,
+              id: `${port}.pullup`,
+              port,
+              voltage: numberOf(ctx.config, "logicLevel"),
+              resistance: numberOf(ctx.config, "pullupResistance"),
+            },
+          ]
+        : [];
+    }),
   step: (s, _inputs, ctx) => {
     const threshold = numberOf(ctx.config, "logicLevel") / 2;
     const pins = Object.fromEntries(

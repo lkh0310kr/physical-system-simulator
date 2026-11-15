@@ -25,6 +25,13 @@
       "min": 0,
       "default": 25,
       "description": "출력 핀 내부 저항"
+    },
+    "pullupResistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 0,
+      "default": 20000,
+      "description": "INPUT_PULLUP일 때 내부 풀업 저항 (ATmega328P 20~50kΩ)"
     }
   },
   "defaultBehavior": "behavior.digital-io"
