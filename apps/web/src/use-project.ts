@@ -11,7 +11,8 @@ import {
 } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { dirOf, joinPath, listFiles, onFileChange, readFile } from "./project-client.ts";
+import { formatJson } from "./edit.ts";
+import { dirOf, joinPath, listFiles, onFileChange, readFile, writeFile } from "./project-client.ts";
 
 export interface ProjectState {
   readonly files: readonly string[];
@@ -73,15 +74,77 @@ async function load(path: string): Promise<Loaded> {
 export function useProject() {
   const [state, setState] = useState<ProjectState>(EMPTY);
   const pathRef = useRef<string | undefined>(undefined);
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const past = useRef<unknown[]>([]);
+  const future = useRef<unknown[]>([]);
+
+  /** 문서를 바꿔 화면에 바로 반영하고 파일에 저장한다. 검증에 실패해도 마지막 정상 상태로 계속 그린다. */
+  const apply = useCallback(async (next: unknown) => {
+    const path = pathRef.current;
+    if (!path) return;
+    setState((s) => {
+      const r = loadSystemProject(next, (rel) => s.refs[rel], createStandardRegistry);
+      return {
+        ...s,
+        docJson: next,
+        loaded: r.ok ? r.value : s.loaded,
+        issues: r.ok ? [] : r.issues,
+        revision: s.revision + 1,
+      };
+    });
+    await writeFile(path, formatJson(next));
+  }, []);
+
+  const update = useCallback(
+    (next: unknown) => {
+      past.current.push(stateRef.current.docJson);
+      future.current = [];
+      return apply(next);
+    },
+    [apply],
+  );
+  const undo = useCallback(() => {
+    const prev = past.current.pop();
+    if (prev === undefined) return;
+    future.current.push(stateRef.current.docJson);
+    return apply(prev);
+  }, [apply]);
+  const redo = useCallback(() => {
+    const next = future.current.pop();
+    if (next === undefined) return;
+    past.current.push(stateRef.current.docJson);
+    return apply(next);
+  }, [apply]);
 
   const open = useCallback(async (path: string) => {
+    if (pathRef.current !== path) {
+      past.current = [];
+      future.current = [];
+    }
     pathRef.current = path;
     const result = await load(path);
     if (pathRef.current !== path) return;
     const url = new URL(location.href);
     url.searchParams.set("system", path);
     history.replaceState(null, "", url);
-    setState((s) => ({ ...s, path, ...result, revision: s.revision + 1 }));
+    setState((s) => {
+      // 방금 저장한 내용이 감시로 돌아온 경우: 이미 반영돼 있으므로 다시 그리지 않는다.
+      if (
+        s.path === path &&
+        JSON.stringify(s.docJson) === JSON.stringify(result.docJson) &&
+        result.loaded
+      ) {
+        return { ...s, refs: result.refs };
+      }
+      return {
+        ...s,
+        path,
+        ...result,
+        loaded: result.loaded ?? (s.path === path ? s.loaded : undefined),
+        revision: s.revision + 1,
+      };
+    });
   }, []);
 
   const refreshFiles = useCallback(async () => {
@@ -109,5 +172,5 @@ export function useProject() {
     [open, refreshFiles],
   );
 
-  return { ...state, open };
+  return { ...state, open, update, undo, redo };
 }

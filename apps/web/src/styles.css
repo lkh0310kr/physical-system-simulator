@@ -298,3 +298,105 @@ select.bare {
 .issues {
   color: var(--danger);
 }
+
+.wire-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 10;
+  cursor: pointer;
+}
+
+.wire.selected {
+  stroke-dasharray: 5 4;
+  opacity: 1;
+}
+
+.wire.pending {
+  stroke: var(--accent);
+  stroke-dasharray: 4 4;
+  pointer-events: none;
+}
+
+.part {
+  cursor: move;
+}
+
+.part .pin {
+  cursor: crosshair;
+}
+
+.part .pin:hover,
+.wiring .part .pin {
+  stroke: var(--accent);
+}
+
+.part .pin:hover {
+  r: 5;
+}
+
+/* 왼쪽 도구 */
+.tools {
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.parts-panel {
+  position: absolute;
+  z-index: 11;
+  top: 50%;
+  left: 64px;
+  transform: translateY(-50%);
+  width: 260px;
+  max-height: 70vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.parts-panel input {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  margin-bottom: 6px;
+  border: 1px solid var(--surface-line);
+  border-radius: 8px;
+  background: transparent;
+  outline: none;
+}
+
+.parts-panel .category {
+  margin: 8px 0 2px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.parts-panel button.item {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.parts-panel button.item:hover {
+  background: var(--surface-line);
+}
+
+.parts-panel .id {
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.selection-tools {
+  top: 16px;
+  right: 16px;
+}

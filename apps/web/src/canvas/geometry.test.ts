@@ -1,7 +1,7 @@
 import { ModelSchema } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
 import { describe, expect, it } from "vitest";
-import { pinWorld, placements, route, symbolFor } from "./geometry.ts";
+import { pinDir, pinWorld, placements, route, symbolFor } from "./geometry.ts";
 
 const registry = createStandardRegistry();
 const model = (id: string) => {
@@ -69,8 +69,29 @@ describe("placements", () => {
   });
 });
 
+describe("route between pins at the same height", () => {
+  it("uses one straight segment instead of a detour", () => {
+    // 세로로 세운 저항의 위쪽 핀(위로 나감) → 같은 높이 오른쪽 LED의 A 핀
+    expect(route([290, -140], [330, -140], [0, -1], [-1, 0])).toEqual([
+      [290, -140],
+      [330, -140],
+    ]);
+  });
+});
+
+describe("pinDir", () => {
+  const led = symbolFor(model("model.led"));
+  it("points away from the part and turns with rotation", () => {
+    expect(pinDir(led, { x: 0, y: 0, rotate: 0 }, "A")).toEqual([-1, 0]);
+    expect(pinDir(led, { x: 0, y: 0, rotate: 90 }, "A")).toEqual([-0, -1]);
+    expect(pinDir(symbolFor(model("model.arduino-uno")), { x: 0, y: 0, rotate: 0 }, "D13")).toEqual(
+      [0, -1],
+    );
+  });
+});
+
 describe("route", () => {
-  it("connects pins with one horizontal then one vertical segment", () => {
+  it("connects pins with one horizontal then one vertical segment when directions are unknown", () => {
     expect(route([0, 0], [50, 30])).toEqual([
       [0, 0],
       [50, 0],
@@ -79,6 +100,17 @@ describe("route", () => {
     expect(route([0, 0], [0, 30])).toEqual([
       [0, 0],
       [0, 30],
+    ]);
+  });
+
+  it("leaves pins outward and never doubles back through a part", () => {
+    // 헤더 핀(위로 나감) → 왼쪽 위 LED의 A 핀(왼쪽으로 나감): 헤더 위로 살짝 올라 왼쪽으로, 다시 올라가 A로 들어간다.
+    expect(route([290, 0], [160, -140], [0, -1], [-1, 0])).toEqual([
+      [290, 0],
+      [290, -20],
+      [140, -20],
+      [140, -140],
+      [160, -140],
     ]);
   });
 });

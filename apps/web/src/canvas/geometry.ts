@@ -9,11 +9,15 @@ export const PIN_PITCH = 20;
 
 export type Glyph = "led" | "resistor" | "box";
 
+export type Vec = readonly [number, number];
+
 export interface PinGeom {
   readonly name: string;
   /** 부품 원점(좌상단) 기준. */
   readonly x: number;
   readonly y: number;
+  /** 선이 핀에서 빠져나가는 방향 (단위 벡터). */
+  readonly dir: Vec;
   readonly ground: boolean;
 }
 
@@ -47,6 +51,7 @@ export function symbolFor(m: Model): PartSymbol {
       name: p.name,
       x: i === 0 ? 0 : width,
       y: height / 2,
+      dir: (i === 0 ? [-1, 0] : [1, 0]) as Vec,
       ground: !!p.ground,
     }));
     return { kind: "two-terminal", glyph: glyphOf(m), width, height, pins };
@@ -59,6 +64,7 @@ export function symbolFor(m: Model): PartSymbol {
     name: p.name,
     x: margin + i * PIN_PITCH,
     y: 0,
+    dir: [0, -1] as Vec,
     ground: !!p.ground,
   }));
   return { kind: "board", glyph: "box", width, height, pins };
@@ -87,6 +93,21 @@ export function pinWorld(s: PartSymbol, p: Placement, pin: string): [number, num
   if (!g) return undefined;
   const [x, y] = rotatePoint(g.x, g.y, s, p.rotate);
   return [p.x + x, p.y + y];
+}
+
+/** 회전을 반영한 핀의 바깥 방향. */
+export function pinDir(s: PartSymbol, p: Placement, pin: string): Vec {
+  const d = s.pins.find((x) => x.name === pin)?.dir ?? [0, 0];
+  switch (((p.rotate % 360) + 360) % 360) {
+    case 90:
+      return [-d[1], d[0]];
+    case 180:
+      return [-d[0], -d[1]];
+    case 270:
+      return [d[1], -d[0]];
+    default:
+      return d;
+  }
 }
 
 export const snap = (v: number) => Math.round(v / GRID) * GRID;
@@ -119,10 +140,77 @@ export function placements(
   return out;
 }
 
-/** 두 핀을 잇는 직각 경로: 가로로 가다가 세로로 꺾는다. */
-export function route(a: [number, number], b: [number, number]): [number, number][] {
-  if (a[0] === b[0] || a[1] === b[1]) return [a, b];
-  return [a, [b[0], a[1]], b];
+const STUB = 20;
+
+/**
+ * 두 핀을 잇는 직각 경로. 후보(바로 꺾기 / 핀 바깥으로 STUB만큼 빠져나온 뒤 꺾기, 각각 세로·가로 먼저) 중
+ * 되돌아가지 않고, 핀의 바깥 방향으로 나가고 들어오며, 가장 짧은 것을 고른다
+ * — 보드 헤더를 따라 겹치거나 부품 몸체를 가로지르는 선을 피한다.
+ */
+export function route(
+  a: [number, number],
+  b: [number, number],
+  da: Vec = [0, 0],
+  db: Vec = [0, 0],
+): [number, number][] {
+  const sa: [number, number] = [a[0] + da[0] * STUB, a[1] + da[1] * STUB];
+  const sb: [number, number] = [b[0] + db[0] * STUB, b[1] + db[1] * STUB];
+  const candidates = [
+    simplify([a, [b[0], a[1]], b]),
+    simplify([a, [a[0], b[1]], b]),
+    simplify([a, sa, [sb[0], sa[1]], sb, b]),
+    simplify([a, sa, [sa[0], sb[1]], sb, b]),
+  ];
+  const dirOf = (p: [number, number], q: [number, number]) => [
+    Math.sign(q[0] - p[0]),
+    Math.sign(q[1] - p[1]),
+  ];
+  /**
+   * 핀 방향 감점: 첫 구간은 핀의 바깥 방향(da)으로, 마지막 구간은 바깥에서(-db) 들어와야 한다.
+   * 정반대면 부품 몸체를 관통하므로 크게, 옆으로 비껴 나가면 조금 감점한다.
+   */
+  const penalty = (seg: number[], want: Vec) => {
+    if (!want[0] && !want[1]) return 0;
+    const dot = (seg[0] ?? 0) * want[0] + (seg[1] ?? 0) * want[1];
+    return dot < 0 ? 1e5 : dot === 0 ? 30 : 0;
+  };
+  const violations = (pts: [number, number][]) =>
+    penalty(dirOf(pts[0] ?? a, pts[1] ?? b), da) +
+    penalty(dirOf(pts[pts.length - 2] ?? a, pts[pts.length - 1] ?? b), [-db[0], -db[1]]);
+  const score = (pts: [number, number][]) => {
+    let length = 0;
+    let reversals = 0;
+    for (let i = 1; i < pts.length; i++) {
+      const [p, q, r] = [pts[i - 1], pts[i], pts[i + 1]] as [
+        [number, number],
+        [number, number],
+        [number, number] | undefined,
+      ];
+      length += Math.abs(q[0] - p[0]) + Math.abs(q[1] - p[1]);
+      if (r && Math.sign(q[0] - p[0]) * Math.sign(r[0] - q[0]) < 0) reversals++;
+      if (r && Math.sign(q[1] - p[1]) * Math.sign(r[1] - q[1]) < 0) reversals++;
+    }
+    return reversals * 1e6 + violations(pts) + length;
+  };
+  return candidates.reduce((best, c) => (score(c) < score(best) ? c : best));
+}
+
+/** 연속된 같은 점과, 같은 방향으로 이어지는 일직선의 중간점을 뺀다 (되돌아가는 점은 남긴다). */
+function simplify(points: [number, number][]): [number, number][] {
+  const out: [number, number][] = [];
+  for (const p of points) {
+    const last = out[out.length - 1];
+    if (last && last[0] === p[0] && last[1] === p[1]) continue;
+    const prev = out[out.length - 2];
+    const continues =
+      prev &&
+      last &&
+      Math.sign(last[0] - prev[0]) === Math.sign(p[0] - last[0]) &&
+      Math.sign(last[1] - prev[1]) === Math.sign(p[1] - last[1]);
+    if (continues) out[out.length - 1] = p;
+    else out.push(p);
+  }
+  return out;
 }
 
 /** 점들의 경계 상자 [minX, minY, maxX, maxY]. */
