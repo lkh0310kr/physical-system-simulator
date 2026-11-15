@@ -57,6 +57,14 @@ export const PartShapeSchema = z.discriminatedUnion("shape", [
   }),
 ]);
 
+/** 전기 Port가 물리적으로 닿는 지점 (납땜 패드·커넥터 핀). 배선(connections)을 3D 케이블로 그릴 때 끝점이 된다. body 중심 기준 mm. */
+export const PinLocationSchema = z.strictObject({
+  port: z.string().min(1),
+  position: Vec3Schema,
+  /** 보드에 적힌 이름 (예: "BAT+"). Port 이름과 다를 때 쓴다. */
+  label: z.string().optional(),
+});
+
 /** 기구 형상: 박스(필수 크기) + 선택적 외부 메시. 메시가 없으면 박스로 그린다. */
 export const BodySchema = z.strictObject({
   /** 가로(x)·세로(y)·높이(z) 크기. */
@@ -67,6 +75,8 @@ export const BodySchema = z.strictObject({
   mesh: z.string().min(1).optional(),
   /** 표시 색 (CSS 색). 없으면 분류별 기본색. */
   color: z.string().optional(),
+  /** Port가 닿는 위치. 있으면 연결을 3D 케이블로 보여 준다. */
+  pins: z.array(PinLocationSchema).optional(),
   /** 표시용 세부 형상. 있으면 박스 대신 이것들을 그린다 (박스는 계산에만 쓴다). */
   parts: z.array(PartShapeSchema).optional(),
 });
@@ -100,6 +110,7 @@ export const PlacementSchema = z.strictObject({
 });
 
 export type Body = z.output<typeof BodySchema>;
+export type PinLocation = z.output<typeof PinLocationSchema>;
 export type PartShape = z.output<typeof PartShapeSchema>;
 export type MaterialKind = z.output<typeof MaterialKindSchema>;
 export type Opening = z.output<typeof OpeningSchema>;

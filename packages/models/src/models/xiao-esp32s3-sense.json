@@ -3,18 +3,46 @@
   "id": "model.xiao-esp32s3-sense",
   "name": "Seeed XIAO ESP32S3 Sense",
   "category": "electronic/module",
-  "description": "ESP32-S3 + 카메라(OV5640 AF) + 마이크 + microSD 확장 보드를 겹친 실제 모듈. 외형·렌즈·USB-C·버튼 위치는 Seeed 공식 STEP(2023-05)에서 읽은 값. 전기 동작은 별도 camera-node 모델이 맡는다.",
-  "ports": [],
-  "capabilities": [],
+  "description": "ESP32-S3 + 카메라(OV5640 AF) + 마이크 + microSD 확장 보드를 겹친 실제 모듈. 외형·렌즈·USB-C·버튼·패드 위치는 Seeed 공식 STEP과 위키 핀맵에서 읽은 값. 전기 동작(절전·촬영·전송)은 camera-node 동작 모델을 그대로 쓴다.",
+  "ports": [
+    {
+      "name": "VCC",
+      "domain": "electrical",
+      "description": "배터리 + (보드 뒷면 BAT+ 패드)"
+    },
+    {
+      "name": "GND",
+      "domain": "electrical",
+      "ground": true,
+      "description": "배터리 − (보드 뒷면 BAT− 패드)"
+    },
+    {
+      "name": "WAKE",
+      "domain": "electrical",
+      "description": "깨우기 입력 (D0, GPIO1: RTC 핀 — 내부 풀업, 버튼은 GND로)"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.camera-node"
+    }
+  ],
   "metadata": {
     "fidelity": "approximate",
-    "source": "https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/ (21×17.8 mm, 확장 포함 높이 15 mm), https://files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/res/seeed-studio-xiao-esp32s3-sense-3d_model.zip (STEP: 부품별 좌표). docs/scenarios/wearable-camera-specs.md 참조 세부 형상(parts)은 STEP 부품별 외곽 상자와 렌즈 통 원기둥 치수에서 옮긴 것 — 형상 데이터가 아니라 치수만 사용. 3D 메시(mesh)는 같은 STEP을 tools/step-to-glb.py로 변환한 것 (Seeed 공식 모델, 사용 허락은 사용자 확인).",
+    "source": "https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/ (21×17.8 mm, 확장 포함 높이 15 mm), https://files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/res/seeed-studio-xiao-esp32s3-sense-3d_model.zip (STEP: 부품별 좌표). docs/scenarios/wearable-camera-specs.md 참조 세부 형상(parts)은 STEP 부품별 외곽 상자와 렌즈 통 원기둥 치수에서 옮긴 것 — 형상 데이터가 아니라 치수만 사용. 3D 메시(mesh)는 같은 STEP을 tools/step-to-glb.py로 변환한 것 (Seeed 공식 모델, 사용 허락은 사용자 확인). 패드: 위키 핀맵 그림(앞면 D0=USB 쪽 왼쪽 열 첫째, 뒷면 BAT−가 BAT+보다 USB 가까움)과 STEP 뒷면 패드 두 개(X 2.12·4.03)가 일치. docs/scenarios/wearable-camera-specs.md의 전기값 출처도 같이 적용.",
     "assumptions": [
       "STEP 높이 14.0 mm (사양표는 15 mm) — 케이스는 STEP 기준",
       "USB-C 개구부 12.4×6.5 mm = 플러그 오버몰드 최대 크기 가정 (USB Type-C 규격, 재확인 안 함)",
       "버튼 접근 구멍 지름 2.2 mm = 클립·핀 도구 가정, 두 버튼 중 어느 쪽이 BOOT인지 미확인",
       "STEP의 카메라는 JUSHUO AFC01-S24FCA FPC 모듈 — 현행 출하 OV5640 모듈과 같은지 미확인",
-      "microSD 소켓 접근 개구부 없음 (카드는 케이스를 닫기 전에 넣어야 함)"
+      "microSD 소켓 접근 개구부 없음 (카드는 케이스를 닫기 전에 넣어야 함)",
+      "bootTime",
+      "captureTime",
+      "connectTime",
+      "connectCurrent(RX 하한)",
+      "imageBytes",
+      "throughput(실험실 iperf)",
+      "센서 전원 완전 차단"
     ],
     "bom": {
       "vendor": "Seeed Studio",
@@ -162,7 +190,24 @@
         "color": "#1a2233"
       }
     ],
-    "mesh": "xiao-esp32s3-sense.glb"
+    "mesh": "xiao-esp32s3-sense.glb",
+    "pins": [
+      {
+        "port": "VCC",
+        "label": "BAT+",
+        "position": [-1.09, 4.45, -6.97]
+      },
+      {
+        "port": "GND",
+        "label": "BAT-",
+        "position": [0.82, 4.45, -6.97]
+      },
+      {
+        "port": "WAKE",
+        "label": "D0",
+        "position": [6.19, 7.59, -5.73]
+      }
+    ]
   },
   "mounts": [
     {
@@ -206,5 +251,101 @@
         "diameter": 2.2
       }
     }
-  ]
+  ],
+  "propertySchema": {
+    "sleepCurrent": {
+      "type": "number",
+      "unit": "uA",
+      "min": 0,
+      "default": 8,
+      "description": "딥슬립 전류. ESP32-S3 칩 8 µA(Datasheet Table 5-10). 센서는 전원 차단 가정이라 0 (OV2640을 켜 두면 +600 µA)"
+    },
+    "bootTime": {
+      "type": "number",
+      "unit": "ms",
+      "min": 0,
+      "default": 150,
+      "description": "깨어나 부팅하는 시간"
+    },
+    "bootCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 66,
+      "description": "부팅: 240 MHz 듀얼코어 모뎀슬립 66.2 mA (Table 5-9). 부팅 시간은 미확인 가정"
+    },
+    "captureTime": {
+      "type": "number",
+      "unit": "ms",
+      "min": 0,
+      "default": 250,
+      "description": "센서 초기화 + 촬영 + JPEG 인코딩"
+    },
+    "captureCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 108,
+      "description": "촬영: 240 MHz 듀얼코어 66 mA + OV2640 압축 활성 140 mW ≈ 42 mA (유도값). OV5640 5MP는 +140 mA. 촬영 시간은 미확인 가정"
+    },
+    "connectTime": {
+      "type": "number",
+      "unit": "ms",
+      "min": 0,
+      "default": 600,
+      "description": "Wi-Fi 연결 (고정 IP·빠른 재연결 가정)"
+    },
+    "connectCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 88,
+      "description": "Wi-Fi 연결: RX 88 mA (Table 5-7, 하한). 연결 시간 600 ms는 미확인 가정"
+    },
+    "imageBytes": {
+      "type": "integer",
+      "min": 1,
+      "default": 90000,
+      "description": "JPEG 한 장 [byte]. 미확인 가정 (UXGA 약 90 kB)"
+    },
+    "throughput": {
+      "type": "integer",
+      "min": 1,
+      "default": 2500000,
+      "description": "실효 전송 속도 [byte/s]. 2.5 MB/s = ESP-IDF 실험실 iperf TCP TX 20 Mbit/s (실제 HTTP 업로드는 더 느림)"
+    },
+    "transmitCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0,
+      "default": 283,
+      "description": "Wi-Fi TX 283 mA (802.11n HT20 MCS7 @18.5 dBm, Table 5-7)"
+    },
+    "supplyVoltage": {
+      "type": "number",
+      "unit": "V",
+      "default": 3.3,
+      "description": "내부 레귤레이터 출력 전압"
+    },
+    "batteryNominal": {
+      "type": "number",
+      "unit": "V",
+      "default": 3.7,
+      "description": "배터리 공칭 전압 (전류 환산용)"
+    },
+    "regulatorEfficiency": {
+      "type": "number",
+      "min": 0.1,
+      "max": 1,
+      "default": 0.9,
+      "description": "전원관리 효율 (배터리 전류 = 부하 전류 × Vout / (Vbat × 효율))"
+    },
+    "wakeThreshold": {
+      "type": "number",
+      "unit": "V",
+      "default": 1,
+      "description": "이 전압 아래면 버튼이 눌린 것으로 본다"
+    }
+  },
+  "properties": {}
 }

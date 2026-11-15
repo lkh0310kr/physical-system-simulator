@@ -146,3 +146,77 @@ export function activityOf(id: string, signals: Readonly<Record<string, unknown>
   if (typeof phase === "string") return phase === "sleep" ? 0 : 1;
   return 0;
 }
+
+/** 3D 케이블 하나: 연결(connection)의 두 끝이 모두 핀 위치를 가질 때만 만든다. 좌표는 월드 [m]. */
+export interface SceneCable {
+  readonly id: string;
+  readonly from: Vec3;
+  readonly to: Vec3;
+  /** 접지 선이면 검정, 아니면 빨강 계열로 그린다. */
+  readonly ground: boolean;
+  /** 케이블이 부품 바깥으로 나오는 방향(위 또는 옆)을 잡는 용도: 두 끝의 부품 중심. */
+  readonly fromCenter: Vec3;
+  readonly toCenter: Vec3;
+  /** 두 부품의 월드 반크기 (회전 반영). 케이블이 부품 바깥으로 빠지는 거리를 잡는다. */
+  readonly fromHalf: Vec3;
+  readonly toHalf: Vec3;
+}
+
+const rad = (d: number) => (d * Math.PI) / 180;
+
+/** z → y → x 순서 회전 (core fit과 같은 규약). */
+function rotateVec(v: Vec3, rotation: Vec3): Vec3 {
+  const [rx, ry, rz] = rotation.map(rad) as [number, number, number];
+  let [x, y, z] = v;
+  [x, y] = [x * Math.cos(rz) - y * Math.sin(rz), x * Math.sin(rz) + y * Math.cos(rz)];
+  [x, z] = [x * Math.cos(ry) + z * Math.sin(ry), -x * Math.sin(ry) + z * Math.cos(ry)];
+  [y, z] = [y * Math.cos(rx) - z * Math.sin(rx), y * Math.sin(rx) + z * Math.cos(rx)];
+  return [x, y, z];
+}
+
+/** 회전한 박스의 월드 반크기. */
+function worldHalf(box: SceneBox): Vec3 {
+  const [hx, hy, hz] = box.size.map((v) => v / 2) as [number, number, number];
+  const ax = rotateVec([hx, 0, 0], box.rotation).map(Math.abs);
+  const ay = rotateVec([0, hy, 0], box.rotation).map(Math.abs);
+  const az = rotateVec([0, 0, hz], box.rotation).map(Math.abs);
+  return [0, 1, 2].map((i) => (ax[i] ?? 0) + (ay[i] ?? 0) + (az[i] ?? 0)) as unknown as Vec3;
+}
+
+export function buildCables(loaded: LoadedSystem, boxes: readonly SceneBox[]): SceneCable[] {
+  const pinOf = (
+    ref: string,
+  ): { world: Vec3; center: Vec3; half: Vec3; ground: boolean } | undefined => {
+    const [instId, portName] = ref.split(":");
+    const box = boxes.find((b) => b.id === instId);
+    const inst = loaded.system.instances.find((i) => i.id === instId);
+    const model = loaded.registry.getModel(inst?.model ?? "");
+    const pin = model?.body?.pins?.find((p) => p.port === portName);
+    if (!box || !pin) return undefined;
+    const local = rotateVec(v3(pin.position), box.rotation);
+    const port = model?.ports.find((p) => p.name === portName);
+    return {
+      world: [box.position[0] + local[0], box.position[1] + local[1], box.position[2] + local[2]],
+      center: box.position,
+      half: worldHalf(box),
+      ground: port?.ground === true,
+    };
+  };
+  return loaded.doc.connections.flatMap(([a, b]) => {
+    const pa = pinOf(a);
+    const pb = pinOf(b);
+    if (!pa || !pb) return [];
+    return [
+      {
+        id: `${a}~${b}`,
+        from: pa.world,
+        to: pb.world,
+        ground: pa.ground || pb.ground,
+        fromCenter: pa.center,
+        toCenter: pb.center,
+        fromHalf: pa.half,
+        toHalf: pb.half,
+      },
+    ];
+  });
+}

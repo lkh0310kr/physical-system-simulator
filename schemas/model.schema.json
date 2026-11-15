@@ -185,6 +185,40 @@
         "color": {
           "type": "string"
         },
+        "pins": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "port": {
+                "type": "string",
+                "minLength": 1
+              },
+              "position": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": ["number", "string"]
+                  },
+                  {
+                    "type": ["number", "string"]
+                  },
+                  {
+                    "type": ["number", "string"]
+                  }
+                ],
+                "items": false,
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": ["port", "position"],
+            "additionalProperties": false
+          }
+        },
         "parts": {
           "type": "array",
           "items": {

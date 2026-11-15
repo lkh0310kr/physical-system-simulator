@@ -25,7 +25,7 @@ describe("bom", () => {
   });
 
   it("keeps modeling-only instances out of the shopping list", () => {
-    expect(bom.modelOnly.map((m) => m.instance).sort()).toEqual(["btn", "node"]);
+    expect(bom.modelOnly.map((m) => m.instance).sort()).toEqual(["btn"]);
   });
 
   it("estimates printed mass from volume and process density", () => {

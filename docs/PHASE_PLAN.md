@@ -235,7 +235,7 @@
 - [x] P7-T20 조사: BenchTwin 직접 확인, r3f 조명·그림자 기법, Claude Code 시각 검증 루프 (`docs/references.md`)
 - [x] P7-T21 부품 세부 형상 `body.parts`(표시 전용 프리미티브 + 재질 분류), XIAO 모듈 적용
 - [x] P7-T22 렌더링: 이미지 기반 조명(RoomEnvironment), 부드러운 그림자, PBR 재질, ACES 톤매핑
-- [ ] P7-T23 배터리·커넥터 등 나머지 부품 세부 형상, 3D 케이블(배선을 곡선 케이블로)
+- [x] P7-T23 배터리 실제 메시, Model `body.pins`와 3D 케이블 (XIAO BAT± 패드 ↔ 배터리 리드, 리드 출구 위치는 가정)
 - [x] P7-T24 제작사 STEP → glb 변환(`tools/step-to-glb.py`)과 뷰어 로딩 (XIAO 적용, 사용 허락 확인)
 - [x] P7-T25 케이스 뷰: 분해(exploded) 슬라이더, 부품 이름표(치수 없는 부품은 "가정 크기" 표시)
 

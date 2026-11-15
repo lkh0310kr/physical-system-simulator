@@ -1,7 +1,7 @@
 import { loadSystemProject } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
 import { describe, expect, it } from "vitest";
-import { activityOf, buildScene3d, PLACEHOLDER_SIZE, sceneBounds } from "./scene.ts";
+import { activityOf, buildCables, buildScene3d, PLACEHOLDER_SIZE, sceneBounds } from "./scene.ts";
 
 const load = (assembly?: unknown) => {
   const r = loadSystemProject(
@@ -111,5 +111,56 @@ describe("detailed parts", () => {
         expect(Math.abs(p.position[i] ?? 0) + (e[i] ?? 0) / 2).toBeLessThanOrEqual(half[i] ?? 0);
       }
     }
+  });
+});
+
+describe("buildCables", () => {
+  const load3 = () => {
+    const r = loadSystemProject(
+      {
+        name: "t",
+        instances: [
+          { id: "bat", model: "model.lipo-adafruit-1317" },
+          { id: "node", model: "model.xiao-esp32s3-sense" },
+        ],
+        connections: [
+          ["bat:+", "node:VCC"],
+          ["bat:-", "node:GND"],
+        ],
+        assembly: {
+          node: { position: [0, 0, 0] },
+          bat: { position: [-2.5, 0, -8.89], rotation: [0, 0, 90] },
+        },
+      },
+      () => undefined,
+      createStandardRegistry,
+    );
+    if (!r.ok) throw new Error(JSON.stringify(r.issues));
+    return r.value;
+  };
+
+  it("draws one cable per connection whose both ends have pin locations, ground in black", () => {
+    const loaded = load3();
+    const cables = buildCables(loaded, buildScene3d(loaded));
+    expect(cables).toHaveLength(2);
+    expect(cables.map((c) => c.ground)).toEqual([false, true]);
+  });
+
+  it("puts the XIAO BAT+ pad on the back of the board, 2 mm from BAT-, with BAT- nearer the USB end", () => {
+    const loaded = load3();
+    const cables = buildCables(loaded, buildScene3d(loaded));
+    const plus = cables[0]?.to;
+    const minus = cables[1]?.to;
+    if (!plus || !minus) throw new Error("cables");
+    expect(minus[0] - plus[0]).toBeCloseTo(0.00191, 4); // 4.03 − 2.12 mm, USB는 +x 쪽
+    expect(plus[2]).toBeCloseTo(-0.00697, 4); // 보드 뒷면
+  });
+
+  it("skips connections where an end has no pin location (e.g. a part without a body)", () => {
+    const loaded = load3();
+    const boxes = buildScene3d(loaded);
+    expect(
+      buildCables({ ...loaded, doc: { ...loaded.doc, connections: [["bat:+", "btn:1"]] } }, boxes),
+    ).toEqual([]);
   });
 });

@@ -51,10 +51,10 @@ describe("case generator", () => {
   it("collects the lens, USB-C and button openings from the XIAO model mounts", async () => {
     const r = await buildCase(sample, fdmProfile);
     expect(r.input.openings.map((o) => `${o.part}.${o.mount}`).sort()).toEqual([
-      "xiao.button-a",
-      "xiao.button-b",
-      "xiao.lens",
-      "xiao.usb-c",
+      "node.button-a",
+      "node.button-b",
+      "node.lens",
+      "node.usb-c",
     ]);
     const lens = r.input.openings.find((o) => o.mount === "lens");
     expect([lens?.axis, lens?.sign]).toEqual([2, 1]);
