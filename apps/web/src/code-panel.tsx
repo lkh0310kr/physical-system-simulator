@@ -27,7 +27,17 @@ export function CodePanel({ loaded, files, serial, onSave, onCreate, onClose }: 
   const path = current?.program;
   const saved = path ? (files[path] ?? "") : "";
   const [text, setText] = useState(saved);
-  useEffect(() => setText(saved), [saved]);
+  // 바깥(에이전트 등)에서 파일이 바뀌면 따라가되, 저장 안 한 수정이 있으면 덮어쓰지 않고 알린다.
+  const base = useRef(saved);
+  const [conflict, setConflict] = useState(false);
+  useEffect(() => {
+    setText((t) => {
+      const clean = t === base.current;
+      setConflict(!clean && t !== saved);
+      return clean ? saved : t;
+    });
+    base.current = saved;
+  }, [saved]);
   const dirty = text !== saved;
 
   const lines = current ? (serial[current.id] ?? []) : [];
@@ -40,6 +50,7 @@ export function CodePanel({ loaded, files, serial, onSave, onCreate, onClose }: 
 
   const save = () => {
     if (path && dirty) onSave(path, text);
+    setConflict(false);
   };
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "s") {
@@ -68,7 +79,15 @@ export function CodePanel({ loaded, files, serial, onSave, onCreate, onClose }: 
               {i.id} <span className="muted">{i.program}</span>
             </button>
           ))}
-          {dirty && <span className="muted">저장 안 됨 · ⌘S</span>}
+          {dirty && !conflict && <span className="muted">저장 안 됨 · ⌘S</span>}
+          {conflict && (
+            <span className="warn">
+              파일이 바깥에서 바뀌었다 ·{" "}
+              <button type="button" className="reset" onClick={() => setText(saved)}>
+                파일 내용 불러오기
+              </button>
+            </span>
+          )}
         </div>
         <button type="button" className="icon" onClick={onClose} title="닫기">
           <CloseIcon />
