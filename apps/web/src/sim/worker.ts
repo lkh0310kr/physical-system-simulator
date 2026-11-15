@@ -8,6 +8,7 @@ import { startPrograms } from "@physisim/avr";
 import { type LoadedSystem, loadSystemProject, type PropertyValue } from "@physisim/core";
 import { createSimulation, type Program, type Simulation } from "@physisim/engine";
 import { createStandardRegistry } from "@physisim/models";
+import { PressQueue } from "./press-queue.ts";
 import type { FromWorker, ToWorker } from "./protocol.ts";
 
 /** 이 전압을 넘으면 선에 "전기가 살아 있다"고 본다. */
@@ -24,6 +25,7 @@ let programs: [string, Program][] = [];
 let firmware: ReadonlyMap<string, string> = new Map();
 let signals: Record<string, PropertyValue> = {};
 let running = false;
+const presses = new PressQueue();
 let last = performance.now();
 
 const post = (m: FromWorker) => postMessage(m);
@@ -74,6 +76,9 @@ setInterval(() => {
   if (running && sim) {
     try {
       sim.run(elapsed);
+      // 빠른 탭도 최소 한 프레임은 눌려 있게: 미뤄 둔 뗌은 시뮬레이션이 진행된 뒤에 전달한다.
+      for (const id of presses.tick())
+        sim.dispatch(id, "capability.switching", { type: "release" });
     } catch (e) {
       running = false;
       post({ type: "error", message: (e as Error).message });
@@ -95,6 +100,8 @@ self.onmessage = (e: MessageEvent<ToWorker>) => {
     }
     case "input":
       try {
+        if (m.event === "press") presses.press(m.instance);
+        if (m.event === "release" && !presses.release(m.instance)) break;
         sim?.dispatch(m.instance, m.capability, { type: m.event });
       } catch (e) {
         post({ type: "error", message: (e as Error).message });
