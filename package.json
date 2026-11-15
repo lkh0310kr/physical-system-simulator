@@ -11,10 +11,16 @@
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b --noEmit",
-    "clean": "tsc -b --clean"
+    "clean": "tsc -b --clean",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.6.7",
     "@types/node": "^22.20.5",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
   }
 }
