@@ -1,0 +1,72 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.lipo-adafruit-1317",
+  "name": "LiPo 150 mAh (Adafruit 1317)",
+  "category": "electrical/power",
+  "description": "Adafruit 1317, 3.7 V 150 mAh 리튬폴리머 (402025 셀 + 보호회로). 크기·용량·전압은 제품 페이지 값, 내부 저항은 가정.",
+  "propertySchema": {
+    "capacity": {
+      "type": "number",
+      "unit": "mAh",
+      "min": 0,
+      "description": "용량"
+    },
+    "fullVoltage": {
+      "type": "number",
+      "unit": "V",
+      "default": 4.2,
+      "description": "만충 개방 전압"
+    },
+    "emptyVoltage": {
+      "type": "number",
+      "unit": "V",
+      "default": 3.0,
+      "description": "방전 종지 개방 전압"
+    },
+    "internalResistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 0,
+      "default": 0.15,
+      "description": "내부 저항"
+    },
+    "initialSoc": {
+      "type": "number",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "description": "시작 충전 상태"
+    }
+  },
+  "properties": {
+    "capacity": 150,
+    "fullVoltage": 4.2,
+    "emptyVoltage": 3.0
+  },
+  "ports": [
+    {
+      "name": "+",
+      "domain": "electrical"
+    },
+    {
+      "name": "-",
+      "domain": "electrical",
+      "ground": true
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.battery"
+    }
+  ],
+  "metadata": {
+    "fidelity": "approximate",
+    "source": "https://www.adafruit.com/product/1317 (용량 150 mAh, 3.7 V 공칭, 4.2 V 만충, 3.0 V 종지, 19.75×26.02×3.8 mm, 4.65 g). 내부 저항 0.15 Ω은 미확인 가정",
+    "assumptions": ["internalResistance"]
+  },
+  "body": {
+    "size": [19.75, 26.02, 3.8],
+    "mass": 4.65,
+    "color": "#7a8ca8"
+  }
+}

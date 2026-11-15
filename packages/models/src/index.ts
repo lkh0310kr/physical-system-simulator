@@ -27,6 +27,7 @@ import esp32P4Camera from "./models/esp32-p4-c6-camera-node.json" with { type: "
 import esp32Camera from "./models/esp32-s3-camera-node.json" with { type: "json" };
 import led from "./models/led.json" with { type: "json" };
 import liIonCell from "./models/li-ion-cell.json" with { type: "json" };
+import lipo1317 from "./models/lipo-adafruit-1317.json" with { type: "json" };
 import potentiometerModel from "./models/potentiometer.json" with { type: "json" };
 import pushbutton from "./models/pushbutton.json" with { type: "json" };
 import resistor from "./models/resistor.json" with { type: "json" };
@@ -72,6 +73,7 @@ export const standardLibrary: LibraryInput = {
     esp32Camera,
     esp32P4Camera,
     liIonCell,
+    lipo1317,
     resistor,
     pushbutton,
     toggleSwitch,

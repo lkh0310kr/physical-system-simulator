@@ -26,6 +26,7 @@ import { Inspector } from "./inspector-panel.tsx";
 import { PartsPanel } from "./parts-panel.tsx";
 import { useSimulation } from "./sim/use-simulation.ts";
 import { useProject } from "./use-project.ts";
+import { Viewer3D } from "./view3d/viewer3d.tsx";
 
 const isTyping = (e: KeyboardEvent) => {
   const t = e.target as HTMLElement | null;
@@ -47,6 +48,7 @@ export function App() {
   const [selection, setSelection] = useState<Selection | undefined>(undefined);
   const [adding, setAdding] = useState(false);
   const [coding, setCoding] = useState(false);
+  const [view, setView] = useState<"2d" | "3d">("2d");
   const center = useRef(() => ({ x: 0, y: 0 }));
 
   const problems = [
@@ -93,7 +95,17 @@ export function App() {
 
   return (
     <main>
-      {loaded && (
+      {loaded && view === "3d" && (
+        <Viewer3D
+          loaded={loaded}
+          signals={frame?.signals ?? {}}
+          running={running}
+          onPress={sim.input}
+          selection={selection}
+          onSelect={setSelection}
+        />
+      )}
+      {loaded && view === "2d" && (
         <Canvas
           loaded={loaded}
           layout={loaded.doc.layout}
@@ -127,6 +139,23 @@ export function App() {
             ))}
           </select>
           {project.compiling && <span className="muted">· 컴파일 중…</span>}
+          <span className="muted">/</span>
+          <span className="seg">
+            <button
+              type="button"
+              className={view === "2d" ? "on" : ""}
+              onClick={() => setView("2d")}
+            >
+              2D
+            </button>
+            <button
+              type="button"
+              className={view === "3d" ? "on" : ""}
+              onClick={() => setView("3d")}
+            >
+              3D
+            </button>
+          </span>
         </div>
       </div>
 

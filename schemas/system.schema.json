@@ -77,6 +77,54 @@
         "maxItems": 2
       }
     },
+    "assembly": {
+      "description": "3D 조립 배치. 위치는 mm 숫자 또는 \"25mm\" 문자열.",
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "position": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": ["number", "string"]
+              },
+              {
+                "type": ["number", "string"]
+              },
+              {
+                "type": ["number", "string"]
+              }
+            ],
+            "items": false,
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "rotation": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "items": false,
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "required": ["position"],
+        "additionalProperties": false
+      }
+    },
     "layout": {
       "description": "에디터용 화면 정보. 시뮬레이션에 영향 없음.",
       "type": "object",

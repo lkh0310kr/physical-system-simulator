@@ -20,6 +20,11 @@ describe("units", () => {
     expect(parseUnit("kg").scale).toBe(1);
   });
 
+  it("reads the centi prefix (cm) without confusing it with coulomb (C)", () => {
+    expect(toSI(2, "cm")).toBeCloseTo(0.02);
+    expect(toSI(2, "C")).toBe(2);
+  });
+
   it("distinguishes meter from the milli prefix", () => {
     expect(toSI(1, "m")).toBe(1);
     expect(toSI(1, "mm")).toBe(1e-3);

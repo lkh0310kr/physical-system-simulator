@@ -16,6 +16,7 @@ describe("standard library", () => {
       "model.esp32-s3-camera-node",
       "model.esp32-p4-c6-camera-node",
       "model.li-ion-cell",
+      "model.lipo-adafruit-1317",
       "model.resistor",
       "model.pushbutton",
       "model.toggle-switch",

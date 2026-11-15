@@ -5,6 +5,7 @@
 import { z } from "zod";
 import type { Capability } from "./capability.ts";
 import { BehaviorId, CapabilityId, ModelId } from "./ids.ts";
+import { BodySchema, MountSchema } from "./mechanical.ts";
 import { PropertySchemaSchema, PropertyValueSchema } from "./property.ts";
 
 /** Port가 속한 물리 도메인. electrical Port는 전압(across)·전류(through)로 해석된다. */
@@ -60,6 +61,9 @@ export const ModelSchema = z
     description: z.string().optional(),
     propertySchema: PropertySchemaSchema.default({}),
     properties: z.record(z.string(), PropertyValueSchema).default({}),
+    /** 기구 형상 (3D 조립, 크기·간섭 검사). 없으면 3D에서는 자동 박스를 쓴다. */
+    body: BodySchema.optional(),
+    mounts: z.array(MountSchema).default([]),
     ports: z.array(PortSchema).default([]),
     components: z.array(ComponentSchema).default([]),
     capabilities: z.array(CapabilityBindingSchema).default([]),
@@ -75,6 +79,7 @@ export const ModelSchema = z
       });
     };
     dup(m.ports, (p) => p.name, "ports");
+    dup(m.mounts, (x) => x.name, "mounts");
     dup(m.components, (c) => c.name, "components");
     dup(m.capabilities, (c) => c.capability, "capabilities");
   });

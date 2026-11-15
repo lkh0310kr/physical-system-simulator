@@ -57,6 +57,7 @@ const PREFIXES: Readonly<Record<string, number>> = {
   n: 1e-9,
   u: 1e-6,
   µ: 1e-6,
+  c: 1e-2,
   m: 1e-3,
   k: 1e3,
   M: 1e6,

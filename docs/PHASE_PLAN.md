@@ -178,24 +178,32 @@
 
 ---
 
-## Phase 7 — Mechanical & Physics + 3D
+## Phase 7 — Mechanical, 3D (목표: full 3D에서 기구와 하드웨어 흐름이 연결돼 작동)
 
-**목표**: 스펙 §9.1 — MCU → 회로 → 모터 → 바퀴 → 차체 → 센서 → MCU 폐루프.
+**7a 조립 + 실시간 연동 (첫 마일스톤, 사용자 결정)** — 카메라 제품을 3D에 실치수로 조립하고, 같은 시뮬레이션이 3D에 보이게 한다.
 
-- [ ] P7-T0 계층 Composition: System을 Model로 감싸 Port 노출 (Phase 2에서 이동)
-- [ ] P7-T1 기계 Model 스키마: Body(질량·관성·형상), Joint, Gear, Wheel
-- [ ] P7-T2 물리 엔진 어댑터 (Domain Solver 인터페이스 뒤에 숨김)
-- [ ] P7-T3 전기↔기계 결합: 모터 토크·역기전력
-- [ ] P7-T4 도메인 Solver 간 co-simulation 스텝 조정
-- [ ] P7-T5 3D 뷰어 (조립·실행 화면), 환경(바닥·장애물·라인)
-- [ ] P7-T6 데모: 초음파 센서로 장애물 회피하는 2륜 로봇
+- [ ] P7-T1 기구 스키마: Model `body`(크기·질량·형상 참조)와 `mounts`(장착점), System `assembly`(3D 위치·회전). 단위 mm
+- [x] P7-T2 3D 뷰어(`apps/web`): three.js + react-three-fiber, 조립 렌더링, 궤도 카메라, 2D 캔버스와 전환
+- [x] P7-T3 실시간 연동: 같은 Worker 시뮬레이션 상태(절전·촬영·전송, 전류, LED)를 3D 부품 색·발광으로 표시, 3D에서 버튼 클릭 → 회로 실행
+- [ ] P7-T4 크기·간섭 검사: 외곽 상자, 부품 간 겹침, 케이스 안에 들어가는지, 케이스별 부피
+- [ ] P7-T5 카메라 제품 조립: 실치수(데이터시트 패키지 크기)로 Case A/B 조립, 비교 표에 크기·부피 추가
+- [ ] P7-T6 glTF/STL 형상 불러오기 (실제 CAD 내보내기)
+
+**7b 움직이는 기구 (Rapier 도입)**
+
+- [ ] P7-T7 물리 엔진 어댑터(Rapier, Domain Solver 인터페이스 뒤)와 결정론 검증
+- [ ] P7-T8 관절·스프링: 버튼 스프링, 힌지, 슬라이더 — 기구 상태가 회로(스위치)를 구동
+- [ ] P7-T9 전기↔기계 결합: 모터 토크·역기전력, 모터 → 바퀴
+- [ ] P7-T10 도메인 Solver 간 co-simulation 스텝 조정
+- [ ] P7-T11 데모: 초음파 센서로 장애물을 피하는 2륜 로봇
+- [ ] P7-T12 계층 Composition: System을 Model로 감싸 Port 노출
 
 🔶 결정 게이트
-- G7-1 물리 엔진: Rapier / Jolt / cannon-es
-- G7-2 기계 Model 포맷: 자체 스키마 vs URDF/MJCF 가져오기 지원
-- G7-3 3D 렌더러: three.js 직접 vs react-three-fiber
+- ~~G7-1 물리 엔진~~ → Rapier (7b에서 도입)
+- ~~G7-2 기구 포맷~~ → 자체 스키마 + glTF/STL
+- ~~G7-3 3D 렌더러~~ → three.js + react-three-fiber
 
-**완료 기준**: 헤드리스와 3D 뷰어 양쪽에서 같은 결과(결정론)로 로봇 폐루프 동작.
+**완료 기준 (7a)**: 3D 화면에서 Case A 제품을 실치수로 조립해 보고, 버튼을 눌러 절전→촬영→전송 흐름이 3D 위의 부품 상태로 나타난다.
 
 ---
 

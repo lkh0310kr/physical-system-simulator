@@ -154,6 +154,93 @@
         "type": ["number", "string", "boolean"]
       }
     },
+    "body": {
+      "type": "object",
+      "properties": {
+        "size": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": ["number", "string"]
+            },
+            {
+              "type": ["number", "string"]
+            },
+            {
+              "type": ["number", "string"]
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "mass": {
+          "type": "number",
+          "minimum": 0
+        },
+        "mesh": {
+          "type": "string",
+          "minLength": 1
+        },
+        "color": {
+          "type": "string"
+        }
+      },
+      "required": ["size"],
+      "additionalProperties": false
+    },
+    "mounts": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "position": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": ["number", "string"]
+              },
+              {
+                "type": ["number", "string"]
+              },
+              {
+                "type": ["number", "string"]
+              }
+            ],
+            "items": false,
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "normal": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "items": false,
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "position"],
+        "additionalProperties": false
+      }
+    },
     "ports": {
       "default": [],
       "type": "array",
