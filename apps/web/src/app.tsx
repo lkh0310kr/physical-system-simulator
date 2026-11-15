@@ -96,7 +96,14 @@ export function App() {
   return (
     <main>
       {loaded && view === "3d" && (
-        <Viewer3D loaded={loaded} selection={selection} onSelect={setSelection} />
+        <Viewer3D
+          loaded={loaded}
+          signals={frame?.signals ?? {}}
+          running={running}
+          onPress={sim.input}
+          selection={selection}
+          onSelect={setSelection}
+        />
       )}
       {loaded && view === "2d" && (
         <Canvas

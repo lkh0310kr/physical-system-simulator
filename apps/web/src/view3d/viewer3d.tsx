@@ -5,7 +5,7 @@ import { useEffect, useMemo } from "react";
 import { BoxGeometry, EdgesGeometry } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { Selection } from "../canvas/canvas.tsx";
-import { buildScene3d, type SceneBox, sceneBounds } from "./scene.ts";
+import { activityOf, buildScene3d, type SceneBox, sceneBounds } from "./scene.ts";
 
 const ACCENT = "#2f6bff";
 const REAL = "#e4e8ee";
@@ -13,6 +13,11 @@ const EDGE = "#1d232b";
 
 interface Props {
   readonly loaded: LoadedSystem;
+  /** 실시간 시뮬레이션 신호 ("instance.output" → 값). */
+  readonly signals?: Readonly<Record<string, unknown>>;
+  /** 시뮬레이션이 돌고 있으면 스위치를 클릭으로 누른다. */
+  readonly running?: boolean;
+  readonly onPress?: (id: string, event: "press" | "release") => void;
   readonly selection?: Selection | undefined;
   readonly onSelect?: (s: Selection | undefined) => void;
 }
@@ -44,41 +49,65 @@ function Orbit({ radius, target }: { radius: number; target: [number, number, nu
 function Part({
   box,
   selected,
+  activity,
+  pressable,
   onSelect,
+  onPress,
 }: {
   box: SceneBox;
   selected: boolean;
+  /** 0~1: 시뮬레이션에서 이 부품이 "살아 있는" 정도 (발광 세기). */
+  activity: number;
+  pressable: boolean;
   onSelect: () => void;
+  onPress: (event: "press" | "release") => void;
 }) {
   const geometry = useMemo(() => new BoxGeometry(...box.size), [box.size]);
   const edges = useMemo(() => new EdgesGeometry(geometry), [geometry]);
   const rotation = box.rotation.map((d) => (d * Math.PI) / 180) as [number, number, number];
   return (
     <group position={box.position} rotation={rotation}>
-      {/* biome-ignore lint/a11y/noStaticElementInteractions: three.js 객체이지 DOM 요소가 아니다 — r3f의 onClick은 레이캐스트 이벤트다. */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: three.js 객체이지 DOM 요소가 아니다 — r3f의 이벤트는 레이캐스트 이벤트다. */}
       <mesh
         geometry={geometry}
         onClick={(e) => {
           e.stopPropagation();
           onSelect();
         }}
+        onPointerDown={(e) => {
+          if (!pressable) return;
+          e.stopPropagation();
+          onPress("press");
+        }}
+        onPointerUp={() => pressable && onPress("release")}
+        onPointerOut={() => pressable && onPress("release")}
       >
-        {/* 실치수는 채운 면, 자리표시(치수 가정)는 투명하게 — 가정을 실물처럼 보이게 하지 않는다 */}
+        {/* 실치수는 채운 면, 자리표시(치수 가정)는 투명하게 — 가정을 실물처럼 보이게 하지 않는다.
+            살아 있는 부품은 강조색으로 발광한다 (강조색은 살아 있는 것에만). */}
         <meshStandardMaterial
           color={selected ? ACCENT : (box.color ?? REAL)}
+          emissive={ACCENT}
+          emissiveIntensity={activity * 1.2}
           transparent={!box.real}
-          opacity={box.real ? 1 : 0.18}
+          opacity={box.real ? 1 : 0.18 + activity * 0.5}
           roughness={0.7}
         />
       </mesh>
       <lineSegments geometry={edges}>
-        <lineBasicMaterial color={selected ? ACCENT : EDGE} />
+        <lineBasicMaterial color={selected || activity > 0 ? ACCENT : EDGE} />
       </lineSegments>
     </group>
   );
 }
 
-export function Viewer3D({ loaded, selection, onSelect }: Props) {
+export function Viewer3D({
+  loaded,
+  signals = {},
+  running = false,
+  onPress,
+  selection,
+  onSelect,
+}: Props) {
   const boxes = useMemo(() => buildScene3d(loaded), [loaded]);
   const bounds = useMemo(() => sceneBounds(boxes), [boxes]);
   const center: [number, number, number] = bounds
@@ -122,7 +151,10 @@ export function Viewer3D({ loaded, selection, onSelect }: Props) {
             key={b.id}
             box={b}
             selected={selection?.kind === "part" && selection.id === b.id}
+            activity={activityOf(b.id, signals)}
+            pressable={running && b.switchable}
             onSelect={() => onSelect?.({ kind: "part", id: b.id })}
+            onPress={(event) => onPress?.(b.id, event)}
           />
         ))}
       </Canvas>

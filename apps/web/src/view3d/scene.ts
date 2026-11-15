@@ -18,6 +18,8 @@ export interface SceneBox {
   readonly rotation: Vec3;
   /** 크기 [m]. */
   readonly size: Vec3;
+  /** 사람이 누르는 스위치 부품인지 (3D에서 클릭으로 조작). */
+  readonly switchable: boolean;
   /** 실치수(body 선언)인지, 자리표시인지. */
   readonly real: boolean;
   readonly color: string | undefined;
@@ -39,12 +41,14 @@ export function buildScene3d(loaded: LoadedSystem): SceneBox[] {
       cursor += size[0] + GAP;
     }
     const rotation = (placed?.rotation ?? [0, 0, 0]) as Vec3;
+    const switchable = !!model?.capabilities.some((c) => c.capability === "capability.switching");
     return {
       id: inst.id,
       model: inst.model,
       position,
       rotation,
       size,
+      switchable,
       real: !!body,
       color: body?.color,
     };
@@ -67,4 +71,17 @@ export function sceneBounds(boxes: readonly SceneBox[]): [Vec3, Vec3] | undefine
     }
   }
   return [min, max];
+}
+
+/**
+ * 시뮬레이션 신호로 부품이 "살아 있는" 정도 (0~1). 색은 이 값으로 강조색을 섞는다 (docs/DESIGN.md: 강조색은 살아 있는 것에만).
+ * - LED: 밝기 · 스위치: 닫혀 있으면 1 · 카메라 노드: 절전이 아니면 1(동작 중)
+ */
+export function activityOf(id: string, signals: Readonly<Record<string, unknown>>): number {
+  const brightness = signals[`${id}.brightness`];
+  if (typeof brightness === "number") return Math.min(1, Math.max(0, brightness));
+  if (signals[`${id}.closed`] === true) return 1;
+  const phase = signals[`${id}.phase`];
+  if (typeof phase === "string") return phase === "sleep" ? 0 : 1;
+  return 0;
 }

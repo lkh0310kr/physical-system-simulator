@@ -1,7 +1,7 @@
 import { loadSystemProject } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
 import { describe, expect, it } from "vitest";
-import { buildScene3d, PLACEHOLDER_SIZE, sceneBounds } from "./scene.ts";
+import { activityOf, buildScene3d, PLACEHOLDER_SIZE, sceneBounds } from "./scene.ts";
 
 const load = (assembly?: unknown) => {
   const r = loadSystemProject(
@@ -51,5 +51,36 @@ describe("sceneBounds", () => {
         buildScene3d(load({ bat: { position: [0, 0, 0] }, r1: { position: [50, 0, 0] } })),
       ) ?? [];
     expect((max?.[0] ?? 0) - (min?.[0] ?? 0)).toBeGreaterThan(0.05);
+  });
+});
+
+describe("activityOf", () => {
+  it("is the LED brightness, 1 for a closed switch, 1 for an awake node, else 0", () => {
+    expect(activityOf("led1", { "led1.brightness": 0.4 })).toBe(0.4);
+    expect(activityOf("led1", { "led1.brightness": 7 })).toBe(1);
+    expect(activityOf("btn", { "btn.closed": true })).toBe(1);
+    expect(activityOf("btn", { "btn.closed": false })).toBe(0);
+    expect(activityOf("node", { "node.phase": "capture" })).toBe(1);
+    expect(activityOf("node", { "node.phase": "sleep" })).toBe(0);
+    expect(activityOf("none", {})).toBe(0);
+  });
+
+  it("flags switch parts so the 3D view can press them", () => {
+    const r = loadSystemProject(
+      {
+        name: "t",
+        instances: [
+          { id: "btn", model: "model.pushbutton" },
+          { id: "r1", model: "model.resistor" },
+        ],
+      },
+      () => undefined,
+      createStandardRegistry,
+    );
+    if (!r.ok) throw new Error("fixture");
+    expect(buildScene3d(r.value).map((b) => [b.id, b.switchable])).toEqual([
+      ["btn", true],
+      ["r1", false],
+    ]);
   });
 });
