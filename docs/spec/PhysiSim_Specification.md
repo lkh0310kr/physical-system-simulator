@@ -1,6 +1,6 @@
 # PhysiSim 프로젝트 전체 설계 명세 (Specification)
 
-> **현재 설계 기준:** v0.12 (2026-11-15)  
+> **현재 설계 기준:** v0.13 (2026-11-15)  
 > **프로젝트 유형:** Model-driven Physical Systems Simulator  
 > **개발 방향:** AI Agentic Simulation Platform  
 > **핵심 철학:** Model 중심 설계
@@ -541,6 +541,10 @@ PhysiSim 전용 Agent 프로토콜을 만들지 않는다. **AI 코딩 에이전
 | 사용자 Model | System 옆 로컬 Model/Capability JSON 허용 (Behavior 코드는 표준만) | 확정 (v0.9) |
 | ESP32-S3 등 비-AVR MCU | **동작 모델(Behavior)로 추상화** — 상태별 전류·시간 프로파일. 실제 펌웨어 에뮬레이션(QEMU)은 필요해질 때 재검토 | 확정 (v0.12) |
 | 스마트폰·서버·네트워크 | Model이 아니라 **수신 기록(이벤트 싱크)** 으로 표현 — 전송 시각·크기·지연만 남긴다 | 확정 (v0.12) |
+| 3D 렌더러 | three.js + react-three-fiber | 확정 (v0.13) |
+| 물리 엔진 | Rapier (WASM, 결정론) — 정적 조립 마일스톤 다음에 도입 | 확정 (v0.13) |
+| 기구 정의 | 자체 스키마(body·mounts) + glTF/STL 형상, 단순 부품은 박스 자동 생성. 전기 Port와 기구 장착점을 한 Model에서 선언 | 확정 (v0.13) |
+| 3D 첫 마일스톤 | 조립 + 실시간 연동 (실치수 배치, 크기·간섭 검사, 3D에서 버튼 조작 → 회로·상태가 3D에 표시) | 확정 (v0.13) |
 | 웹 UI | React + Vite, 캔버스는 직접 SVG, 부품 그래픽은 자체 라인아트 | 확정 (v0.10) |
 | 웹 저장 | 로컬 파일 + dev 서버 (양방향 반영), 백엔드 없음, 시뮬레이션은 Web Worker | 확정 (v0.10) |
 
@@ -645,6 +649,7 @@ interface ModelCapabilityBinding {
 | 버전 | 날짜 | 변경 내용 |
 |---|---|---|
 | v0.4 | — | 초기 기준선 (Model 구조, Properties, Capability 확정) |
+| v0.13 | 2026-11-15 | Phase 7 결정: three.js+r3f, Rapier(후속), 자체 기구 스키마+glTF/STL, 첫 마일스톤은 조립+실시간 연동 |
 | v0.12 | 2026-11-15 | 카메라 시나리오 결정: ESP32-S3는 동작 모델로 추상화, 스마트폰·서버는 수신 기록으로 |
 | v0.11 | 2026-11-15 | MCU 코드를 Arduino 스케치(.ino) + avr8js 실펌웨어로 변경 (Phase 6 G6-1을 앞당김) |
 | v0.10 | 2026-11-15 | Phase 5 결정: React+Vite, 직접 SVG 캔버스, 자체 라인아트 부품, 로컬 파일 + dev 서버 |
