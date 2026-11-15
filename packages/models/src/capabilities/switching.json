@@ -1,0 +1,31 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.switching",
+  "name": "Switching",
+  "description": "두 단자를 열거나 닫는다. 눌림 상태는 사람이 바꾼다 (press / release 이벤트).",
+  "parameters": {
+    "closedResistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 0,
+      "default": 0.1,
+      "description": "닫혔을 때 접촉 저항"
+    },
+    "openResistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 0,
+      "default": 100000000,
+      "description": "열렸을 때 저항 (절연)"
+    },
+    "latching": {
+      "type": "boolean",
+      "default": false,
+      "description": "true면 누를 때마다 켜짐/꺼짐이 바뀐다 (토글 스위치). false면 누르는 동안만 닫힌다."
+    }
+  },
+  "outputs": {
+    "closed": { "type": "boolean", "description": "지금 닫혀 있는지" }
+  },
+  "defaultBehavior": "behavior.switch"
+}

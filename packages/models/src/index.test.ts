@@ -14,6 +14,8 @@ describe("standard library", () => {
     expect(registry.models().map((m) => m.id)).toEqual([
       "model.led",
       "model.resistor",
+      "model.pushbutton",
+      "model.toggle-switch",
       "model.atmega328p",
       "model.arduino-uno",
     ]);

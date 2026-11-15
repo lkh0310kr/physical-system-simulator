@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.toggle-switch",
+  "name": "Toggle Switch",
+  "category": "electronics/input",
+  "description": "SPST 토글 스위치. 누를 때마다 켜짐/꺼짐이 바뀐다.",
+  "ports": [{ "name": "1", "domain": "electrical" }, { "name": "2", "domain": "electrical" }],
+  "capabilities": [{ "capability": "capability.switching", "config": { "latching": true } }],
+  "metadata": { "fidelity": "ideal" }
+}

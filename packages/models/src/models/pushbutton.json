@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.pushbutton",
+  "name": "Pushbutton",
+  "category": "electronics/input",
+  "description": "6mm 택트 스위치. 누르는 동안 두 단자가 연결된다.",
+  "ports": [{ "name": "1", "domain": "electrical" }, { "name": "2", "domain": "electrical" }],
+  "capabilities": [{ "capability": "capability.switching" }],
+  "metadata": { "fidelity": "ideal" }
+}
