@@ -20,10 +20,12 @@ import {
   PlusIcon,
   ResetIcon,
   RotateIcon,
+  ScopeIcon,
   TrashIcon,
 } from "./icons.tsx";
 import { Inspector } from "./inspector-panel.tsx";
 import { PartsPanel } from "./parts-panel.tsx";
+import { ScopePanel } from "./scope-panel.tsx";
 import { useSimulation } from "./sim/use-simulation.ts";
 import { useProject } from "./use-project.ts";
 import { Viewer3D } from "./view3d/viewer3d.tsx";
@@ -48,6 +50,7 @@ export function App() {
   const [selection, setSelection] = useState<Selection | undefined>(undefined);
   const [adding, setAdding] = useState(false);
   const [coding, setCoding] = useState(false);
+  const [scoping, setScoping] = useState(false);
   const [view, setView] = useState<"2d" | "3d">("2d");
   const center = useRef(() => ({ x: 0, y: 0 }));
 
@@ -188,8 +191,15 @@ export function App() {
             </div>
             <span>코드</span>
           </button>
+          <button type="button" className="tool" onClick={() => setScoping((s) => !s)}>
+            <div className={`round${scoping ? " active" : ""}`}>
+              <ScopeIcon />
+            </div>
+            <span>스코프</span>
+          </button>
         </div>
       )}
+      {scoping && loaded && <ScopePanel frame={frame} onClose={() => setScoping(false)} />}
       {adding && loaded && (
         <PartsPanel
           registry={loaded.registry}
