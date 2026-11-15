@@ -6,6 +6,7 @@ import {
   type Registry,
 } from "@physisim/core";
 import { battery } from "./behaviors/battery.ts";
+import { cameraNode } from "./behaviors/camera-node.ts";
 import { digitalIo } from "./behaviors/digital-io.ts";
 import { led as ledBehavior } from "./behaviors/led.ts";
 import { potentiometer } from "./behaviors/potentiometer.ts";
@@ -13,6 +14,7 @@ import { powerSupply } from "./behaviors/power-supply.ts";
 import { resistor as resistorBehavior } from "./behaviors/resistor.ts";
 import { switchBehavior } from "./behaviors/switch.ts";
 import batteryCapability from "./capabilities/battery.json" with { type: "json" };
+import cameraNodeCapability from "./capabilities/camera-node.json" with { type: "json" };
 import gpio from "./capabilities/gpio.json" with { type: "json" };
 import lightEmission from "./capabilities/light-emission.json" with { type: "json" };
 import potentiometry from "./capabilities/potentiometry.json" with { type: "json" };
@@ -21,6 +23,7 @@ import resistance from "./capabilities/resistance.json" with { type: "json" };
 import switching from "./capabilities/switching.json" with { type: "json" };
 import arduinoUno from "./models/arduino-uno.json" with { type: "json" };
 import atmega328p from "./models/atmega328p.json" with { type: "json" };
+import esp32Camera from "./models/esp32-s3-camera-node.json" with { type: "json" };
 import led from "./models/led.json" with { type: "json" };
 import liIonCell from "./models/li-ion-cell.json" with { type: "json" };
 import potentiometerModel from "./models/potentiometer.json" with { type: "json" };
@@ -32,6 +35,7 @@ export { type DigitalIoEvent, type DigitalIoState, pinPort } from "./behaviors/d
 export { parseRails, type Rail } from "./behaviors/power-supply.ts";
 export {
   battery,
+  cameraNode,
   digitalIo,
   ledBehavior,
   potentiometer,
@@ -44,6 +48,7 @@ export {
 export const standardLibrary: LibraryInput = {
   behaviors: [
     battery,
+    cameraNode,
     digitalIo,
     ledBehavior,
     resistorBehavior,
@@ -53,6 +58,7 @@ export const standardLibrary: LibraryInput = {
   ],
   capabilities: [
     batteryCapability,
+    cameraNodeCapability,
     gpio,
     lightEmission,
     resistance,
@@ -62,6 +68,7 @@ export const standardLibrary: LibraryInput = {
   ],
   models: [
     led,
+    esp32Camera,
     liIonCell,
     resistor,
     pushbutton,

@@ -13,6 +13,7 @@ describe("standard library", () => {
   it("loads every definition without issues", () => {
     expect(registry.models().map((m) => m.id)).toEqual([
       "model.led",
+      "model.esp32-s3-camera-node",
       "model.li-ion-cell",
       "model.resistor",
       "model.pushbutton",

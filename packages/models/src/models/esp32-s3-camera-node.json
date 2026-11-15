@@ -1,0 +1,93 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.esp32-s3-camera-node",
+  "name": "ESP32-S3 Camera Node (Case A)",
+  "category": "electronics/camera-node",
+  "description": "ESP32-S3 + OV2640 + Wi-Fi 통합형의 동작 모델. 실제 펌웨어가 아니라 상태별 전류·시간 프로파일이다. 값은 데이터시트급 근사치이므로 실측으로 교체한다.",
+  "propertySchema": {
+    "sleepCurrent": {
+      "type": "number",
+      "unit": "uA",
+      "min": 0,
+      "default": 15,
+      "description": "딥슬립 (모듈 + 센서 전원 차단) 전류"
+    },
+    "bootTime": {
+      "type": "number",
+      "unit": "ms",
+      "min": 0,
+      "default": 150,
+      "description": "깨어나 부팅하는 시간"
+    },
+    "bootCurrent": { "type": "number", "unit": "mA", "min": 0, "default": 60 },
+    "captureTime": {
+      "type": "number",
+      "unit": "ms",
+      "min": 0,
+      "default": 250,
+      "description": "센서 초기화 + 촬영 + JPEG 인코딩"
+    },
+    "captureCurrent": { "type": "number", "unit": "mA", "min": 0, "default": 140 },
+    "connectTime": {
+      "type": "number",
+      "unit": "ms",
+      "min": 0,
+      "default": 600,
+      "description": "Wi-Fi 연결 (고정 IP·빠른 재연결 가정)"
+    },
+    "connectCurrent": { "type": "number", "unit": "mA", "min": 0, "default": 120 },
+    "imageBytes": {
+      "type": "integer",
+      "min": 1,
+      "default": 90000,
+      "description": "JPEG 한 장의 크기 [byte]"
+    },
+    "throughput": {
+      "type": "integer",
+      "min": 1,
+      "default": 1000000,
+      "description": "실효 전송 속도 [byte/s]"
+    },
+    "transmitCurrent": { "type": "number", "unit": "mA", "min": 0, "default": 240 },
+    "supplyVoltage": {
+      "type": "number",
+      "unit": "V",
+      "default": 3.3,
+      "description": "내부 레귤레이터 출력 전압"
+    },
+    "batteryNominal": {
+      "type": "number",
+      "unit": "V",
+      "default": 3.7,
+      "description": "배터리 공칭 전압 (전류 환산용)"
+    },
+    "regulatorEfficiency": {
+      "type": "number",
+      "min": 0.1,
+      "max": 1,
+      "default": 0.9,
+      "description": "전원관리 효율 (배터리 전류 = 부하 전류 × Vout / (Vbat × 효율))"
+    },
+    "wakeThreshold": {
+      "type": "number",
+      "unit": "V",
+      "default": 1,
+      "description": "이 전압 아래면 버튼이 눌린 것으로 본다"
+    }
+  },
+  "properties": {},
+  "ports": [
+    { "name": "VCC", "domain": "electrical", "description": "배터리 +" },
+    { "name": "GND", "domain": "electrical", "ground": true },
+    {
+      "name": "WAKE",
+      "domain": "electrical",
+      "description": "깨우기 버튼 (내부 풀업, 버튼은 GND로)"
+    }
+  ],
+  "capabilities": [{ "capability": "capability.camera-node" }],
+  "metadata": {
+    "fidelity": "approximate",
+    "source": "ESP32-S3 datasheet / OV2640 datasheet 근사. 실측 필요"
+  }
+}
