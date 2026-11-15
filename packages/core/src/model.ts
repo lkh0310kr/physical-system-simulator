@@ -9,7 +9,8 @@ import { BodySchema, MountSchema } from "./mechanical.ts";
 import { PropertySchemaSchema, PropertyValueSchema } from "./property.ts";
 
 /** Port가 속한 물리 도메인. electrical Port는 전압(across)·전류(through)로 해석된다. */
-export const PortDomainSchema = z.enum(["electrical", "mechanical"]);
+/** electrical = 전기 단자, mechanical = 회전축, signal = 제어 신호(출력 → 입력, 블록 선). */
+export const PortDomainSchema = z.enum(["electrical", "mechanical", "signal"]);
 export type PortDomain = z.infer<typeof PortDomainSchema>;
 
 /** 외부와 연결되는 접점 (핀, 단자, 축 등). */
@@ -19,6 +20,8 @@ export const PortSchema = z.strictObject({
   domain: PortDomainSchema,
   /** 회로의 기준 전위(0V)에 묶인 Port (보드 GND 등). */
   ground: z.boolean().optional().describe("true면 회로 기준 전위(0V)에 묶인다 (GND 핀)."),
+  /** 신호 Port의 방향. 출력 Port의 이름이 Behavior 출력 이름이고, 입력 Port의 이름이 `inputs` 키다. */
+  direction: z.enum(["in", "out"]).optional(),
   description: z.string().optional(),
 });
 
@@ -79,6 +82,20 @@ export const ModelSchema = z
       });
     };
     dup(m.ports, (p) => p.name, "ports");
+    m.ports.forEach((p, i) => {
+      if (p.domain === "signal" && !p.direction)
+        ctx.addIssue({
+          code: "custom",
+          path: ["ports", i, "direction"],
+          message: '신호 Port는 direction("in"/"out")이 필요하다',
+        });
+      if (p.domain !== "signal" && p.direction)
+        ctx.addIssue({
+          code: "custom",
+          path: ["ports", i, "direction"],
+          message: "direction은 신호 Port에만 쓴다",
+        });
+    });
     dup(m.mounts, (x) => x.name, "mounts");
     dup(m.components, (c) => c.name, "components");
     dup(m.capabilities, (c) => c.capability, "capabilities");

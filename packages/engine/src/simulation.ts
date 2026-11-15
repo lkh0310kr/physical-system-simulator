@@ -20,8 +20,6 @@ import {
 import { createCircuitSolver, type NodeElement } from "./circuit-solver.ts";
 import { createScheduler, nextStepTime, toMicros, toSeconds } from "./clock.ts";
 
-const NO_INPUTS: Signals = Object.freeze({});
-
 /** Instance의 Capability 바인딩 하나 = Behavior 하나의 실행 단위. */
 interface Unit {
   readonly instance: string;
@@ -143,6 +141,39 @@ export function createSimulation(
     omega: (port) => omegas[mechNode(`${u.instance}:${port}`)] ?? 0,
   });
 
+  // ── 신호 선 (출력 → 입력, 한 스텝 지연) ─────────────────────
+  /** 입력 Port 참조 → 그 선의 출력 Port 참조. */
+  const signalSource = new Map<string, string>();
+  const portDirection = (ref: string) => {
+    const { instance, port } = splitPortRef(ref);
+    const model = registry.getModel(system.instances.find((i) => i.id === instance)?.model ?? "");
+    return model?.ports.find((p) => p.name === port)?.direction;
+  };
+  for (const net of system.nets) {
+    if (net.domain !== "signal") continue;
+    const out = net.ports.find((r) => portDirection(r) === "out");
+    if (!out) continue;
+    for (const ref of net.ports) if (portDirection(ref) === "in") signalSource.set(ref, out);
+  }
+  /** 출력 Port 참조가 가리키는 Instance의 직전 스텝 출력 값 (출력 이름 = Port 이름). */
+  const signalValue = (previous: ReadonlyMap<Unit, Signals>, outRef: string) => {
+    const { instance, port } = splitPortRef(outRef);
+    for (const u of units) {
+      const out = previous.get(u);
+      if (u.instance === instance && out && port in out) return out[port] ?? 0;
+    }
+    return 0;
+  };
+  /** 스텝 시작 시점의 출력으로 입력을 만든다 — Behavior 실행 순서와 무관하게 정확히 한 스텝 지연. */
+  const inputsOf = (previous: ReadonlyMap<Unit, Signals>, u: Unit): Signals => {
+    const inputs: Signals = {};
+    for (const [inRef, outRef] of signalSource) {
+      const { instance, port } = splitPortRef(inRef);
+      if (instance === u.instance) inputs[port] = signalValue(previous, outRef);
+    }
+    return inputs;
+  };
+
   // ── 회로 해석 ─────────────────────────────────────────────
   const solver = createCircuitSolver();
   let voltages: readonly number[] = [0];
@@ -259,9 +290,10 @@ export function createSimulation(
     solveCircuit();
     const stepDt = now - last;
     solveMechanics(stepDt);
+    const previous = new Map(units.map((u) => [u, u.outputs] as const));
     for (const u of units) {
-      // Behavior 사이의 신호 라우팅은 아직 없다. 물리량은 ctx.circuit, 외부 명령은 이벤트로 받는다.
-      const r = u.behavior.step(u.state, NO_INPUTS, ctxOf(u, stepDt));
+      // 신호 선으로 이어진 입력은 직전 스텝의 출력을 받는다 (한 스텝 지연). 물리량은 ctx.circuit·ctx.mechanical.
+      const r = u.behavior.step(u.state, inputsOf(previous, u), ctxOf(u, stepDt));
       u.state = r.state;
       u.outputs = r.outputs;
     }

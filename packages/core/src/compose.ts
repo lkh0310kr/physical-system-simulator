@@ -95,6 +95,21 @@ export function buildSystem(registry: Registry, doc: SystemDoc): Result<BuiltSys
     uf.union(a, b);
   });
 
+  // 신호 Net은 출력이 하나여야 한다 (두 출력이 한 선에 물리면 값이 충돌한다)
+  const directionOf = (ref: string) => {
+    const { instance, port } = splitPortRef(ref);
+    const decl = doc.instances.find((d) => d.id === instance);
+    return registry.getModel(decl?.model ?? "")?.ports.find((x) => x.name === port)?.direction;
+  };
+  for (const ports of uf.groups()) {
+    if (domains.get(ports[0] ?? "") !== "signal") continue;
+    const outs = ports.filter((r) => directionOf(r) === "out");
+    if (outs.length > 1)
+      issues.push({
+        path: "connections",
+        message: `신호 선에 출력이 둘 이상이다: ${outs.join(", ")}`,
+      });
+  }
   if (issues.length) return fail(issues);
   const nets = uf.groups().map((ports, i) => ({
     id: `n${i + 1}`,

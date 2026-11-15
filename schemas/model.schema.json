@@ -473,11 +473,15 @@
           },
           "domain": {
             "type": "string",
-            "enum": ["electrical", "mechanical"]
+            "enum": ["electrical", "mechanical", "signal"]
           },
           "ground": {
             "description": "true면 회로 기준 전위(0V)에 묶인다 (GND 핀).",
             "type": "boolean"
+          },
+          "direction": {
+            "type": "string",
+            "enum": ["in", "out"]
           },
           "description": {
             "type": "string"
