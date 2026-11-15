@@ -26,6 +26,7 @@ describe("standard library", () => {
       "model.resistor",
       "model.multimeter",
       "model.pushbutton",
+      "model.tactile-12mm",
       "model.toggle-switch",
       "model.potentiometer",
       "model.atmega328p",

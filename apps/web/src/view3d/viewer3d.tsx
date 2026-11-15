@@ -101,7 +101,17 @@ function PartMaterial({ part, glow }: { part: ScenePart; glow: number }) {
 }
 
 /** 세부 형상 하나. 원기둥은 three의 기본 y축을 요청한 축으로 눕힌다. */
-function Shape({ part, glow }: { part: ScenePart; glow: number }) {
+function Shape({
+  part,
+  glow,
+  signals,
+  id,
+}: {
+  part: ScenePart;
+  glow: number;
+  signals: Readonly<Record<string, unknown>>;
+  id: string;
+}) {
   const geometry = useMemo(
     () =>
       part.kind === "box"
@@ -109,6 +119,14 @@ function Shape({ part, glow }: { part: ScenePart; glow: number }) {
         : new CylinderGeometry(part.diameter / 2, part.diameter / 2, part.length, 40),
     [part],
   );
+  // 신호를 따라 움직이는 부품 (눌리는 플런저 등): 신호 0~1 × 거리
+  const m = part.motion;
+  const moved = m ? Number(signals[`${id}.${m.signal}`] ?? 0) * m.distance : 0;
+  const position: [number, number, number] = [
+    part.position[0] + (m?.axis === "x" ? moved : 0),
+    part.position[1] + (m?.axis === "y" ? moved : 0),
+    part.position[2] + (m?.axis === "z" ? moved : 0),
+  ];
   const rotation: [number, number, number] =
     part.kind === "cylinder"
       ? part.axis === "z"
@@ -118,7 +136,7 @@ function Shape({ part, glow }: { part: ScenePart; glow: number }) {
           : [0, 0, 0]
       : [0, 0, 0];
   return (
-    <mesh geometry={geometry} position={part.position} rotation={rotation} castShadow receiveShadow>
+    <mesh geometry={geometry} position={position} rotation={rotation} castShadow receiveShadow>
       <PartMaterial part={part} glow={glow} />
     </mesh>
   );
@@ -161,11 +179,13 @@ function Part({
   selected,
   activity,
   burnt,
+  signals,
   pressable,
   onSelect,
   onPress,
 }: {
   box: SceneBox;
+  signals: Readonly<Record<string, unknown>>;
   /** 소손된 부품(고장): 어둡게 탄 색으로 보인다. */
   burnt: boolean;
   selected: boolean;
@@ -211,7 +231,9 @@ function Part({
       {glb ? (
         <primitive object={glb.clone()} />
       ) : detailed ? (
-        box.parts.map((p) => <Shape key={p.name} part={p} glow={glow * 0.35} />)
+        box.parts.map((p) => (
+          <Shape key={p.name} part={p} glow={glow * 0.35} signals={signals} id={box.id} />
+        ))
       ) : (
         <mesh geometry={geometry} castShadow receiveShadow>
           {/* 실치수는 채운 면, 자리표시(치수 가정)는 투명하게 — 가정을 실물처럼 보이게 하지 않는다.
@@ -526,6 +548,7 @@ export function Viewer3D({
                 selected={selection?.kind === "part" && selection.id === b.id}
                 activity={activityOf(b.id, signals)}
                 burnt={signals[`${b.id}.burnt`] === true}
+                signals={signals}
                 pressable={running && b.switchable}
                 onSelect={() => onSelect?.({ kind: "part", id: b.id })}
                 onPress={(event) => onPress?.(b.id, event)}

@@ -132,3 +132,7 @@ Model에 `body`(박스 크기, mm)와 `mounts`를 쓰고, System의 `assembly`�
 ## 새 부품 검증·승인 (에이전트용)
 
 에이전트가 부품(Model/Capability)을 쓰면 먼저 `pnpm physisim check <파일.json>`으로 스키마·교차 참조를 검증한다. 통과해도 "사람이 확인할 것"(출처 없음, 미확인 가정 수, 치수 없음)이 함께 나오고, 이 명령은 파일을 고치지 않는다. 사람이 값과 출처를 확인한 뒤 System의 `library`에 추가하는 것이 승인이다.
+
+## 기구 동작 (플런저)
+
+`capability.switching`에 `travel`(mm)을 주면 누름이 즉시가 아니라 플런저 이동으로 접점을 움직인다(`operatingTravel`에서 닫히고 80% 지점에서 열림, `pressTime`에 걸쳐 이동). 출력 `plunger`(0~1)를 세부 형상의 `motion`(`{signal:"plunger", axis:"z", distance:-1}`)에 연결하면 3D에서 플런저가 눌린다. 예: `model.tactile-12mm`, `examples/tactile-led.system.json`.

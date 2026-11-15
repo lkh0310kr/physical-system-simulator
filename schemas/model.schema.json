@@ -275,6 +275,24 @@
                   },
                   "color": {
                     "type": "string"
+                  },
+                  "motion": {
+                    "type": "object",
+                    "properties": {
+                      "signal": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "axis": {
+                        "type": "string",
+                        "enum": ["x", "y", "z"]
+                      },
+                      "distance": {
+                        "type": ["number", "string"]
+                      }
+                    },
+                    "required": ["signal", "axis", "distance"],
+                    "additionalProperties": false
                   }
                 },
                 "required": ["name", "shape", "position", "size"],
@@ -326,6 +344,24 @@
                   },
                   "color": {
                     "type": "string"
+                  },
+                  "motion": {
+                    "type": "object",
+                    "properties": {
+                      "signal": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "axis": {
+                        "type": "string",
+                        "enum": ["x", "y", "z"]
+                      },
+                      "distance": {
+                        "type": ["number", "string"]
+                      }
+                    },
+                    "required": ["signal", "axis", "distance"],
+                    "additionalProperties": false
                   }
                 },
                 "required": ["name", "shape", "position", "diameter", "length"],

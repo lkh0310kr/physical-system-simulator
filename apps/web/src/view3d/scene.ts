@@ -17,6 +17,13 @@ export const PLACEHOLDER_SIZE: Vec3 = [0.01, 0.01, 0.004];
 const GAP = 0.005;
 
 /** 부품 안의 세부 형상 (body 중심 기준 [m]). 박스 또는 축 방향 원기둥. */
+/** 신호를 따라 움직이는 방식 (거리는 m). */
+export interface SceneMotion {
+  readonly signal: string;
+  readonly axis: "x" | "y" | "z";
+  readonly distance: number;
+}
+
 export type ScenePart =
   | {
       readonly kind: "box";
@@ -25,6 +32,7 @@ export type ScenePart =
       readonly size: Vec3;
       readonly material: MaterialKind;
       readonly color: string | undefined;
+      readonly motion: SceneMotion | undefined;
     }
   | {
       readonly kind: "cylinder";
@@ -35,6 +43,7 @@ export type ScenePart =
       readonly axis: "x" | "y" | "z";
       readonly material: MaterialKind;
       readonly color: string | undefined;
+      readonly motion: SceneMotion | undefined;
     };
 
 export interface SceneBox {
@@ -56,6 +65,10 @@ export interface SceneBox {
   /** 세부 형상. 비어 있으면 박스 하나로 그린다. */
   readonly parts: readonly ScenePart[];
 }
+
+const motionOf = (
+  m: { signal: string; axis: "x" | "y" | "z"; distance: number | string } | undefined,
+) => (m ? { signal: m.signal, axis: m.axis, distance: toMeters(m.distance) } : undefined);
 
 const v3 = (v: readonly [number | string, number | string, number | string]): Vec3 => [
   toMeters(v[0]),
@@ -100,6 +113,7 @@ export function buildScene3d(loaded: LoadedSystem): SceneBox[] {
                 size: v3(p.size),
                 material: p.material,
                 color: p.color,
+                motion: motionOf(p.motion),
               }
             : {
                 kind: "cylinder",
@@ -110,6 +124,7 @@ export function buildScene3d(loaded: LoadedSystem): SceneBox[] {
                 axis: p.axis,
                 material: p.material,
                 color: p.color,
+                motion: motionOf(p.motion),
               },
       ),
     };

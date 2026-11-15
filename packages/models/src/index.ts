@@ -39,6 +39,7 @@ import ov5640Sensor from "./models/ov5640-sensor.json" with { type: "json" };
 import potentiometerModel from "./models/potentiometer.json" with { type: "json" };
 import pushbutton from "./models/pushbutton.json" with { type: "json" };
 import resistor from "./models/resistor.json" with { type: "json" };
+import tactile12 from "./models/tactile-12mm.json" with { type: "json" };
 import toggleSwitch from "./models/toggle-switch.json" with { type: "json" };
 import xiaoSense from "./models/xiao-esp32s3-sense.json" with { type: "json" };
 
@@ -95,6 +96,7 @@ export const standardLibrary: LibraryInput = {
     resistor,
     multimeter,
     pushbutton,
+    tactile12,
     toggleSwitch,
     potentiometerModel,
     atmega328p,
