@@ -7,6 +7,8 @@ import { BehaviorId, CapabilityId } from "./ids.ts";
 import { PropertySchemaSchema } from "./property.ts";
 
 export const CapabilitySchema = z.strictObject({
+  /** 에디터·에이전트용 JSON Schema 경로. 검증에는 쓰지 않는다. */
+  $schema: z.string().optional(),
   id: CapabilityId,
   name: z.string().min(1),
   description: z.string().optional(),

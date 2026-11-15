@@ -17,7 +17,7 @@ export const PortSchema = z.strictObject({
   name: z.string().regex(/^[A-Za-z0-9_.+-]+$/, { message: "영문·숫자·_.+- 만 쓸 수 있다" }),
   domain: PortDomainSchema,
   /** 회로의 기준 전위(0V)에 묶인 Port (보드 GND 등). */
-  ground: z.boolean().optional(),
+  ground: z.boolean().optional().describe("true면 회로 기준 전위(0V)에 묶인다 (GND 핀)."),
   description: z.string().optional(),
 });
 
@@ -32,9 +32,12 @@ export const ComponentSchema = z.strictObject({
 export const CapabilityBindingSchema = z.strictObject({
   capability: CapabilityId,
   /** Capability `parameters`에 대한 값. */
-  config: z.record(z.string(), PropertyValueSchema).default({}),
+  config: z
+    .record(z.string(), PropertyValueSchema)
+    .default({})
+    .describe("Capability parameters에 대한 이 Model의 값."),
   /** Capability의 기본 Behavior 대신 쓸 Behavior. */
-  behavior: BehaviorId.optional(),
+  behavior: BehaviorId.optional().describe("Capability의 defaultBehavior 대신 쓸 Behavior ID."),
 });
 
 export const MetadataSchema = z.looseObject({
@@ -48,6 +51,8 @@ export const MetadataSchema = z.looseObject({
 
 export const ModelSchema = z
   .strictObject({
+    /** 에디터·에이전트용 JSON Schema 경로. 검증에는 쓰지 않는다. */
+    $schema: z.string().optional(),
     id: ModelId,
     name: z.string().min(1),
     /** `/`로 나눈 분류 (예: "electronics/output"). */

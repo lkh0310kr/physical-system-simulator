@@ -1,9 +1,15 @@
 {
+  "$schema": "../../../../schemas/capability.schema.json",
   "id": "capability.light-emission",
   "name": "Light Emission",
   "description": "흐르는 전류에 비례해 빛을 낸다.",
   "outputs": {
-    "brightness": { "type": "number", "min": 0, "max": 1, "description": "0(꺼짐) ~ 1(최대)" }
+    "brightness": {
+      "type": "number",
+      "min": 0,
+      "max": 1,
+      "description": "0(꺼짐) ~ 1(최대)"
+    }
   },
   "defaultBehavior": "behavior.led"
 }

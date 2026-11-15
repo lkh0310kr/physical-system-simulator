@@ -22,15 +22,23 @@ export const PortRefSchema = z.string().regex(/^[a-z][a-z0-9_-]*:[A-Za-z0-9_.+-]
 
 export const SystemSchema = z
   .strictObject({
+    /** 에디터·에이전트용 JSON Schema 경로. 검증에는 쓰지 않는다. */
+    $schema: z.string().optional(),
     name: z.string().min(1),
     description: z.string().optional(),
     /** 표준 라이브러리에 더할 로컬 Model/Capability JSON 파일 (이 문서 기준 상대 경로, 파일당 정의 1개). */
-    library: z.array(z.string().min(1)).default([]),
+    library: z
+      .array(z.string().min(1))
+      .default([])
+      .describe("로컬 Model/Capability JSON 파일 경로 (이 문서 기준). 파일당 정의 1개."),
     instances: z.array(InstanceDeclSchema).default([]),
     /** 두 Port를 잇는 선. 같은 Port에 여러 선이 닿으면 하나의 Net이 된다. */
-    connections: z.array(z.tuple([PortRefSchema, PortRefSchema])).default([]),
+    connections: z
+      .array(z.tuple([PortRefSchema, PortRefSchema]))
+      .default([])
+      .describe('두 Port를 잇는 선. 예: ["uno:D13", "r1:1"]'),
     /** 에디터용 화면 정보. 엔진과 Agent는 해석하지 않는다. */
-    layout: z.looseObject({}).optional(),
+    layout: z.looseObject({}).optional().describe("에디터용 화면 정보. 시뮬레이션에 영향 없음."),
   })
   .superRefine((s, ctx) => {
     const seen = new Set<string>();

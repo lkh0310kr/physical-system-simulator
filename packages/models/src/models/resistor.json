@@ -1,4 +1,5 @@
 {
+  "$schema": "../../../../schemas/model.schema.json",
   "id": "model.resistor",
   "name": "Resistor",
   "category": "electrical/passive",

@@ -1,10 +1,19 @@
 {
+  "$schema": "../../../../schemas/capability.schema.json",
   "id": "capability.gpio",
   "name": "GPIO",
   "description": "범용 디지털 입출력 핀. 프로그램이 pinMode/digitalWrite 이벤트로 제어하고, 출력 핀은 회로를 구동한다.",
   "parameters": {
-    "pinCount": { "type": "integer", "min": 1 },
-    "logicLevel": { "type": "number", "unit": "V", "min": 0, "description": "HIGH 전압" },
+    "pinCount": {
+      "type": "integer",
+      "min": 1
+    },
+    "logicLevel": {
+      "type": "number",
+      "unit": "V",
+      "min": 0,
+      "description": "HIGH 전압"
+    },
     "pinPrefix": {
       "type": "string",
       "default": "D",

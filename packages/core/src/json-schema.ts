@@ -6,6 +6,15 @@
 import { z } from "zod";
 import { CapabilitySchema } from "./capability.ts";
 import { ModelSchema } from "./model.ts";
+import { SystemSchema } from "./system.ts";
 
 export const modelJsonSchema = () => z.toJSONSchema(ModelSchema, { io: "input" });
 export const capabilityJsonSchema = () => z.toJSONSchema(CapabilitySchema, { io: "input" });
+export const systemJsonSchema = () => z.toJSONSchema(SystemSchema, { io: "input" });
+
+/** 파일 이름 → JSON Schema. `schemas/` 폴더 생성에 쓴다. */
+export const jsonSchemaFiles = () => ({
+  "system.schema.json": systemJsonSchema(),
+  "model.schema.json": modelJsonSchema(),
+  "capability.schema.json": capabilityJsonSchema(),
+});

@@ -1,4 +1,5 @@
 {
+  "$schema": "../schemas/system.schema.json",
   "name": "Blink LED",
   "description": "Arduino UNO D13 → 220Ω 저항 → LED → GND. Phase 3 Blink 데모의 회로.",
   "instances": [
