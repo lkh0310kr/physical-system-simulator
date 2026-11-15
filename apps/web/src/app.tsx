@@ -105,6 +105,8 @@ export function App() {
           }}
           onMove={(id, x, y) => update(moveInstance(docJson, id, x, y))}
           onConnect={(a, b) => update(connect(docJson, a, b))}
+          onPress={sim.input}
+          running={running}
           centerRef={center}
         />
       )}

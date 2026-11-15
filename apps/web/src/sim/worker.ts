@@ -93,6 +93,13 @@ self.onmessage = (e: MessageEvent<ToWorker>) => {
       start();
       break;
     }
+    case "input":
+      try {
+        sim?.dispatch(m.instance, m.capability, { type: m.event });
+      } catch (e) {
+        post({ type: "error", message: (e as Error).message });
+      }
+      break;
     case "play":
       running = !!sim;
       last = performance.now();

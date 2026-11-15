@@ -8,10 +8,20 @@ interface Props {
   readonly placement: Placement;
   /** 0~1. 빛·동작 등 "살아 있음"의 세기. */
   readonly activity?: number;
+  /** 스위치가 닫혀 있는지. */
+  readonly closed?: boolean;
   readonly selected?: boolean;
 }
 
-function TwoTerminal({ symbol, activity = 0 }: { symbol: PartSymbol; activity?: number }) {
+function TwoTerminal({
+  symbol,
+  activity = 0,
+  closed = false,
+}: {
+  symbol: PartSymbol;
+  activity?: number;
+  closed?: boolean;
+}) {
   const mid = symbol.height / 2;
   const cx = symbol.width / 2;
   return (
@@ -29,6 +39,14 @@ function TwoTerminal({ symbol, activity = 0 }: { symbol: PartSymbol; activity?: 
             d={`M${cx - 5} ${mid - 6} L${cx + 5} ${mid} L${cx - 5} ${mid + 6} Z M${cx + 5} ${mid - 6} V${mid + 6}`}
             className="mark"
           />
+        </g>
+      ) : symbol.glyph === "switch" ? (
+        <g className={`switch${closed ? " closed" : ""}`}>
+          <circle cx={cx - 14} cy={mid} r={2.5} className="contact" />
+          <circle cx={cx + 14} cy={mid} r={2.5} className="contact" />
+          {/* 닫히면 접점에 닿고, 열리면 위로 들린다 */}
+          <line x1={cx - 14} y1={mid} x2={cx + 14} y2={closed ? mid : mid - 11} className="blade" />
+          <rect x={cx - 18} y={mid - 16} width={36} height={32} className="hit" />
         </g>
       ) : symbol.glyph === "resistor" ? (
         <rect x={cx - 16} y={mid - 6} width={32} height={12} rx={3} className="body" />
@@ -55,7 +73,7 @@ function Board({ symbol, name }: { symbol: PartSymbol; name: string }) {
   );
 }
 
-export function Part({ id, name, symbol, placement, activity, selected }: Props) {
+export function Part({ id, name, symbol, placement, activity, closed, selected }: Props) {
   const { width: w, height: h } = symbol;
   const vertical = placement.rotate % 180 !== 0;
   // 이름표는 회전하지 않는다: 보드는 왼쪽 아래, 세로 부품은 오른쪽, 가로 부품은 위.
@@ -75,7 +93,7 @@ export function Part({ id, name, symbol, placement, activity, selected }: Props)
         {symbol.kind === "board" ? (
           <Board symbol={symbol} name={name} />
         ) : (
-          <TwoTerminal symbol={symbol} activity={activity ?? 0} />
+          <TwoTerminal symbol={symbol} activity={activity ?? 0} closed={closed ?? false} />
         )}
         {selected && (
           <rect x={-8} y={-8} width={w + 16} height={h + 16} rx={12} className="selection" />

@@ -7,7 +7,7 @@ import type { Model } from "@physisim/core";
 export const GRID = 10;
 export const PIN_PITCH = 20;
 
-export type Glyph = "led" | "resistor" | "box";
+export type Glyph = "led" | "resistor" | "switch" | "box";
 
 export type Vec = readonly [number, number];
 
@@ -40,6 +40,7 @@ const glyphOf = (m: Model): Glyph => {
   const caps = m.capabilities.map((c) => c.capability);
   if (caps.includes("capability.light-emission")) return "led";
   if (caps.includes("capability.resistance")) return "resistor";
+  if (caps.includes("capability.switching")) return "switch";
   return "box";
 };
 
