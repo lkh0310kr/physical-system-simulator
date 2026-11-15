@@ -1,0 +1,15 @@
+{
+  "name": "@physisim/cad",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Manufacturing geometry for PhysiSim: process profiles, enclosure generator, validation, STL/3MF and BOM output",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@physisim/core": "workspace:*",
+    "manifold-3d": "^3.5.5"
+  }
+}
