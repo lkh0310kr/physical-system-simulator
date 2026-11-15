@@ -49,7 +49,7 @@ describe("behavior.digital-io", () => {
   );
 
   it("maps pin numbers to ports with the configured prefix", () => {
-    expect(output13.pins).toEqual({ D13: { mode: "output", level: true } });
+    expect(output13.pins).toEqual({ D13: { pin: 13, mode: "output", level: true } });
   });
 
   it("drives output pins at the logic level through the output resistance", () => {

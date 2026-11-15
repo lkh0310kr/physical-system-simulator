@@ -2,6 +2,8 @@ import { defineBehavior, numberOf, type ResolvedValues } from "@physisim/core";
 
 export type PinMode = "input" | "output";
 export interface PinState {
+  /** 핀 번호 (프로그램이 쓰는 번호). */
+  readonly pin: number;
   readonly mode: PinMode;
   readonly level: boolean;
 }
@@ -41,7 +43,7 @@ export const digitalIo = defineBehavior<DigitalIoState>({
   onEvent: (s, event, ctx) => {
     const e = event as DigitalIoEvent;
     const port = pinPort(ctx.config, e.payload.pin);
-    const prev = s.pins[port] ?? { mode: "input", level: false };
+    const prev: PinState = s.pins[port] ?? { pin: e.payload.pin, mode: "input", level: false };
     const next: PinState =
       e.type === "pinMode"
         ? { ...prev, mode: e.payload.mode }
