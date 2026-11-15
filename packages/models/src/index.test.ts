@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { createStandardRegistry, digitalIo, ledBehavior } from "./index.ts";
-
-const ctx = { time: 0, dt: 0.001, config: {} };
+import {
+  createStandardRegistry,
+  type DigitalIoEvent,
+  type DigitalIoState,
+  digitalIo,
+  ledBehavior,
+} from "./index.ts";
 
 describe("standard library", () => {
   const registry = createStandardRegistry();
@@ -26,30 +30,69 @@ describe("standard library", () => {
 });
 
 describe("behavior.digital-io", () => {
-  const step = (inputs: Parameters<typeof digitalIo.step>[1]) =>
-    digitalIo.step({}, inputs, { ...ctx, properties: {} }).outputs;
+  const config = { pinCount: 20, logicLevel: 5, pinPrefix: "D", outputResistance: 25 };
+  const ctx = (voltage = 0) => ({
+    time: 0,
+    dt: 0.001,
+    properties: {},
+    config,
+    circuit: { voltage: () => voltage, current: () => 0 },
+  });
+  const send = (state: DigitalIoState, event: DigitalIoEvent) =>
+    digitalIo.onEvent?.(state, event, ctx()).state as DigitalIoState;
+  const output13 = send(
+    send({ pins: {} }, { type: "pinMode", payload: { pin: 13, mode: "output" } }),
+    {
+      type: "digitalWrite",
+      payload: { pin: 13, level: true },
+    },
+  );
 
-  it("drives the written level in output mode", () => {
-    expect(step({ mode: "output", write: true, external: false })).toEqual({
-      driving: true,
-      level: true,
-    });
+  it("maps pin numbers to ports with the configured prefix", () => {
+    expect(output13.pins).toEqual({ D13: { pin: 13, mode: "output", level: true } });
   });
 
-  it("reads the external level in input mode", () => {
-    expect(step({ mode: "input", write: true, external: false })).toEqual({
-      driving: false,
-      level: false,
-    });
+  it("drives output pins at the logic level through the output resistance", () => {
+    expect(digitalIo.circuit?.(output13, ctx())).toEqual([
+      { kind: "drive", id: "D13", port: "D13", voltage: 5, resistance: 25 },
+    ]);
+  });
+
+  it("reads input pins as HIGH above half the logic level", () => {
+    const input = send({ pins: {} }, { type: "pinMode", payload: { pin: 2, mode: "input" } });
+    expect(digitalIo.step(input, {}, ctx(3)).outputs).toEqual({ D2: true });
+    expect(digitalIo.step(input, {}, ctx(2)).outputs).toEqual({ D2: false });
+  });
+
+  it("rejects pins outside the board", () => {
+    expect(() =>
+      send({ pins: {} }, { type: "pinMode", payload: { pin: 20, mode: "output" } }),
+    ).toThrow(RangeError);
   });
 });
 
 describe("behavior.led", () => {
+  const properties = { forwardVoltage: 2, maxCurrent: 0.02, dynamicResistance: 10 };
   const brightness = (current: number) =>
-    ledBehavior.step({}, { current }, { ...ctx, properties: { maxCurrent: 0.02 } }).outputs
-      .brightness;
+    ledBehavior.step(
+      {},
+      {},
+      {
+        time: 0,
+        dt: 0.001,
+        config: {},
+        properties,
+        circuit: { voltage: () => 0, current: () => current },
+      },
+    ).outputs.brightness;
 
-  it("scales brightness with current up to the maximum", () => {
+  it("contributes a diode from A to C", () => {
+    expect(ledBehavior.circuit?.({}, { properties, config: {} })).toEqual([
+      { kind: "diode", id: "diode", anode: "A", cathode: "C", forwardVoltage: 2, onResistance: 10 },
+    ]);
+  });
+
+  it("scales brightness with forward current up to the maximum", () => {
     expect(brightness(0.01)).toBeCloseTo(0.5);
     expect(brightness(0.05)).toBe(1);
     expect(brightness(-0.01)).toBe(0);

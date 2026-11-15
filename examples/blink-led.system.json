@@ -2,16 +2,42 @@
   "name": "Blink LED",
   "description": "Arduino UNO D13 → 220Ω 저항 → LED → GND. Phase 3 Blink 데모의 회로.",
   "instances": [
-    { "id": "uno", "model": "model.arduino-uno" },
-    { "id": "r1", "model": "model.resistor", "properties": { "resistance": "220Ω" } },
-    { "id": "led1", "model": "model.led", "properties": { "color": "red" } }
+    {
+      "id": "uno",
+      "model": "model.arduino-uno",
+      "program": "blink.js"
+    },
+    {
+      "id": "r1",
+      "model": "model.resistor",
+      "properties": {
+        "resistance": "220Ω"
+      }
+    },
+    {
+      "id": "led1",
+      "model": "model.led",
+      "properties": {
+        "color": "red"
+      }
+    }
   ],
   "connections": [["uno:D13", "r1:1"], ["r1:2", "led1:A"], ["led1:C", "uno:GND.1"]],
   "layout": {
     "instances": {
-      "uno": { "x": 0, "y": 0 },
-      "r1": { "x": 260, "y": -40, "rotate": 90 },
-      "led1": { "x": 320, "y": -40 }
+      "uno": {
+        "x": 0,
+        "y": 0
+      },
+      "r1": {
+        "x": 260,
+        "y": -40,
+        "rotate": 90
+      },
+      "led1": {
+        "x": 320,
+        "y": -40
+      }
     }
   }
 }

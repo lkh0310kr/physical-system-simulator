@@ -1,0 +1,13 @@
+{
+  "id": "capability.resistance",
+  "name": "Resistance",
+  "description": "두 단자 사이의 전기 저항.",
+  "outputs": {
+    "current": {
+      "type": "number",
+      "unit": "A",
+      "description": "단자 1 → 2 방향 전류"
+    }
+  },
+  "defaultBehavior": "behavior.resistor"
+}

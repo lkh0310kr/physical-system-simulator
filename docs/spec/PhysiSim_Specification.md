@@ -1,6 +1,6 @@
 # PhysiSim 프로젝트 전체 설계 명세 (Specification)
 
-> **현재 설계 기준:** v0.7 (2026-11-15)  
+> **현재 설계 기준:** v0.8 (2026-11-15)  
 > **프로젝트 유형:** Model-driven Physical Systems Simulator  
 > **개발 방향:** AI Agentic Simulation Platform  
 > **핵심 철학:** Model 중심 설계
@@ -411,7 +411,23 @@ Simulation Engine은 실제 시뮬레이션 실행을 담당한다.
 | Behavior Execution | Behavior 실행 |
 | Domain Solvers | 전기·기계·물리 계산 |
 
-### 9.1 통합 시뮬레이션 예시
+### 9.1 실행 모델 (v0.8)
+
+```text
+매 스텝 (기본 1ms, 다음 이벤트가 더 가까우면 그 시각까지)
+  1. 이벤트 처리     MCU 프로그램 재개 → digitalWrite 등이 Behavior onEvent로 전달
+  2. 도메인 해석     Behavior가 내놓은 회로 요소로 전압·전류 계산
+  3. Behavior step  해석 결과를 읽고 새 상태·출력 계산
+  4. 기록           바뀐 출력만 trace에 남김
+```
+
+- **혼합 시간 모델**: 연속 현상(회로, 이후 물리)은 고정 스텝으로, 이산 현상(타이머, `delay`)은 정확한 시각의 이벤트로 처리한다. 시간은 정수 마이크로초로 관리해 누적 오차가 없다.
+- **도메인 기여**: Behavior는 `step` 외에 자기 Port 기준의 도메인 요소(예: 회로 요소)를 선택적으로 내놓는다. 엔진의 Domain Solver가 이를 Net 위에서 풀고, 결과를 Behavior가 읽는다.
+- **회로 해석**: 저항·구동원·다이오드(LED)를 노드 해석으로 푼다. 정밀 해석(SPICE)은 Phase 6에서 다시 검토한다.
+- **MCU 프로그램**: Arduino식 API의 JS 스크립트. `delay`는 `yield`로 시뮬레이션 시간을 양보한다. 엔진은 파일 I/O 없이 소스 문자열만 받는다(브라우저에서도 동작).
+- **결정론**: 같은 System·프로그램·설정이면 같은 trace.
+
+### 9.2 통합 시뮬레이션 예시
 
 ```text
 MCU
@@ -497,7 +513,9 @@ AI Agent는 필요한 Model을 검색하고 Instance를 생성하며 연결 관�
 | Composition 구조 | Model이 도메인별 Port 선언, 문서는 핀-핀 연결, 엔진은 Net으로 해석 | 확정 (v0.7) |
 | System 문서 레이아웃 | 같은 파일의 선택적 `layout` 섹션 (엔진·Agent는 무시) | 확정 (v0.7) |
 | 계층 Composition (System → Model) | Phase 7로 연기 | 확정 (v0.7) |
-| Simulation Engine | 미결정 | 대기 |
+| Simulation Engine 시간 모델 | 혼합: 고정 스텝 + 정확한 시각의 이벤트 | 확정 (v0.8) |
+| 회로 해석 | 직접 구현 (노드 해석 + 구간 선형 다이오드) | 확정 (v0.8) |
+| MCU 사용자 코드 | JS 스크립트 + Arduino식 API (`setup`/`loop`, `delay`는 `yield`) | 확정 (v0.8) |
 | AI Agent 연동 | 미결정 | 대기 |
 
 ## 13. 앞으로 결정할 순서
@@ -601,6 +619,7 @@ interface ModelCapabilityBinding {
 | 버전 | 날짜 | 변경 내용 |
 |---|---|---|
 | v0.4 | — | 초기 기준선 (Model 구조, Properties, Capability 확정) |
+| v0.8 | 2026-11-15 | Phase 3 결정: 혼합 시간 모델, 직접 구현 회로 해석, JS Arduino식 MCU 프로그램. §9.1 실행 모델 |
 | v0.7 | 2026-11-15 | Phase 2 결정: Instance 바인딩별 State, Port·핀-핀 연결·Net 해석, layout 섹션, 계층 Composition은 Phase 7로 |
 | v0.6 | 2026-11-15 | Phase 1 결정: 자체 단위 시스템, Behavior = 순수 함수 + 이벤트 훅, 바인딩당 Behavior 1개 |
 | v0.5 | 2026-11-15 | §14 Behavior↔Capability A' 하이브리드 확정, §15 기술 스택·개발 전략 추가, §12·§13 갱신, 문서 주도 개발 원칙(문서는 목표·구조, 세부는 코드) |

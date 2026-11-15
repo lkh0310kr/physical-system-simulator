@@ -17,6 +17,13 @@
     "color": {
       "type": "enum",
       "options": ["red", "green", "blue", "yellow", "white"]
+    },
+    "dynamicResistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 0,
+      "default": 10,
+      "description": "도통 시 직렬 저항"
     }
   },
   "properties": {

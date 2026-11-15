@@ -1,0 +1,19 @@
+{
+  "name": "@physisim/cli",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PhysiSim command line: validate and run system documents",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "physisim": "./src/main.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@physisim/core": "workspace:*",
+    "@physisim/engine": "workspace:*",
+    "@physisim/models": "workspace:*"
+  }
+}

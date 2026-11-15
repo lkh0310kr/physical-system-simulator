@@ -16,7 +16,8 @@
     "format": "biome check --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "physisim": "node packages/cli/src/main.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.7",

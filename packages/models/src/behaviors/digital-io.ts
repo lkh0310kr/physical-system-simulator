@@ -1,15 +1,75 @@
-import { defineBehavior } from "@physisim/core";
+import { defineBehavior, numberOf, type ResolvedValues } from "@physisim/core";
 
-type Inputs = { mode: string; write: boolean; external: boolean };
-type Outputs = { driving: boolean; level: boolean };
+export type PinMode = "input" | "output";
+export interface PinState {
+  /** 핀 번호 (프로그램이 쓰는 번호). */
+  readonly pin: number;
+  readonly mode: PinMode;
+  readonly level: boolean;
+}
+export interface DigitalIoState {
+  /** Port 이름 → 핀 상태. pinMode로 설정된 핀만 있다. */
+  readonly pins: Readonly<Record<string, PinState>>;
+}
 
-/** GPIO 핀 하나. 출력 모드면 `write`를 구동하고, 입력 모드면 외부 레벨을 읽는다. 상태 없음. */
-export const digitalIo = defineBehavior<Record<string, never>, Inputs, Outputs>({
+/** 이벤트: `{ type: "pinMode", payload: { pin, mode } }`, `{ type: "digitalWrite", payload: { pin, level } }`. */
+export type DigitalIoEvent =
+  | { readonly type: "pinMode"; readonly payload: { readonly pin: number; readonly mode: PinMode } }
+  | {
+      readonly type: "digitalWrite";
+      readonly payload: { readonly pin: number; readonly level: boolean };
+    };
+
+/** 핀 번호 → Port 이름. 범위를 벗어나면 RangeError. */
+export function pinPort(config: ResolvedValues, pin: number): string {
+  const count = numberOf(config, "pinCount");
+  if (!Number.isInteger(pin) || pin < 0 || pin >= count) {
+    throw new RangeError(`없는 핀: ${pin} (0~${count - 1})`);
+  }
+  return `${String(config.pinPrefix)}${pin}`;
+}
+
+const outputsOf = (s: DigitalIoState) =>
+  Object.fromEntries(Object.entries(s.pins).map(([port, p]) => [port, p.level]));
+
+/**
+ * GPIO 핀 묶음.
+ * - 출력 핀: logicLevel 또는 0V를 내부 저항을 거쳐 구동한다.
+ * - 입력 핀: 회로 전압이 logicLevel의 절반을 넘으면 HIGH로 읽는다.
+ */
+export const digitalIo = defineBehavior<DigitalIoState>({
   id: "behavior.digital-io",
-  init: () => ({}),
-  step: (state, { mode, write, external }) => ({
-    state,
-    outputs:
-      mode === "output" ? { driving: true, level: write } : { driving: false, level: external },
-  }),
+  init: () => ({ pins: {} }),
+  onEvent: (s, event, ctx) => {
+    const e = event as DigitalIoEvent;
+    const port = pinPort(ctx.config, e.payload.pin);
+    const prev: PinState = s.pins[port] ?? { pin: e.payload.pin, mode: "input", level: false };
+    const next: PinState =
+      e.type === "pinMode"
+        ? { ...prev, mode: e.payload.mode }
+        : { ...prev, level: e.payload.level };
+    const state = { pins: { ...s.pins, [port]: next } };
+    return { state, outputs: outputsOf(state) };
+  },
+  circuit: (s, ctx) =>
+    Object.entries(s.pins)
+      .filter(([, p]) => p.mode === "output")
+      .map(([port, p]) => ({
+        kind: "drive" as const,
+        id: port,
+        port,
+        voltage: p.level ? numberOf(ctx.config, "logicLevel") : 0,
+        resistance: numberOf(ctx.config, "outputResistance"),
+      })),
+  step: (s, _inputs, ctx) => {
+    const threshold = numberOf(ctx.config, "logicLevel") / 2;
+    const pins = Object.fromEntries(
+      Object.entries(s.pins).map(([port, p]) => [
+        port,
+        p.mode === "input" ? { ...p, level: (ctx.circuit?.voltage(port) ?? 0) > threshold } : p,
+      ]),
+    );
+    const state = { pins };
+    return { state, outputs: outputsOf(state) };
+  },
 });

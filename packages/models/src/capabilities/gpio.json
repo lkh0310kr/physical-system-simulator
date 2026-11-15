@@ -1,27 +1,22 @@
 {
   "id": "capability.gpio",
   "name": "GPIO",
-  "description": "범용 디지털 입출력 핀. 신호는 핀 하나 기준.",
-  "inputs": {
-    "mode": { "type": "enum", "options": ["input", "output"], "default": "input" },
-    "write": {
-      "type": "boolean",
-      "default": false,
-      "description": "출력 모드에서 내보낼 논리 레벨"
-    },
-    "external": {
-      "type": "boolean",
-      "default": false,
-      "description": "입력 모드에서 외부가 주는 논리 레벨"
-    }
-  },
-  "outputs": {
-    "driving": { "type": "boolean", "description": "핀이 레벨을 직접 구동 중인지" },
-    "level": { "type": "boolean", "description": "핀의 현재 논리 레벨" }
-  },
+  "description": "범용 디지털 입출력 핀. 프로그램이 pinMode/digitalWrite 이벤트로 제어하고, 출력 핀은 회로를 구동한다.",
   "parameters": {
     "pinCount": { "type": "integer", "min": 1 },
-    "logicLevel": { "type": "number", "unit": "V", "min": 0, "description": "HIGH 전압" }
+    "logicLevel": { "type": "number", "unit": "V", "min": 0, "description": "HIGH 전압" },
+    "pinPrefix": {
+      "type": "string",
+      "default": "D",
+      "description": "핀 번호 n의 Port 이름은 pinPrefix + n"
+    },
+    "outputResistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 0,
+      "default": 25,
+      "description": "출력 핀 내부 저항"
+    }
   },
   "defaultBehavior": "behavior.digital-io"
 }

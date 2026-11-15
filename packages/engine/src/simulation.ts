@@ -1,0 +1,225 @@
+/**
+ * 시뮬레이션 루프 (스펙 §9.1). 매 스텝:
+ *   1. 시각이 된 이벤트 처리  2. 회로 해석  3. Behavior step  4. 구독자에게 알림
+ * 파일 I/O·실제 시계·난수를 쓰지 않으므로 같은 입력이면 같은 결과.
+ */
+import {
+  type Behavior,
+  type BuiltSystem,
+  type CircuitElement,
+  type CircuitReadings,
+  type Registry,
+  type ResolvedValues,
+  resolveBehaviorId,
+  resolveProperties,
+  type Signals,
+  type SimEvent,
+  splitPortRef,
+} from "@physisim/core";
+import { createCircuitSolver, type NodeElement } from "./circuit-solver.ts";
+import { createScheduler, nextStepTime, toMicros, toSeconds } from "./clock.ts";
+
+const NO_INPUTS: Signals = Object.freeze({});
+
+/** Instance의 Capability 바인딩 하나 = Behavior 하나의 실행 단위. */
+interface Unit {
+  readonly instance: string;
+  readonly capability: string;
+  readonly behavior: Behavior;
+  readonly properties: ResolvedValues;
+  readonly config: ResolvedValues;
+  state: unknown;
+  outputs: Signals;
+}
+
+export interface StepInfo {
+  /** 현재 시각 [s]. */
+  readonly time: number;
+  /** 스텝 직후 출력. `instance` → `capability` → 출력. */
+  readonly outputs: ReadonlyMap<string, ReadonlyMap<string, Signals>>;
+}
+
+export interface SimulationOptions {
+  /** 고정 스텝 [s]. 기본 1ms. */
+  readonly dt?: number;
+}
+
+export interface Simulation {
+  /** 현재 시각 [s]. */
+  readonly time: number;
+  /** 현재 시각 이후 `at`[s]에 실행할 일을 예약한다. */
+  schedule(at: number, run: () => void): void;
+  /** Behavior의 `onEvent`로 이벤트를 즉시 전달한다. */
+  dispatch(instance: string, capability: string, event: SimEvent): void;
+  /** Behavior 상태 조회 (읽기 전용으로 다룰 것). */
+  state(instance: string, capability: string): unknown;
+  /** 매 스텝 후 호출될 구독자. 해제 함수를 돌려준다. */
+  onStep(listener: (info: StepInfo) => void): () => void;
+  /** `duration`[s]만큼 진행한다. */
+  run(duration: number): void;
+}
+
+export function createSimulation(
+  registry: Registry,
+  system: BuiltSystem,
+  options: SimulationOptions = {},
+): Simulation {
+  const dt = toMicros(options.dt ?? 0.001);
+  if (dt <= 0) throw new RangeError("dt는 0보다 커야 한다");
+
+  // ── 실행 단위 ──────────────────────────────────────────────
+  const units: Unit[] = [];
+  for (const inst of system.instances) {
+    const model = registry.getModel(inst.model);
+    for (const binding of model?.capabilities ?? []) {
+      const capability = registry.getCapability(binding.capability);
+      const behaviorId = capability && resolveBehaviorId(binding, capability);
+      const behavior = behaviorId ? registry.getBehavior(behaviorId) : undefined;
+      const config = capability && resolveProperties(capability.parameters, binding.config);
+      if (!behavior || !config?.ok)
+        throw new Error(`${inst.id}: ${binding.capability} 해석 실패 (Registry 검증 필요)`);
+      units.push({
+        instance: inst.id,
+        capability: binding.capability,
+        behavior,
+        properties: inst.properties,
+        config: config.value,
+        state: inst.state[binding.capability],
+        outputs: {},
+      });
+    }
+  }
+  const unitOf = (instance: string, capability: string) => {
+    const u = units.find((x) => x.instance === instance && x.capability === capability);
+    if (!u) throw new Error(`실행 단위 없음: ${instance} / ${capability}`);
+    return u;
+  };
+
+  // ── Port → 회로 노드 (0 = 접지) ─────────────────────────────
+  const isGround = (ref: string) => {
+    const { instance, port } = splitPortRef(ref);
+    const model = registry.getModel(system.instances.find((i) => i.id === instance)?.model ?? "");
+    return model?.ports.find((p) => p.name === port)?.ground === true;
+  };
+  const nodeOf = new Map<string, number>();
+  let nodeCount = 1;
+  for (const net of system.nets) {
+    if (net.domain !== "electrical") continue;
+    const node = net.ports.some(isGround) ? 0 : nodeCount++;
+    for (const ref of net.ports) nodeOf.set(ref, node);
+  }
+  /** 연결되지 않은 Port는 자기만의 노드를 갖는다 (접지 Port는 0). */
+  const node = (ref: string): number => {
+    let n = nodeOf.get(ref);
+    if (n === undefined) {
+      n = isGround(ref) ? 0 : nodeCount++;
+      nodeOf.set(ref, n);
+    }
+    return n;
+  };
+
+  // ── 회로 해석 ─────────────────────────────────────────────
+  const solver = createCircuitSolver();
+  let voltages: readonly number[] = [0];
+  let currents: ReadonlyMap<string, number> = new Map();
+  const elementKey = (u: Unit, id: string) => `${u.instance}/${u.capability}/${id}`;
+  const readingsFor = (u: Unit): CircuitReadings => ({
+    voltage: (port) => voltages[node(`${u.instance}:${port}`)] ?? 0,
+    current: (id) => currents.get(elementKey(u, id)) ?? 0,
+  });
+
+  function toNodeElement(u: Unit, e: CircuitElement): NodeElement {
+    const n = (port: string) => node(`${u.instance}:${port}`);
+    const id = elementKey(u, e.id);
+    switch (e.kind) {
+      case "resistor":
+        return { ...e, id, a: n(e.a), b: n(e.b) };
+      case "drive":
+        return { kind: "drive", id, node: n(e.port), voltage: e.voltage, resistance: e.resistance };
+      case "diode":
+        return { ...e, id, anode: n(e.anode), cathode: n(e.cathode) };
+    }
+  }
+
+  function solveCircuit() {
+    const elements = units.flatMap((u) =>
+      (u.behavior.circuit?.(u.state, { properties: u.properties, config: u.config }) ?? []).map(
+        (e) => toNodeElement(u, e),
+      ),
+    );
+    if (elements.length === 0) return;
+    const solution = solver.solve(nodeCount, elements);
+    voltages = solution.voltages;
+    currents = solution.currents;
+  }
+
+  // ── 루프 ─────────────────────────────────────────────────
+  const scheduler = createScheduler<() => void>();
+  const listeners = new Set<(info: StepInfo) => void>();
+  let now = 0;
+  let last = 0;
+
+  const ctxOf = (u: Unit, stepDt: number) => ({
+    properties: u.properties,
+    config: u.config,
+    time: toSeconds(now),
+    dt: toSeconds(stepDt),
+    circuit: readingsFor(u),
+  });
+
+  function step() {
+    for (const run of scheduler.popDue(now)) run();
+    solveCircuit();
+    const stepDt = now - last;
+    for (const u of units) {
+      // Behavior 사이의 신호 라우팅은 아직 없다. 물리량은 ctx.circuit, 외부 명령은 이벤트로 받는다.
+      const r = u.behavior.step(u.state, NO_INPUTS, ctxOf(u, stepDt));
+      u.state = r.state;
+      u.outputs = r.outputs;
+    }
+    last = now;
+    if (listeners.size) {
+      const outputs = new Map<string, Map<string, Signals>>();
+      for (const u of units) {
+        const byCap = outputs.get(u.instance) ?? new Map<string, Signals>();
+        byCap.set(u.capability, u.outputs);
+        outputs.set(u.instance, byCap);
+      }
+      for (const l of listeners) l({ time: toSeconds(now), outputs });
+    }
+  }
+
+  let started = false;
+  return {
+    get time() {
+      return toSeconds(now);
+    },
+    schedule(at, run) {
+      scheduler.schedule(Math.max(toMicros(at), now), run);
+    },
+    dispatch(instance, capability, event) {
+      const u = unitOf(instance, capability);
+      const r = u.behavior.onEvent?.(u.state, event, ctxOf(u, 0));
+      if (r) {
+        u.state = r.state;
+        u.outputs = r.outputs;
+      }
+    },
+    state: (instance, capability) => unitOf(instance, capability).state,
+    onStep(listener) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    run(duration) {
+      const end = now + toMicros(duration);
+      if (!started) {
+        started = true;
+        step(); // t = 0 상태
+      }
+      while (now < end) {
+        now = nextStepTime(now, dt, end, scheduler.nextTime());
+        step();
+      }
+    },
+  };
+}

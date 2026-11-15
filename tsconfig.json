@@ -1,4 +1,9 @@
 {
   "files": [],
-  "references": [{ "path": "packages/core" }, { "path": "packages/models" }]
+  "references": [
+    { "path": "packages/core" },
+    { "path": "packages/models" },
+    { "path": "packages/engine" },
+    { "path": "packages/cli" }
+  ]
 }

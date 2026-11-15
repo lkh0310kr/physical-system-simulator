@@ -86,19 +86,19 @@
 
 **목표**: 스펙 §9 — 시간·이벤트·상태·Behavior 실행을 갖춘 헤드리스 엔진. 스펙 §11대로 CPU 에뮬레이션 대신 단순 Behavior부터.
 
-- [ ] P3-T1 시뮬레이션 시계·스케줄러 (결정론적)
-- [ ] P3-T2 Behavior 실행 루프 + Instance State 관리
-- [ ] P3-T3 신호 전파 (digital/analog 신호 Port)
-- [ ] P3-T4 DC 회로 Solver v0 (선형 MNA: 전압원·저항 + LED 단순 모델)
-- [ ] P3-T5 MCU 프로그램 = 스크립트 Behavior (`pinMode/digitalWrite/delay` 수준의 TS API)
-- [ ] P3-T6 결과 기록 (시계열 trace, 이벤트 로그) + JSON 출력
-- [ ] P3-T7 CLI: `physisim validate|run <system.json> --duration 2s`
-- [ ] P3-T8 E2E: Blink 예제에서 LED 밝기가 1Hz로 토글되는지 테스트
+- [x] P3-T1 시뮬레이션 시계·스케줄러 (결정론적)
+- [x] P3-T2 Behavior 실행 루프 + Instance State 관리
+- [x] P3-T3 표준 Behavior의 회로 기여와 GPIO 이벤트 (저항·LED·GPIO 핀 구동)
+- [x] P3-T4 DC 회로 Solver v0 (노드 해석: 저항·구동원 + 구간 선형 다이오드)
+- [x] P3-T5 MCU 프로그램 런타임 (JS, `pinMode/digitalWrite/digitalRead/delay/millis`)
+- [x] P3-T6 결과 기록 (시계열 trace, 이벤트 로그) + JSON 출력
+- [x] P3-T7 CLI: `physisim validate|run <system.json> --duration 2s`
+- [x] P3-T8 E2E: Blink 예제에서 LED 밝기가 1Hz로 토글되는지 테스트
 
 🔶 결정 게이트
-- G3-1 시간 모델: 고정 스텝 vs 이산 이벤트(DES) vs 혼합 (스펙 §12 "Simulation Engine" 미결정)
-- G3-2 회로 해석: 자체 MNA vs ngspice-WASM(eecircuit-engine) 조기 도입
-- G3-3 MCU 사용자 코드 형식: TS/JS 스크립트 vs Arduino C 서브셋 해석
+- ~~G3-1 시간 모델~~ → 혼합
+- ~~G3-2 회로 해석~~ → 직접 구현
+- ~~G3-3 MCU 코드~~ → JS 스크립트 + Arduino식 API
 
 **완료 기준**: `physisim run examples/blink-led.system.json`이 재현 가능한 trace를 출력.
 
