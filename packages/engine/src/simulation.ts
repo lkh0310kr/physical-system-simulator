@@ -138,6 +138,8 @@ export function createSimulation(
         return { ...e, id, a: n(e.a), b: n(e.b) };
       case "drive":
         return { kind: "drive", id, node: n(e.port), voltage: e.voltage, resistance: e.resistance };
+      case "load":
+        return { kind: "load", id, node: n(e.port), current: e.current };
       case "diode":
         return { ...e, id, anode: n(e.anode), cathode: n(e.cathode) };
     }

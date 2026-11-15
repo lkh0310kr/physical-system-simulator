@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.camera-node",
+  "name": "Camera Node",
+  "description": "버튼으로 깨어나 촬영하고 무선으로 전송한 뒤 다시 절전하는 장치의 동작 모델 (절전 → 부팅 → 촬영 → 연결 → 전송). 상태별 전류와 시간으로 전력·지연을 추정한다.",
+  "outputs": {
+    "phase": {
+      "type": "enum",
+      "options": ["sleep", "boot", "capture", "connect", "transmit"],
+      "description": "현재 상태"
+    },
+    "current": { "type": "number", "unit": "A", "description": "배터리에서 끌어가는 전류" },
+    "wakes": { "type": "integer", "description": "깨어난 횟수" },
+    "sent": { "type": "integer", "description": "전송을 마친 이미지 수 (수신 기록)" },
+    "sentBytes": { "type": "integer", "description": "전송을 마친 총 바이트 (수신 기록)" }
+  },
+  "defaultBehavior": "behavior.camera-node"
+}

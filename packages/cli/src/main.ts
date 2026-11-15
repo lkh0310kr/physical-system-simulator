@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /** physisim CLI. 사용법은 USAGE 참고. */
 import { parseArgs } from "node:util";
-import { formatIssues, parseQuantity, type Registry } from "@physisim/core";
+import { formatIssues, parseQuantity, type Registry, resolveProperties } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
 import { describeModel, searchModels } from "./catalog.ts";
 import { formatTime, formatValue, unitOf } from "./format.ts";
+import { analyzeCaptures, formatReport, parsePress } from "./report.ts";
 import {
   compileFirmware,
   type Loaded,
@@ -18,6 +19,7 @@ const USAGE = `사용법:
   physisim models [검색어] [--system <system.json>] [--json]   부품 찾기
   physisim validate <system.json>                              검증
   physisim run <system.json> [--duration 2s] [--dt 1ms] [--json] [--limit 40]
+  physisim report <system.json> --press btn@1s [--duration 4s] [--node node] [--battery bat] [--per-day 10,100]
   physisim watch <system.json> [run 옵션]                       파일이 바뀔 때마다 다시 실행`;
 
 function seconds(text: string, name: string): number {
@@ -25,6 +27,15 @@ function seconds(text: string, name: string): number {
   if (q.unit.dimension.some((d, i) => d !== (i === 2 ? 1 : 0)))
     throw new Error(`--${name}은 시간이어야 한다 (예: 2s, 500ms)`);
   return q.value;
+}
+
+/** 배터리 Instance의 용량 [mAh] (Model 값 + Instance override). 없으면 0. */
+function capacityMah(loaded: Loaded, batteryId: string): number {
+  const inst = loaded.doc.instances.find((i) => i.id === batteryId);
+  const model = loaded.registry.getModel(inst?.model ?? "");
+  if (!inst || !model) return 0;
+  const r = resolveProperties(model.propertySchema, { ...model.properties, ...inst.properties });
+  return r.ok ? Number(r.value.capacity ?? 0) / 3.6 : 0;
 }
 
 async function main(argv: string[]): Promise<number> {
@@ -37,12 +48,21 @@ async function main(argv: string[]): Promise<number> {
       json: { type: "boolean", default: false },
       limit: { type: "string", default: "40" },
       system: { type: "string" },
+      press: { type: "string", multiple: true },
+      node: { type: "string", default: "node" },
+      battery: { type: "string", default: "bat" },
+      "per-day": { type: "string", default: "10,100,1000" },
       help: { type: "boolean", short: "h", default: false },
     },
   });
   const [command, file] = positionals;
   if (command === "models" && !values.help) return models(file, values.system, values.json);
-  if (values.help || !command || !file || !["validate", "run", "watch"].includes(command)) {
+  if (
+    values.help ||
+    !command ||
+    !file ||
+    !["validate", "run", "watch", "report"].includes(command)
+  ) {
     console.log(USAGE);
     return values.help ? 0 : 2;
   }
@@ -80,7 +100,15 @@ async function main(argv: string[]): Promise<number> {
     console.error(`✗ 컴파일 실패\n${formatIssues(firmware.issues)}`);
     return 1;
   }
-  const result = runLoaded(loaded.value, { duration, dt }, firmware.value);
+  const presses = (values.press ?? []).map((p) => parsePress(p, (t) => seconds(t, "press")));
+  const result = runLoaded(loaded.value, { duration, dt, presses }, firmware.value);
+  if (command === "report") {
+    const report = analyzeCaptures(result.trace, { node: values.node, battery: values.battery });
+    const capacity = capacityMah(loaded.value, values.battery);
+    const perDay = values["per-day"].split(",").map(Number);
+    console.log(`${loaded.value.doc.name}\n\n${formatReport(report, capacity, perDay)}`);
+    return 0;
+  }
   printRun(loaded.value, result, duration, values.json, limit);
   return Object.keys(result.programErrors).length ? 1 : 0;
 }

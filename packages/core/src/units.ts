@@ -42,6 +42,9 @@ const BASE_UNITS: Readonly<Record<string, Unit>> = {
   N: { dimension: dim(1, 1, -2), scale: 1 },
   Hz: { dimension: dim(0, 0, -1), scale: 1 },
   C: { dimension: dim(0, 0, 1, 1), scale: 1 },
+  // 배터리 용량·에너지 단위: 1 Ah = 3600 C, 1 Wh = 3600 J
+  Ah: { dimension: dim(0, 0, 1, 1), scale: 3600 },
+  Wh: { dimension: dim(2, 1, -2), scale: 3600 },
   F: { dimension: dim(-2, -1, 4, 2), scale: 1 },
   H: { dimension: dim(2, 1, -2, -2), scale: 1 },
   // 각도는 무차원. rad이 기준.

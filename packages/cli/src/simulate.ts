@@ -42,7 +42,19 @@ export async function compileFirmware(loaded: Loaded): Promise<Result<Map<string
   return issues.length ? { ok: false, issues } : { ok: true, value: firmware };
 }
 
+/** 시뮬레이션 중 사람이 스위치를 누르는 일정. */
+export interface Press {
+  /** 스위치 Instance ID. */
+  readonly instance: string;
+  /** 누르는 시각 [s]. */
+  readonly at: number;
+  /** 누르고 있는 시간 [s]. */
+  readonly hold: number;
+}
+
 export interface RunOptions {
+  /** 시뮬레이션 중에 누를 스위치들. */
+  readonly presses?: readonly Press[];
   /** [s] */
   readonly duration: number;
   /** [s] */
@@ -72,6 +84,12 @@ export function runLoaded(
     options.dt ? { dt: options.dt } : {},
   );
   const programs = startPrograms(sim, loaded, firmware);
+  for (const p of options.presses ?? []) {
+    sim.schedule(p.at, () => sim.dispatch(p.instance, "capability.switching", { type: "press" }));
+    sim.schedule(p.at + p.hold, () =>
+      sim.dispatch(p.instance, "capability.switching", { type: "release" }),
+    );
+  }
   const recorder = recordTrace(sim);
   sim.run(options.duration);
   const trace = recorder.stop();
