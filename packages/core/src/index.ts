@@ -3,6 +3,7 @@ export const CORE_VERSION = "0.0.0";
 
 export * from "./behavior.ts";
 export * from "./capability.ts";
+export * from "./compose.ts";
 export * from "./ids.ts";
 export * from "./instance.ts";
 export * from "./issues.ts";
