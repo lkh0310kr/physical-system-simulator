@@ -18,6 +18,7 @@ import {
   runLoaded,
 } from "./simulate.ts";
 import { formatSweep, parseAxis, sweepSystem } from "./sweep.ts";
+import { formatTune, parseConstraint, parseRange, tuneSystem } from "./tune.ts";
 import { watchSystem } from "./watch.ts";
 
 const USAGE = `사용법:
@@ -28,6 +29,7 @@ const USAGE = `사용법:
   physisim compare <a.json> <b.json> ... --press btn@1s [--duration 4s] [--per-day 100]   같은 조건에서 비교
   physisim case <system.json> [--process fdm] [--profile <profile.json>] [--out out] [--meshes <dir>]   케이스 STL/3MF + BOM (검증 통과 시에만 파일 생성)
   physisim sweep <system.json> --set r1.resistance=100,220,470 [--set …] --watch led1.brightness,r1.current [--duration 1s]   속성 값을 바꿔 가며 비교
+  physisim tune <system.json> --range r1.resistance=50..2000 --maximize led1.brightness --require led1.burnt=false [--require r1.current<=0.02]   제약을 지키는 최적값 찾기
   physisim watch <system.json> [run 옵션]                       파일이 바뀔 때마다 다시 실행`;
 
 function seconds(text: string, name: string): number {
@@ -49,6 +51,10 @@ async function main(argv: string[]): Promise<number> {
       system: { type: "string" },
       press: { type: "string", multiple: true },
       set: { type: "string", multiple: true },
+      range: { type: "string" },
+      maximize: { type: "string" },
+      minimize: { type: "string" },
+      require: { type: "string", multiple: true },
       watch: { type: "string" },
       node: { type: "string", default: "node" },
       battery: { type: "string", default: "bat" },
@@ -66,7 +72,7 @@ async function main(argv: string[]): Promise<number> {
     values.help ||
     !command ||
     !file ||
-    !["validate", "run", "watch", "report", "compare", "case", "sweep"].includes(command)
+    !["validate", "run", "watch", "report", "compare", "case", "sweep", "tune"].includes(command)
   ) {
     console.log(USAGE);
     return values.help ? 0 : 2;
@@ -105,6 +111,34 @@ async function main(argv: string[]): Promise<number> {
     }
     console.log(formatComparison(rows.value, perDay));
     return 0;
+  }
+
+  if (command === "tune") {
+    const range = parseRange(values.range ?? "");
+    const reqs = (values.require ?? []).map(parseConstraint);
+    const bad = [range, ...reqs].flatMap((r) => (r.ok ? [] : r.issues));
+    const signal = values.maximize ?? values.minimize;
+    if (bad.length || !range.ok || !signal) {
+      console.error(
+        `✗ ${bad.length ? formatIssues(bad) : "--range 와 --maximize(또는 --minimize)가 필요하다"}`,
+      );
+      return 2;
+    }
+    const goal = { signal, direction: values.maximize ? ("max" as const) : ("min" as const) };
+    const presses = (values.press ?? []).map((p) => parsePress(p, (t) => seconds(t, "press")));
+    const result = await tuneSystem(
+      file,
+      range.value,
+      goal,
+      reqs.flatMap((r) => (r.ok ? [r.value] : [])),
+      { duration, dt, presses },
+    );
+    if (!result.ok) {
+      console.error(`✗ ${formatIssues(result.issues)}`);
+      return 1;
+    }
+    console.log(formatTune(range.value, goal, result.value));
+    return result.value.best ? 0 : 1;
   }
 
   if (command === "sweep") {

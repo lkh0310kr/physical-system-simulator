@@ -124,3 +124,7 @@ Model에 `body`(박스 크기, mm)와 `mounts`를 쓰고, System의 `assembly`�
 ## 파라미터 스윕 (에이전트용)
 
 값을 바꿔 가며 같은 시뮬레이션을 반복해 비교한다: `pnpm physisim sweep <system.json> --set r1.resistance=100,220,1000 --watch led1.brightness,r1.current --duration 2s`. `--set`은 여러 번 쓰면 모든 조합을 돈다. 표는 신호별 최종·최대 값을 보여 준다(LED가 탔는지는 `led1.burnt`를 watch).
+
+## 자동 탐색 (에이전트용)
+
+제약을 지키면서 목표가 가장 좋아지는 값을 찾는다: `pnpm physisim tune <system.json> --range r1.resistance=50..2000 --maximize led1.brightness --require led1.burnt=false --require "r1.current<=0.02"`. 거친 격자 후 가장 좋은 점 주변을 다시 훑고, 제안과 평가한 값(제약 ○/×)을 보여 준다. 제약 만족 값이 없으면 종료 코드 1. 제안은 파일을 고치지 않는다 — 에이전트가 값을 확인하고 직접 반영한다.
