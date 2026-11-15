@@ -36,8 +36,15 @@ export interface FirmwareOptions {
   readonly pins?: readonly PinMap[];
   /** GPIO가 다루는 핀 수. 이보다 큰 번호의 핀 변화는 무시한다 (보드에 없는 핀). */
   readonly pinCount?: number;
-  /** 입력 핀이 읽을 논리 레벨 (보통 회로 전압 > HIGH 판정 전압). 없으면 LOW. */
+  /**
+   * 입력 핀이 읽을 논리 레벨. 보통 회로 전압 > HIGH 판정 전압.
+   * 없으면 `{instance}:{pinPrefix}{pin}` Port의 전압이 `logicLevel`/2를 넘는지로 읽는다.
+   */
   readonly readPin?: (pin: number) => boolean;
+  /** Port 이름 접두어 (핀 n → `${pinPrefix}${n}`). 기본 "D". */
+  readonly pinPrefix?: string;
+  /** HIGH 전압 [V]. 기본 5. */
+  readonly logicLevel?: number;
 }
 
 export function loadFirmware(
@@ -78,8 +85,8 @@ export function loadFirmware(
   }
 
   /** 마지막으로 GPIO에 알린 핀 상태. 리셋 직후(입력·LOW)는 알리지 않는다 — 실제로 바뀐 핀만 보인다. */
-  const known = new Map<number, { output: boolean; level: boolean }>();
-  const initial = { output: false, level: false };
+  const known = new Map<number, { output: boolean; level: boolean; pullup: boolean }>();
+  const initial = { output: false, level: false, pullup: false };
   const dispatch = (type: string, payload: unknown) => {
     try {
       sim.dispatch(instance, capability, { type, payload });
@@ -92,15 +99,20 @@ export function loadFirmware(
       const state = ports[port].pinState(bit);
       const output = state === PinState.High || state === PinState.Low;
       const level = state === PinState.High;
+      const pullup = state === PinState.InputPullUp;
       const prev = known.get(pin) ?? initial;
-      if (prev.output !== output) dispatch("pinMode", { pin, mode: output ? "output" : "input" });
+      if (prev.output !== output || prev.pullup !== pullup) {
+        dispatch("pinMode", { pin, mode: output ? "output" : "input", pullup });
+      }
       if (output && prev.level !== level) dispatch("digitalWrite", { pin, level });
-      known.set(pin, { output, level });
+      known.set(pin, { output, level, pullup });
     });
   };
-  for (const p of Object.values(ports)) p.addListener(sync);
 
-  const readPin = options.readPin ?? (() => false);
+  const prefix = options.pinPrefix ?? "D";
+  const threshold = (options.logicLevel ?? 5) / 2;
+  const readPin =
+    options.readPin ?? ((pin: number) => sim.voltage(`${instance}:${prefix}${pin}`) > threshold);
   const feedInputs = () => {
     pinMap.forEach(({ port, bit }, pin) => {
       const state = ports[port].pinState(bit);
@@ -108,6 +120,21 @@ export function loadFirmware(
         ports[port].setPin(bit, readPin(pin));
     });
   };
+
+  // PORT/DDR에 쓸 때마다 (풀업을 켜는 순간 등) 핀 상태를 알리고, 입력 핀 값을 바로 다시 넣는다.
+  // 구간 시작에만 넣으면 setup()에서 풀업을 켠 직후의 digitalRead가 한 번 어긋난다.
+  let syncing = false;
+  const onPortWrite = () => {
+    if (syncing) return; // setPin이 다시 리스너를 부르는 것을 막는다
+    syncing = true;
+    try {
+      sync();
+      feedInputs();
+    } finally {
+      syncing = false;
+    }
+  };
+  for (const p of Object.values(ports)) p.addListener(onPortWrite);
 
   const run = () => {
     if (error) return;

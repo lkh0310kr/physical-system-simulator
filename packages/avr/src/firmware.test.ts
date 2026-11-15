@@ -69,6 +69,34 @@ describe("loadFirmware (real Arduino Blink build)", () => {
   });
 });
 
+describe("INPUT_PULLUP", () => {
+  const pullupHex = readFileSync(join(import.meta.dirname, "fixtures/pullup.hex"), "utf8");
+
+  function reads(connections: string[][]) {
+    const built = buildSystem(
+      registry,
+      SystemSchema.parse({
+        name: "pullup",
+        instances: [{ id: "uno", model: "model.arduino-uno" }],
+        connections,
+      }),
+    );
+    if (!built.ok) throw new Error(JSON.stringify(built.issues));
+    const sim = createSimulation(registry, built.value);
+    const program = loadFirmware(sim, "uno", pullupHex, { pinCount: 14 });
+    sim.run(0.5);
+    return program.serial.map((l) => l.text);
+  }
+
+  it("reads HIGH on an unconnected pin, as on a real board", () => {
+    expect(new Set(reads([]))).toEqual(new Set(["1"]));
+  });
+
+  it("reads LOW when the pin is wired to GND", () => {
+    expect(new Set(reads([["uno:D2", "uno:GND.1"]]))).toEqual(new Set(["0"]));
+  });
+});
+
 describe("loadFirmware errors", () => {
   it("reports a broken HEX file instead of throwing", () => {
     expect(loadFirmware(blinkCircuit(), "uno", ":zz\n").error).toBeInstanceOf(SyntaxError);

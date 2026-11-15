@@ -157,7 +157,7 @@
 
 **6b — 부품·계측·고장** (부품 데이터는 직접 작성 + 에이전트 보조, 출처는 `metadata.source`)
 
-- [ ] P6-T1a 풀업: `INPUT_PULLUP` 핀이 회로에서 약 20kΩ으로 5V에 당겨지게 (지금은 떠 있는 핀이 0으로 읽힘)
+- [x] P6-T1a 풀업: `INPUT_PULLUP` 핀이 회로에서 약 20kΩ으로 5V에 당겨지게 (지금은 떠 있는 핀이 0으로 읽힘)
 - [ ] P6-T1b 스위치(버튼) Model, 캔버스에서 클릭으로 누르기
 - [ ] P6-T2 가변저항 Model + ADC 연결 (`analogRead`)
 - [ ] P6-T3 PWM 출력: `analogWrite` → 평균 전압으로 LED 밝기
