@@ -138,9 +138,13 @@ function Shape({
     () =>
       part.kind === "box"
         ? new BoxGeometry(...part.size)
-        : new CylinderGeometry(part.diameter / 2, part.diameter / 2, part.length, 40),
+        : part.kind === "cylinder"
+          ? new CylinderGeometry(part.diameter / 2, part.diameter / 2, part.length, 40)
+          : undefined,
     [part],
   );
+  const glbSource = useGlb(part.kind === "mesh" ? part.url : undefined);
+  const glb = useMemo(() => glbSource?.clone(), [glbSource]);
   // 신호를 따라 움직이는 부품: 평행 이동(눌리는 플런저)과 축 회전(바퀴·관절). 회전 목록은 안쪽 관절부터.
   const signalValue = (signal: string) => Number(signals[`${id}.${signal}`] ?? 0);
   const shift: [number, number, number] = [0, 0, 0];
@@ -164,21 +168,28 @@ function Shape({
   const rotations = part.motions.filter(
     (m): m is Extract<SceneMotion, { kind: "rotate" }> => m.kind === "rotate",
   );
-  const mesh = (at: readonly number[]) => (
-    <mesh
-      geometry={geometry}
-      position={[
-        position[0] - (at[0] ?? 0),
-        position[1] - (at[1] ?? 0),
-        position[2] - (at[2] ?? 0),
-      ]}
-      rotation={shapeRotation}
-      castShadow
-      receiveShadow
-    >
-      <PartMaterial part={part} glow={glow} />
-    </mesh>
-  );
+  const mesh = (at: readonly number[]) =>
+    part.kind === "mesh" ? (
+      glb ? (
+        <group position={[-(at[0] ?? 0), -(at[1] ?? 0), -(at[2] ?? 0)]}>
+          <primitive object={glb} />
+        </group>
+      ) : null
+    ) : geometry ? (
+      <mesh
+        geometry={geometry}
+        position={[
+          position[0] - (at[0] ?? 0),
+          position[1] - (at[1] ?? 0),
+          position[2] - (at[2] ?? 0),
+        ]}
+        rotation={shapeRotation}
+        castShadow
+        receiveShadow
+      >
+        <PartMaterial part={part} glow={glow} />
+      </mesh>
+    ) : null;
   if (rotations.length === 0) return mesh([0, 0, 0]);
   // 안쪽 회전부터 바깥쪽 그룹으로 감싼다: 바깥 그룹이 안쪽 그룹 전체를 돌린다
   const pivots = rotations.map((m) => m.pivot ?? part.position);

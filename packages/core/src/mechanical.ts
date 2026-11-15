@@ -86,6 +86,15 @@ export const PartShapeSchema = z.discriminatedUnion("shape", [
     color: z.string().optional(),
     motion: MotionInputSchema.optional(),
   }),
+  z.strictObject({
+    name: z.string().min(1),
+    shape: z.literal("mesh"),
+    /** 형상 파일 이름(glb, PhysiSim body 좌표계 m). 웹은 `/meshes/<파일>`에서 읽는다. 여러 개를 한 Model에 둘 수 있어 부품마다 따로 움직인다. */
+    file: z.string().min(1),
+    material: MaterialKindSchema.default("plastic"),
+    color: z.string().optional(),
+    motion: MotionInputSchema.optional(),
+  }),
 ]);
 
 /** 전기 Port가 물리적으로 닿는 지점 (납땜 패드·커넥터 핀). 배선(connections)을 3D 케이블로 그릴 때 끝점이 된다. body 중심 기준 mm. */

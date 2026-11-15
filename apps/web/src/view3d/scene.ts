@@ -54,6 +54,16 @@ export type ScenePart =
       readonly material: MaterialKind;
       readonly color: string | undefined;
       readonly motions: readonly SceneMotion[];
+    }
+  | {
+      /** body 좌표계(m)로 구워진 glb. 위치는 glb 안에 있어 position은 항상 원점. */
+      readonly kind: "mesh";
+      readonly name: string;
+      readonly position: Vec3;
+      readonly url: string;
+      readonly material: MaterialKind;
+      readonly color: string | undefined;
+      readonly motions: readonly SceneMotion[];
     };
 
 export interface SceneBox {
@@ -164,17 +174,27 @@ export function buildScene3d(loaded: LoadedSystem): SceneBox[] {
                   color: p.color,
                   motions: motionsOf(p.motion),
                 }
-              : {
-                  kind: "cylinder",
-                  name: p.name,
-                  position: v3(p.position),
-                  diameter: toMeters(p.diameter),
-                  length: toMeters(p.length),
-                  axis: p.axis,
-                  material: p.material,
-                  color: p.color,
-                  motions: motionsOf(p.motion),
-                },
+              : p.shape === "mesh"
+                ? {
+                    kind: "mesh",
+                    name: p.name,
+                    position: [0, 0, 0],
+                    url: `/meshes/${p.file}`,
+                    material: p.material,
+                    color: p.color,
+                    motions: motionsOf(p.motion),
+                  }
+                : {
+                    kind: "cylinder",
+                    name: p.name,
+                    position: v3(p.position),
+                    diameter: toMeters(p.diameter),
+                    length: toMeters(p.length),
+                    axis: p.axis,
+                    material: p.material,
+                    color: p.color,
+                    motions: motionsOf(p.motion),
+                  },
         ),
       };
     });
