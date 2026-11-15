@@ -45,7 +45,7 @@ const glyphOf = (m: Model): Glyph => {
 };
 
 export function symbolFor(m: Model): PartSymbol {
-  if (m.ports.length <= 2) {
+  if (m.ports.length >= 1 && m.ports.length <= 2) {
     const width = 80;
     const height = 40;
     const pins = m.ports.map((p, i) => ({
@@ -59,8 +59,9 @@ export function symbolFor(m: Model): PartSymbol {
   }
   // 핀이 많은 부품: 위쪽 가장자리에 선언 순서대로 한 줄 (헤더처럼).
   const margin = 30;
-  const width = margin * 2 + (m.ports.length - 1) * PIN_PITCH;
-  const height = 120;
+  // 핀이 없는 부품(벽·바닥 같은 환경)은 이름만 있는 작은 상자
+  const width = Math.max(120, margin * 2 + (m.ports.length - 1) * PIN_PITCH);
+  const height = m.ports.length === 0 ? 60 : 120;
   const pins = m.ports.map((p, i) => ({
     name: p.name,
     x: margin + i * PIN_PITCH,
