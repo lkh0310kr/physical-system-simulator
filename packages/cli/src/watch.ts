@@ -6,6 +6,7 @@ import { type FSWatcher, watch } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 import type { Issue } from "@physisim/core";
 import {
+  compileFirmware,
   type Loaded,
   loadSystemFile,
   type RunOptions,
@@ -57,14 +58,20 @@ export function watchSystem(
     );
   }
 
-  function reload() {
+  async function reload() {
     if (closed) return;
     const loaded = loadSystemFile(systemPath);
     if (loaded.ok) {
       rewatch(filesOf(systemPath, loaded.value));
+      const firmware = await compileFirmware(loaded.value);
+      if (closed) return;
+      if (!firmware.ok) {
+        onResult(firmware);
+        return;
+      }
       let run: RunResult;
       try {
-        run = runLoaded(loaded.value, options);
+        run = runLoaded(loaded.value, options, firmware.value);
       } catch (e) {
         onResult({ ok: false, issues: [{ path: systemPath, message: (e as Error).message }] });
         return;
@@ -79,10 +86,10 @@ export function watchSystem(
 
   function schedule() {
     if (timer) clearTimeout(timer);
-    timer = setTimeout(reload, debounceMs);
+    timer = setTimeout(() => void reload(), debounceMs);
   }
 
-  reload();
+  void reload();
   return {
     close() {
       closed = true;

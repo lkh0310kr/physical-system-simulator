@@ -5,7 +5,13 @@ import { formatIssues, parseQuantity, type Registry } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
 import { describeModel, searchModels } from "./catalog.ts";
 import { formatTime, formatValue, unitOf } from "./format.ts";
-import { type Loaded, loadSystemFile, type RunResult, runLoaded } from "./simulate.ts";
+import {
+  compileFirmware,
+  type Loaded,
+  loadSystemFile,
+  type RunResult,
+  runLoaded,
+} from "./simulate.ts";
 import { watchSystem } from "./watch.ts";
 
 const USAGE = `사용법:
@@ -21,7 +27,7 @@ function seconds(text: string, name: string): number {
   return q.value;
 }
 
-function main(argv: string[]): number {
+async function main(argv: string[]): Promise<number> {
   const { positionals, values } = parseArgs({
     args: argv,
     allowPositionals: true,
@@ -69,7 +75,12 @@ function main(argv: string[]): number {
     return 0;
   }
 
-  const result = runLoaded(loaded.value, { duration, dt });
+  const firmware = await compileFirmware(loaded.value);
+  if (!firmware.ok) {
+    console.error(`✗ 컴파일 실패\n${formatIssues(firmware.issues)}`);
+    return 1;
+  }
+  const result = runLoaded(loaded.value, { duration, dt }, firmware.value);
   printRun(loaded.value, result, duration, values.json, limit);
   return Object.keys(result.programErrors).length ? 1 : 0;
 }
@@ -137,9 +148,12 @@ function models(query: string | undefined, systemFile: string | undefined, json:
   return 0;
 }
 
-try {
-  process.exitCode = main(process.argv.slice(2));
-} catch (e) {
-  console.error(`✗ ${(e as Error).message}`);
-  process.exitCode = 1;
-}
+main(process.argv.slice(2)).then(
+  (code) => {
+    process.exitCode = code;
+  },
+  (e: Error) => {
+    console.error(`✗ ${e.message}`);
+    process.exitCode = 1;
+  },
+);

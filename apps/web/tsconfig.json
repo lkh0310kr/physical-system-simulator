@@ -12,8 +12,17 @@
   },
   "include": ["src"],
   "references": [
-    { "path": "../../packages/core" },
-    { "path": "../../packages/engine" },
-    { "path": "../../packages/models" }
+    {
+      "path": "../../packages/core"
+    },
+    {
+      "path": "../../packages/engine"
+    },
+    {
+      "path": "../../packages/models"
+    },
+    {
+      "path": "../../packages/avr"
+    }
   ]
 }

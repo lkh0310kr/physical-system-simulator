@@ -1,14 +1,10 @@
 /** System 파일을 읽어 검증·실행한다. 출력 형식과 무관한 부분이라 테스트와 다른 도구에서 재사용한다. */
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { type LoadedSystem, loadSystemProject, type Result } from "@physisim/core";
-import {
-  createSimulation,
-  loadProgram,
-  recordTrace,
-  type SerialLine,
-  type Trace,
-} from "@physisim/engine";
+import { isSketch, startPrograms } from "@physisim/avr";
+import { compileSketch } from "@physisim/avr/compile";
+import { type Issue, type LoadedSystem, loadSystemProject, type Result } from "@physisim/core";
+import { createSimulation, recordTrace, type SerialLine, type Trace } from "@physisim/engine";
 import { createStandardRegistry } from "@physisim/models";
 
 export type Loaded = LoadedSystem;
@@ -32,6 +28,20 @@ export function loadSystemFile(path: string): LoadResult {
   return loadSystemProject(json, read, createStandardRegistry);
 }
 
+/** 문서의 `.ino` 프로그램을 컴파일한다. Instance ID → HEX. 하나라도 실패하면 모든 오류를 돌려준다. */
+export async function compileFirmware(loaded: Loaded): Promise<Result<Map<string, string>>> {
+  const firmware = new Map<string, string>();
+  const issues: Issue[] = [];
+  for (const inst of loaded.doc.instances) {
+    const source = loaded.programs.get(inst.id);
+    if (!inst.program || !isSketch(inst.program) || source === undefined) continue;
+    const r = await compileSketch(source, { fileName: inst.program });
+    if (r.ok) firmware.set(inst.id, r.value);
+    else issues.push(...r.issues);
+  }
+  return issues.length ? { ok: false, issues } : { ok: true, value: firmware };
+}
+
 export interface RunOptions {
   /** [s] */
   readonly duration: number;
@@ -49,16 +59,19 @@ export interface RunResult {
   readonly wallMs: number;
 }
 
-export function runLoaded(loaded: Loaded, options: RunOptions): RunResult {
+/** @param firmware `.ino` 프로그램의 컴파일 결과 (`compileFirmware`). */
+export function runLoaded(
+  loaded: Loaded,
+  options: RunOptions,
+  firmware: ReadonlyMap<string, string> = new Map(),
+): RunResult {
   const started = performance.now();
   const sim = createSimulation(
     loaded.registry,
     loaded.system,
     options.dt ? { dt: options.dt } : {},
   );
-  const programs = [...loaded.programs].map(
-    ([id, source]) => [id, loadProgram(sim, id, source)] as const,
-  );
+  const programs = startPrograms(sim, loaded, firmware);
   const recorder = recordTrace(sim);
   sim.run(options.duration);
   const trace = recorder.stop();

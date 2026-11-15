@@ -12,6 +12,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@physisim/avr": "workspace:*",
     "@physisim/core": "workspace:*",
     "@physisim/engine": "workspace:*",
     "@physisim/models": "workspace:*"
