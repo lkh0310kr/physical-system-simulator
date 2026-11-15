@@ -128,3 +128,7 @@ Model에 `body`(박스 크기, mm)와 `mounts`를 쓰고, System의 `assembly`�
 ## 자동 탐색 (에이전트용)
 
 제약을 지키면서 목표가 가장 좋아지는 값을 찾는다: `pnpm physisim tune <system.json> --range r1.resistance=50..2000 --maximize led1.brightness --require led1.burnt=false --require "r1.current<=0.02"`. 거친 격자 후 가장 좋은 점 주변을 다시 훑고, 제안과 평가한 값(제약 ○/×)을 보여 준다. 제약 만족 값이 없으면 종료 코드 1. 제안은 파일을 고치지 않는다 — 에이전트가 값을 확인하고 직접 반영한다.
+
+## 새 부품 검증·승인 (에이전트용)
+
+에이전트가 부품(Model/Capability)을 쓰면 먼저 `pnpm physisim check <파일.json>`으로 스키마·교차 참조를 검증한다. 통과해도 "사람이 확인할 것"(출처 없음, 미확인 가정 수, 치수 없음)이 함께 나오고, 이 명령은 파일을 고치지 않는다. 사람이 값과 출처를 확인한 뒤 System의 `library`에 추가하는 것이 승인이다.

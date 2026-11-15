@@ -257,7 +257,7 @@
 - [ ] P8-T2 라인트레이서 데모 (PID 게인 튜닝)
 - [x] P8-T3 Agent 분석 tool: 파라미터 스윕(`physisim sweep`), 실행 결과 비교(`compare`)
 - [x] P8-T4 Agent 개선 제안 루프: `physisim tune`(범위 탐색 + 제약 + 목표, 제안과 근거 표). PID 게인 탐색은 P8-T1(PID Model) 이후
-- [ ] P8-T5 Agent의 Model 작성 + 스키마 검증 + 사용자 승인 흐름
+- [x] P8-T5 Agent의 Model 작성 + 스키마 검증(`physisim check`: 오류 + 사람이 확인할 항목) + 사용자 승인(library에 추가)
 
 🔶 결정 게이트
 - G8-1 PLC(래더 등) 지원 범위

@@ -7,6 +7,7 @@ import { formatIssues, parseQuantity, type Registry } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
 import { writeCase } from "./case.ts";
 import { describeModel, searchModels } from "./catalog.ts";
+import { checkModelFile, formatReview } from "./check-model.ts";
 import { compareSystems, formatComparison } from "./compare.ts";
 import { formatTime, formatValue, unitOf } from "./format.ts";
 import { analyzeCaptures, capacityMah, formatReport, parsePress } from "./report.ts";
@@ -30,6 +31,7 @@ const USAGE = `사용법:
   physisim case <system.json> [--process fdm] [--profile <profile.json>] [--out out] [--meshes <dir>]   케이스 STL/3MF + BOM (검증 통과 시에만 파일 생성)
   physisim sweep <system.json> --set r1.resistance=100,220,470 [--set …] --watch led1.brightness,r1.current [--duration 1s]   속성 값을 바꿔 가며 비교
   physisim tune <system.json> --range r1.resistance=50..2000 --maximize led1.brightness --require led1.burnt=false [--require r1.current<=0.02]   제약을 지키는 최적값 찾기
+  physisim check <model-or-capability.json>                    새 부품 정의 검증 + 사람이 확인할 항목 (파일은 안 고침)
   physisim watch <system.json> [run 옵션]                       파일이 바뀔 때마다 다시 실행`;
 
 function seconds(text: string, name: string): number {
@@ -72,7 +74,9 @@ async function main(argv: string[]): Promise<number> {
     values.help ||
     !command ||
     !file ||
-    !["validate", "run", "watch", "report", "compare", "case", "sweep", "tune"].includes(command)
+    !["validate", "run", "watch", "report", "compare", "case", "sweep", "tune", "check"].includes(
+      command,
+    )
   ) {
     console.log(USAGE);
     return values.help ? 0 : 2;
@@ -110,6 +114,16 @@ async function main(argv: string[]): Promise<number> {
       return 1;
     }
     console.log(formatComparison(rows.value, perDay));
+    return 0;
+  }
+
+  if (command === "check") {
+    const review = checkModelFile(file);
+    if (!review.ok) {
+      console.error(`✗ ${formatIssues(review.issues)}`);
+      return 1;
+    }
+    console.log(formatReview(review.value));
     return 0;
   }
 
