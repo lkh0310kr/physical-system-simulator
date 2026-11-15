@@ -3,9 +3,32 @@
   "name": "Resistor",
   "category": "electrical/passive",
   "propertySchema": {
-    "resistance": { "type": "number", "unit": "Ω", "min": 0 },
-    "powerRating": { "type": "number", "unit": "W", "min": 0, "default": 0.25 }
+    "resistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 0
+    },
+    "powerRating": {
+      "type": "number",
+      "unit": "W",
+      "min": 0,
+      "default": 0.25
+    }
   },
-  "properties": { "resistance": 220 },
-  "metadata": { "fidelity": "ideal" }
+  "properties": {
+    "resistance": 220
+  },
+  "ports": [
+    {
+      "name": "1",
+      "domain": "electrical"
+    },
+    {
+      "name": "2",
+      "domain": "electrical"
+    }
+  ],
+  "metadata": {
+    "fidelity": "ideal"
+  }
 }

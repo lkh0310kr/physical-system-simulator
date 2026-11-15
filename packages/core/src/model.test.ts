@@ -51,6 +51,23 @@ describe("ModelSchema", () => {
   });
 });
 
+describe("ports", () => {
+  it("parses ports with a domain and rejects duplicate names or unknown domains", () => {
+    const ports = [
+      { name: "A", domain: "electrical" },
+      { name: "C", domain: "electrical" },
+    ];
+    expect(ModelSchema.parse({ ...uno, ports }).ports).toHaveLength(2);
+    expect(ModelSchema.safeParse({ ...uno, ports: [...ports, ports[0]] }).success).toBe(false);
+    expect(
+      ModelSchema.safeParse({ ...uno, ports: [{ name: "A", domain: "thermal" }] }).success,
+    ).toBe(false);
+    expect(
+      ModelSchema.safeParse({ ...uno, ports: [{ name: "a:b", domain: "electrical" }] }).success,
+    ).toBe(false);
+  });
+});
+
 describe("resolveBehaviorId (spec §14.2)", () => {
   it("uses the model binding override first", () => {
     const binding = { capability: "capability.gpio", config: {}, behavior: "behavior.esp32-io" };

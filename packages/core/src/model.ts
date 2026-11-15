@@ -1,11 +1,23 @@
 /**
  * Model: 물리적 대상을 표현하는 재사용 가능한 정의 데이터 (스펙 §4).
- * Identity · Properties · Components · Capabilities · Metadata.
+ * Identity · Properties · Ports · Components · Capabilities · Metadata.
  */
 import { z } from "zod";
 import type { Capability } from "./capability.ts";
 import { BehaviorId, CapabilityId, ModelId } from "./ids.ts";
 import { PropertySchemaSchema, PropertyValueSchema } from "./property.ts";
+
+/** Port가 속한 물리 도메인. electrical Port는 전압(across)·전류(through)로 해석된다. */
+export const PortDomainSchema = z.enum(["electrical", "mechanical"]);
+export type PortDomain = z.infer<typeof PortDomainSchema>;
+
+/** 외부와 연결되는 접점 (핀, 단자, 축 등). */
+export const PortSchema = z.strictObject({
+  /** Model 안에서 유일한 이름 (예: "D13", "GND.1", "A"). */
+  name: z.string().regex(/^[A-Za-z0-9_.+-]+$/, { message: "영문·숫자·_.+- 만 쓸 수 있다" }),
+  domain: PortDomainSchema,
+  description: z.string().optional(),
+});
 
 /** 내부 구성 요소: 다른 Model을 이름 붙여 참조한다. */
 export const ComponentSchema = z.strictObject({
@@ -41,6 +53,7 @@ export const ModelSchema = z
     description: z.string().optional(),
     propertySchema: PropertySchemaSchema.default({}),
     properties: z.record(z.string(), PropertyValueSchema).default({}),
+    ports: z.array(PortSchema).default([]),
     components: z.array(ComponentSchema).default([]),
     capabilities: z.array(CapabilityBindingSchema).default([]),
     metadata: MetadataSchema.default({}),
@@ -54,10 +67,12 @@ export const ModelSchema = z
         seen.add(k);
       });
     };
+    dup(m.ports, (p) => p.name, "ports");
     dup(m.components, (c) => c.name, "components");
     dup(m.capabilities, (c) => c.capability, "capabilities");
   });
 
+export type Port = z.output<typeof PortSchema>;
 export type Component = z.output<typeof ComponentSchema>;
 export type CapabilityBinding = z.output<typeof CapabilityBindingSchema>;
 export type Model = z.output<typeof ModelSchema>;
