@@ -45,7 +45,7 @@
 **목표**: 스펙 §4~§6, §14를 코드로 — Model·Property Schema·Capability·Behavior 참조를 데이터로 정의하고 검증한다.
 
 - [x] P1-T1 물리량·단위 표현 (Quantity, 단위 변환·차원 검사)
-- [ ] P1-T2 Property Schema + 값 검증 (타입·단위·min/max)
+- [x] P1-T2 Property Schema + 값 검증 (타입·단위·min/max)
 - [ ] P1-T3 Capability 정의 스키마 (inputs/outputs/parameters, `defaultBehavior`)
 - [ ] P1-T4 Model 스키마 (Identity/Properties/Components/Capabilities/Metadata) + Capability 바인딩 + Behavior 해석(override → default → 오류)
 - [ ] P1-T5 Registry (Model/Capability/Behavior 등록·조회·참조 무결성 검사, Components 순환 검출)
