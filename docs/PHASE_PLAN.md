@@ -243,6 +243,14 @@
 
 ---
 
+## Phase 7e — 케이스 완성도
+
+- [x] P7-T28 스냅 돌기·홈(`snapBump`, 프로필 설정)과 뚜껑 닫힘 충돌 검사(`lid-clash`)
+- [ ] P7-T29 나사 기둥(보드 고정이 필요한 보드용), 보드 지지 리브
+- [ ] P7-T30 실제 출력·맞춤 후 프로필 보정 (사람 작업)
+
+---
+
 ## Phase 8 — Control & Agent v2
 
 - [ ] P8-T1 Control 도메인 Model: PID 컨트롤러 (블록 Behavior)

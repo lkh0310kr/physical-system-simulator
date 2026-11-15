@@ -29,6 +29,8 @@ export const ProcessProfileSchema = z
     openingClearance: mm,
     /** 맞물리는 두 면 사이 틈 (한 면당). */
     fitGap: mm,
+    /** 스냅 돌기 반지름 (혀 바깥면에서 뚜껑 홈으로). 0이면 돌기 없이 마찰로만 닫는다. */
+    snapBump: z.number().min(0),
     /** 한 번에 출력할 수 있는 크기 x·y·z. */
     buildVolume: z.tuple([mm, mm, mm]),
     /** 재료 밀도 [g/cm³] — BOM의 무게 추정용. */
@@ -56,6 +58,7 @@ export const fdmProfile: ProcessProfile = {
   partClearance: 0.3,
   openingClearance: 0.2,
   fitGap: 0.2,
+  snapBump: 0.4,
   buildVolume: [220, 220, 250],
   density: 1.24,
 };

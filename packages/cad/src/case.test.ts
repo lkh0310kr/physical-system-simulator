@@ -212,3 +212,41 @@ describe("opening spacing", () => {
     expect(r.openings).toHaveLength(2);
   });
 });
+
+describe("snap fit", () => {
+  it("adds snap bumps to the base and matching grooves to the lid", async () => {
+    const withSnap = await buildCase(sample, fdmProfile);
+    const p = resolveProfile({ snapBump: 0 });
+    if (!p.ok) throw new Error(p.message);
+    const without = await buildCase(sample, p.value);
+    expect(inspect(withSnap.geometry.base).volume).toBeGreaterThan(
+      inspect(without.geometry.base).volume,
+    );
+    expect(inspect(withSnap.geometry.lid).volume).toBeLessThan(
+      inspect(without.geometry.lid).volume,
+    );
+    expect(withSnap.ok).toBe(true);
+  });
+
+  it("closed lid does not collide with the base: bumps sit in the grooves", async () => {
+    const r = await buildCase(sample, fdmProfile);
+    expect(r.geometry.base.intersect(r.geometry.lid).volume()).toBeLessThan(1e-6);
+    expect(r.issues.some((i) => i.code === "lid-clash")).toBe(false);
+  });
+
+  it("rejects a profile whose bump is bigger than the groove it must sit in", async () => {
+    const r = await buildCase(sample, fdmProfile);
+    // 홈을 뚜껑에서 빼지 않은 상태(돌기만 있는 베이스)를 흉내: 뚜껑을 홈 없는 것으로 바꿔 검사
+    const noGroove = await buildCase(
+      sample,
+      (() => {
+        const p = resolveProfile({ snapBump: 0 });
+        if (!p.ok) throw new Error(p.message);
+        return p.value;
+      })(),
+    );
+    const g = { ...r.geometry, lid: noGroove.geometry.lid };
+    const issues = await validateCase(r.input, g, fdmProfile);
+    expect(issues.some((i) => i.code === "lid-clash")).toBe(true);
+  });
+});

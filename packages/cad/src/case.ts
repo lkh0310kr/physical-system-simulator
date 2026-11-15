@@ -5,7 +5,8 @@
  *   베이스 벽 = [뚜껑 치마가 덮는 바깥쪽][틈][혀(tongue) — 뚜껑 안쪽으로 올라감] → 공동(cavity)
  *   뚜껑 = 윗판 + 아래로 내려가는 치마. 혀와 치마가 `lipH`만큼 겹쳐 눌러 끼움(press-fit)으로 닫힌다.
  * 공동은 모든 부품의 외곽 상자 + 부품 여유다. 부품 외곽은 축 정렬 상자(AABB)이므로 여유 공간이 실제보다 클 수 있다.
- * 스냅핏·나사는 아직 없다: 부품은 상자 여유와 마찰·접착으로 잡는다.
+ * 뚜껑은 혀 바깥면의 반원 스냅 돌기가 치마 안쪽 홈에 걸려 닫힌다(`snapBump`, 0이면 마찰만). 나사 기둥은 아직 없고
+ * 부품은 상자 여유와 마찰·접착으로 잡는다. 돌기 치수는 출력 후 맞춤이 필요한 가정이다.
  * 단위는 mm. 좌표는 System의 assembly 좌표 그대로다.
  */
 import {
@@ -284,6 +285,38 @@ export async function generateCase(
   let lid = grow(W, cz1, outer.max[2]).add(
     grow(W, zJoin, cz1).subtract(grow(tongue + profile.fitGap, zJoin - 1, cz1 + 1)),
   );
+
+  // 스냅 돌기: 혀 바깥면의 반원 돌기가 뚜껑 치마 안쪽 홈에 걸린다. 네 변 중앙 절반 길이.
+  const r = profile.snapBump;
+  if (r > 0) {
+    const zs = cz1 - LIP_HEIGHT / 2;
+    const sides: { axis: 0 | 1; at: number; mid: number; len: number; c: number }[] = [
+      { axis: 1, at: cx1 + tongue, mid: (cy0 + cy1) / 2, len: (cy1 - cy0) / 2, c: 0 },
+      { axis: 1, at: cx0 - tongue, mid: (cy0 + cy1) / 2, len: (cy1 - cy0) / 2, c: 0 },
+      { axis: 0, at: cy1 + tongue, mid: (cx0 + cx1) / 2, len: (cx1 - cx0) / 2, c: 0 },
+      { axis: 0, at: cy0 - tongue, mid: (cx0 + cx1) / 2, len: (cx1 - cx0) / 2, c: 0 },
+    ];
+    for (const sd of sides) {
+      const bump = cylinderAlong(
+        m,
+        sd.axis,
+        sd.mid - sd.len / 2,
+        sd.mid + sd.len / 2,
+        [sd.at, zs],
+        2 * r,
+      );
+      const groove = cylinderAlong(
+        m,
+        sd.axis,
+        sd.mid - sd.len / 2 - 0.4,
+        sd.mid + sd.len / 2 + 0.4,
+        [sd.at, zs],
+        2 * (r + 0.1),
+      );
+      base = base.add(bump);
+      lid = lid.subtract(groove);
+    }
+  }
 
   const uncut = { base, lid };
   const cutters: { opening: CaseOpening; solid: Solid }[] = [];

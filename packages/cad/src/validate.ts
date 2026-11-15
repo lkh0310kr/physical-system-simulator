@@ -57,6 +57,11 @@ export async function validateCase(
       );
   }
 
+  // 1b. 뚜껑을 닫았을 때 베이스와 겹치지 않는가 (돌기가 홈에 들어가는지 포함)
+  const clash = g.base.intersect(g.lid).volume();
+  if (clash > 1e-6)
+    err("lid-clash", `뚜껑이 베이스와 ${clash.toFixed(3)} mm³ 겹친다 — 닫히지 않는다`);
+
   // 2. 벽·판 두께
   const walls: [string, number][] = [
     ["벽", profile.wall],
