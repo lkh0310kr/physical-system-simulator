@@ -52,6 +52,27 @@
 - OV5640 JPEG 5MP 활성 ≈ 30 + 110 = **140 mA** (센서 레일 합, 3.3 V 환산 근사).
 - Case A 촬영 중 노드 전류 = ESP32-S3 240 MHz 듀얼코어 66 mA + 센서.
 
+## 시작 하드웨어 후보: Seeed XIAO ESP32S3 Sense (P7-T13, 2026-11-15 확인)
+
+출처: Seeed 공식 위키 `wiki.seeedstudio.com/xiao_esp32s3_getting_started/` (제품 페이지 `seeedstudio.com/XIAO-ESP32S3-Sense-p-5639.html`는 센서 표기가 위키와 달라 오래된 것으로 봄).
+
+| 항목 | 값 | 상태 |
+|---|---|---|
+| 메인 보드 크기 | 21 × 17.8 mm | 확인 (위키 사양표) |
+| 확장 보드 포함 높이 | 21 × 17.8 × 15 mm | 확인 (카메라 포함 여부는 문서에 없음) |
+| 카메라 센서 | OV5640(AF) 현행. OV2640 단종, 전환기에는 OV5640 또는 OV3660 출하 | 확인 |
+| 입력 전압 | USB-C 5 V, BAT 3.7 V | 확인 |
+| 3V3 출력 | 최대 700 mA | 확인 |
+| U.FL 안테나 | 전면 좌하단 | 확인 |
+| 배터리 패드 극성 | 음극이 USB 포트 쪽 | 확인 |
+| 딥슬립 전류 | 메인 14 µA / Sense 3 mA로 표기(비정상적으로 큼) | **미확인** — 소비전력 문서로 재확인 필요 |
+| 충전 전류 | 50 mA / 100 mA 두 값이 표에 있으나 제품 매핑 불명 | **미확인** |
+| USB-C·버튼·패드·카메라 렌즈 위치, 두께, 장착 구멍 | 문서에 수치 없음 | **미확인** — 아래 DXF/3D 파일 필요 |
+
+공식 치수 파일(내려받기 전, 사용자 허락 필요): `files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/res/` 아래
+`XIAO_ESP32S3_v1.1_Dimensioning.dxf`, `XIAO_ESP32S3_ExpBoard_v1.0_top.dxf`, `XIAO_ESP32S3_ExpBoard_v1.0_bot.dxf`,
+`seeed-studio-xiao-esp32s3-sense-3d_model.zip` (위 이름은 문서 요약에서 얻은 것이라 실제 링크 확인 필요).
+
 ## 미확인 (가정으로 남아 있음 — 실측 또는 추가 조사 필요)
 
 | 항목 | 현재 모델 가정 | 비고 |
