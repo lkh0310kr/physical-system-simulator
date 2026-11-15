@@ -25,6 +25,9 @@ pnpm physisim run examples/blink-led.system.json --duration 2s
 pnpm physisim watch examples/blink-led.system.json         # 파일이 바뀔 때마다 다시 실행
 pnpm physisim case examples/camera-case-xiao-s3-sense.system.json            # 케이스 STL/3MF + BOM (out/)
 pnpm physisim report examples/camera-case-a2-ov2640.system.json --press btn@1s   # 촬영 지연·에너지·배터리 수명
+pnpm physisim sweep examples/blink-led.system.json --set r1.resistance=100,220,1000 --watch led1.brightness   # 값 바꿔 비교
+pnpm physisim tune examples/motor-pid.system.json --range ctrl.ki=0.05..5 --minimize ctrl.ise --stat final      # 제약 하 최적값 탐색
+pnpm physisim check my-part.model.json                     # 새 부품 정의 검증 + 사람이 확인할 항목
 ```
 
 ## 문서
