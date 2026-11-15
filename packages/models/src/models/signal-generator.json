@@ -1,0 +1,45 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.signal-generator",
+  "name": "Signal generator (block)",
+  "category": "control/source",
+  "description": "사인·사각·삼각파를 신호로 내보내는 시험 입력 블록.",
+  "propertySchema": {
+    "waveform": {
+      "type": "enum",
+      "options": ["sine", "square", "triangle"],
+      "default": "sine"
+    },
+    "amplitude": {
+      "type": "number",
+      "default": 1
+    },
+    "frequency": {
+      "type": "number",
+      "unit": "Hz",
+      "min": 0,
+      "default": 0.5
+    },
+    "offset": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "out",
+      "domain": "signal",
+      "direction": "out",
+      "description": "파형 신호"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.signal-source"
+    }
+  ],
+  "metadata": {
+    "fidelity": "ideal"
+  }
+}

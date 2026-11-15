@@ -32,6 +32,8 @@ describe("standard library", () => {
       "model.photoresistor",
       "model.line-sensor",
       "model.steering-mixer",
+      "model.servo-sg92r",
+      "model.signal-generator",
       "model.line-floor",
       "model.wall",
       "model.resistor",
