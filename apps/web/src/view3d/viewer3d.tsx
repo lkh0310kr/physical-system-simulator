@@ -129,6 +129,8 @@ function Part({
   const edges = useMemo(() => new EdgesGeometry(geometry), [geometry]);
   const rotation = box.rotation.map((d) => (d * Math.PI) / 180) as [number, number, number];
   const detailed = box.parts.length > 0;
+  const [hover, setHover] = useState(false);
+  const glow = activity + (hover ? 0.3 : 0);
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: three.js 객체이지 DOM 요소가 아니다 — r3f의 이벤트는 레이캐스트 이벤트다.
     <group
@@ -144,10 +146,19 @@ function Part({
         onPress("press");
       }}
       onPointerUp={() => pressable && onPress("release")}
-      onPointerOut={() => pressable && onPress("release")}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHover(true);
+        document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={() => {
+        setHover(false);
+        document.body.style.cursor = "";
+        if (pressable) onPress("release");
+      }}
     >
       {detailed ? (
-        box.parts.map((p) => <Shape key={p.name} part={p} glow={activity * 0.35} />)
+        box.parts.map((p) => <Shape key={p.name} part={p} glow={glow * 0.35} />)
       ) : (
         <mesh geometry={geometry} castShadow receiveShadow>
           {/* 실치수는 채운 면, 자리표시(치수 가정)는 투명하게 — 가정을 실물처럼 보이게 하지 않는다.
@@ -155,7 +166,7 @@ function Part({
           <meshStandardMaterial
             color={selected ? ACCENT : (box.color ?? REAL)}
             emissive={ACCENT}
-            emissiveIntensity={activity * 1.2}
+            emissiveIntensity={glow * 1.2}
             transparent={!box.real}
             opacity={box.real ? 1 : 0.18 + activity * 0.5}
             roughness={0.6}
