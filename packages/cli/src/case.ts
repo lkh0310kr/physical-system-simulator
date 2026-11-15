@@ -8,6 +8,7 @@ import {
   type CaseIssue,
   formatBom,
   inspect,
+  meshDirReader,
   type ProcessProfile,
   printLayout,
   write3mf,
@@ -31,8 +32,13 @@ export async function writeCase(
   profile: ProcessProfile,
   outDir: string,
   systemFile: string,
+  meshDir?: string,
 ): Promise<CaseOutput> {
-  const result = await buildCase(loaded, profile);
+  const result = await buildCase(
+    loaded,
+    profile,
+    meshDir ? { readMesh: meshDirReader(meshDir) } : {},
+  );
   const { geometry: g } = result;
   const stats = {
     base: inspect(g.base),

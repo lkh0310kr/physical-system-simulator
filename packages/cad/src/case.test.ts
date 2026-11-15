@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import { buildCase } from "./build.ts";
 import { type CaseInput, generateCase, printLayout } from "./case.ts";
 import { inspect } from "./geometry.ts";
+import { meshDirReader } from "./mesh-dir.ts";
 import { fdmProfile, resolveProfile } from "./process.ts";
 import { hasErrors, validateCase } from "./validate.ts";
 
@@ -145,5 +146,38 @@ describe("case validation", () => {
     expect(codes).toContain("deep-hole");
     expect(codes).toContain("bridge");
     expect(r.ok).toBe(true);
+  });
+});
+
+describe("exact mesh interference", () => {
+  const readMesh = meshDirReader(resolve(root, "apps/web/public/meshes"));
+
+  it("the real XIAO and battery meshes fit the generated case (no interference, no missing mesh)", async () => {
+    const r = await buildCase(sample, fdmProfile, { readMesh });
+    expect(
+      r.issues.filter((i) => i.code === "mesh-interference" || i.code === "mesh-missing"),
+    ).toEqual([]);
+    expect(r.input.parts.every((p) => p.mesh)).toBe(true);
+  });
+
+  it("warns that only boxes were checked when the mesh file cannot be read", async () => {
+    const r = await buildCase(sample, fdmProfile, { readMesh: () => undefined });
+    expect(r.issues.filter((i) => i.code === "mesh-missing")).toHaveLength(2);
+    expect(r.ok).toBe(true);
+  });
+
+  it("rejects a case whose cavity is too small for the real geometry", async () => {
+    const r = await buildCase(sample, fdmProfile);
+    // 보드를 작은 상자로 속여 공동을 줄이면, 실제 형상이 벽·뚜껑을 파고든다
+    const input: CaseInput = {
+      ...r.input,
+      parts: r.input.parts.map((p) =>
+        p.mesh && p.id === "node" ? { ...p, min: [-2, -2, -2], max: [2, 2, 2] } : p,
+      ),
+      openings: [],
+    };
+    const g = await generateCase(input, fdmProfile);
+    const issues = await validateCase(input, g, fdmProfile, { readMesh });
+    expect(issues.some((i) => i.code === "mesh-interference")).toBe(true);
   });
 });

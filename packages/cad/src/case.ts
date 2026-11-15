@@ -38,6 +38,8 @@ export interface CasePart {
   readonly model: string;
   readonly min: Vec3;
   readonly max: Vec3;
+  /** 제작사 형상 파일 이름과 배치 (정밀 간섭 검사용). 위치 mm, 회전 도. */
+  readonly mesh?: { readonly file: string; readonly position: Vec3; readonly rotation: Vec3 };
 }
 
 export interface CaseOpening {
@@ -99,6 +101,15 @@ export function caseInputOf(loaded: LoadedSystem): CaseInput {
       model: inst?.model ?? "",
       min: b.min.map((v) => v * MM) as unknown as Vec3,
       max: b.max.map((v) => v * MM) as unknown as Vec3,
+      ...(model?.body?.mesh
+        ? {
+            mesh: {
+              file: model.body.mesh,
+              position: item.position.map((v) => v * MM) as unknown as Vec3,
+              rotation: item.rotation,
+            },
+          }
+        : {}),
     });
     const placed = assembly[item.id];
     const rotation = (placed?.rotation ?? [0, 0, 0]) as [number, number, number];

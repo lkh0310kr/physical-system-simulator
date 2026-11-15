@@ -5,6 +5,7 @@
 import type { CaseGeometry, CaseInput } from "./case.ts";
 import { skirtOf, tongueOf } from "./case.ts";
 import { box, inspect, loadGeometry } from "./geometry.ts";
+import { solidsOfGlb } from "./glb.ts";
 import type { ProcessProfile } from "./process.ts";
 
 export interface CaseIssue {
@@ -20,10 +21,19 @@ const DEEP_RATIO = 5;
 /** 개구부 기준점이 부품 상자에서 이만큼(mm) 벗어나도 부품 위로 본다. */
 const MOUNT_SLACK = 0.5;
 
+export interface ValidateOptions {
+  /** 형상 파일 이름 → glb 내용. 주면 박스가 아니라 실제 형상으로도 간섭을 검사한다. */
+  readonly readMesh?: (file: string) => Uint8Array | undefined;
+}
+
+/** 실제 형상이 케이스와 이만큼(mm³) 넘게 겹치면 거부한다. 메시 삼각분할 오차를 넘기는 값. */
+const MESH_OVERLAP = 0.5;
+
 export async function validateCase(
   input: CaseInput,
   g: CaseGeometry,
   profile: ProcessProfile,
+  options: ValidateOptions = {},
 ): Promise<CaseIssue[]> {
   const m = await loadGeometry();
   const issues: CaseIssue[] = [];
@@ -64,6 +74,30 @@ export async function validateCase(
   for (const p of input.parts) {
     const v = shell.intersect(box(m, p.min, p.max)).volume();
     if (v > 1e-6) err("interference", `부품 ${p.id}가 케이스와 ${v.toFixed(2)} mm³ 겹친다`);
+  }
+
+  // 3b. 제작사 형상으로 정밀 간섭 (박스 검사는 통과해도 실제 형상이 닿는지는 다르다)
+  const exact: string[] = [];
+  for (const p of input.parts) {
+    if (!p.mesh) continue;
+    const data = options.readMesh?.(p.mesh.file);
+    if (!data) {
+      warn("mesh-missing", `부품 ${p.id}: 형상 파일 ${p.mesh.file}을 못 읽어 박스로만 검사했다`);
+      continue;
+    }
+    const solids = await solidsOfGlb(data);
+    exact.push(p.id);
+    const [rx, ry, rz] = p.mesh.rotation;
+    for (const s of solids) {
+      const placed = s
+        .rotate([0, 0, rz])
+        .rotate([0, ry, 0])
+        .rotate([rx, 0, 0])
+        .translate([...p.mesh.position] as [number, number, number]);
+      const v = shell.intersect(placed).volume();
+      if (v > MESH_OVERLAP)
+        err("mesh-interference", `부품 ${p.id}의 실제 형상이 케이스와 ${v.toFixed(2)} mm³ 겹친다`);
+    }
   }
 
   // 4. 개구부

@@ -6,11 +6,13 @@
 import { readFileSync } from "node:fs";
 import type { ServerResponse } from "node:http";
 import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   bomCsv,
   bomOf,
   buildCase,
   inspect,
+  meshDirReader,
   meshOf,
   printLayout,
   resolveProfile,
@@ -20,6 +22,9 @@ import {
 import { loadSystemProject } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
 import { resolveInside } from "./project-api.ts";
+
+/** 웹 앱이 서비스하는 제작사 형상 폴더 — 정밀 간섭 검사에도 같은 파일을 쓴다. */
+const MESH_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../public/meshes");
 
 const json = (res: ServerResponse, status: number, data: unknown) => {
   res.statusCode = status;
@@ -64,7 +69,9 @@ export async function handleCase(
   const profile = resolveProfile(url.searchParams.get("process") ?? undefined);
   if (!profile.ok) return json(res, 400, { message: profile.message });
 
-  const result = await buildCase(loaded.value, profile.value);
+  const result = await buildCase(loaded.value, profile.value, {
+    readMesh: meshDirReader(MESH_DIR),
+  });
   const g = result.geometry;
   if (!download) {
     const pack = (solid: typeof g.base) => {
