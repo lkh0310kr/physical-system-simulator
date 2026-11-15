@@ -13,10 +13,12 @@ import { potentiometer } from "./behaviors/potentiometer.ts";
 import { powerSupply } from "./behaviors/power-supply.ts";
 import { resistor as resistorBehavior } from "./behaviors/resistor.ts";
 import { switchBehavior } from "./behaviors/switch.ts";
+import { voltmeter } from "./behaviors/voltmeter.ts";
 import batteryCapability from "./capabilities/battery.json" with { type: "json" };
 import cameraNodeCapability from "./capabilities/camera-node.json" with { type: "json" };
 import gpio from "./capabilities/gpio.json" with { type: "json" };
 import lightEmission from "./capabilities/light-emission.json" with { type: "json" };
+import measurement from "./capabilities/measurement.json" with { type: "json" };
 import potentiometry from "./capabilities/potentiometry.json" with { type: "json" };
 import powerSupplyCapability from "./capabilities/power-supply.json" with { type: "json" };
 import resistance from "./capabilities/resistance.json" with { type: "json" };
@@ -31,6 +33,7 @@ import esp32S3Chip from "./models/esp32-s3-qfn56.json" with { type: "json" };
 import led from "./models/led.json" with { type: "json" };
 import liIonCell from "./models/li-ion-cell.json" with { type: "json" };
 import lipo1317 from "./models/lipo-adafruit-1317.json" with { type: "json" };
+import multimeter from "./models/multimeter.json" with { type: "json" };
 import ov2640Sensor from "./models/ov2640-sensor.json" with { type: "json" };
 import ov5640Sensor from "./models/ov5640-sensor.json" with { type: "json" };
 import potentiometerModel from "./models/potentiometer.json" with { type: "json" };
@@ -50,6 +53,7 @@ export {
   powerSupply,
   resistorBehavior,
   switchBehavior,
+  voltmeter,
 };
 
 /** 표준 라이브러리 정의 묶음. */
@@ -60,6 +64,7 @@ export const standardLibrary: LibraryInput = {
     digitalIo,
     ledBehavior,
     resistorBehavior,
+    voltmeter,
     switchBehavior,
     potentiometer,
     powerSupply,
@@ -70,6 +75,7 @@ export const standardLibrary: LibraryInput = {
     gpio,
     lightEmission,
     resistance,
+    measurement,
     switching,
     potentiometry,
     powerSupplyCapability,
@@ -87,6 +93,7 @@ export const standardLibrary: LibraryInput = {
     ov5640Sensor,
     xiaoSense,
     resistor,
+    multimeter,
     pushbutton,
     toggleSwitch,
     potentiometerModel,

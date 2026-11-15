@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.measurement",
+  "name": "Measurement",
+  "description": "회로의 두 점 사이를 측정해 값을 읽어 준다.",
+  "outputs": {
+    "reading": {
+      "type": "number",
+      "unit": "V",
+      "description": "V 단자 − COM 단자 전압"
+    }
+  },
+  "defaultBehavior": "behavior.voltmeter"
+}

@@ -166,7 +166,7 @@
 - [x] P6-T1b 센서 Model: 포토레지스터, 초음파 센서
 - [x] P6-T3 모터 드라이버, DC 모터(전기적 모델), 서보
 - [x] P6-T4 고장 모델: 과전류 LED 소손(절대 최대 전류 초과 지속 → 개방, 3D에서 탄 색·"소손" 표시). 과전압 경고는 후속
-- [ ] P6-T5 계측기 Model: 멀티미터, 오실로스코프(trace 뷰)
+- [ ] P6-T5 계측기 Model: 멀티미터 DC 전압 ✓(입력 저항 부하 효과 포함), 전류·저항 측정·오실로스코프(trace 뷰)는 후속
 - [ ] P6-T6 비선형 소자 Solver (다이오드 Newton-Raphson) 또는 SPICE 연동
 - [ ] P6-T7 두 번째 MCU (ESP32 또는 Pico)로 Capability 재사용·override 검증
 

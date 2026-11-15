@@ -24,6 +24,7 @@ describe("standard library", () => {
       "model.ov5640-sensor",
       "model.xiao-esp32s3-sense",
       "model.resistor",
+      "model.multimeter",
       "model.pushbutton",
       "model.toggle-switch",
       "model.potentiometer",
