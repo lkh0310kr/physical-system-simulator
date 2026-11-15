@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { PropertyDefinitionSchema, type PropertySchema, resolveProperties } from "./property.ts";
+import {
+  numberOf,
+  PropertyDefinitionSchema,
+  type PropertySchema,
+  resolveProperties,
+} from "./property.ts";
 
 const led: PropertySchema = {
   forwardVoltage: { type: "number", unit: "V", min: 0, max: 10 },
@@ -53,5 +58,13 @@ describe("PropertyDefinitionSchema", () => {
       false,
     );
     expect(PropertyDefinitionSchema.safeParse({ type: "number", unti: "V" }).success).toBe(false);
+  });
+});
+
+describe("numberOf", () => {
+  it("returns numeric values and throws on anything else", () => {
+    expect(numberOf({ a: 1 }, "a")).toBe(1);
+    expect(() => numberOf({ a: "x" }, "a")).toThrow(TypeError);
+    expect(() => numberOf({}, "a")).toThrow(TypeError);
   });
 });

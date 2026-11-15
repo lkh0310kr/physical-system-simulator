@@ -1,0 +1,19 @@
+{
+  "id": "model.arduino-uno",
+  "name": "Arduino UNO R3",
+  "category": "electronics/board",
+  "propertySchema": {
+    "operatingVoltage": { "type": "number", "unit": "V" },
+    "clockSpeed": { "type": "number", "unit": "MHz" }
+  },
+  "properties": { "operatingVoltage": 5, "clockSpeed": 16 },
+  "components": [{ "name": "mcu", "model": "model.atmega328p" }],
+  "capabilities": [
+    { "capability": "capability.gpio", "config": { "pinCount": 20, "logicLevel": 5 } }
+  ],
+  "metadata": {
+    "manufacturer": "Arduino",
+    "source": "https://docs.arduino.cc/hardware/uno-rev3/",
+    "fidelity": "approximate"
+  }
+}

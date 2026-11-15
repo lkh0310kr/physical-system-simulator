@@ -1,0 +1,19 @@
+{
+  "id": "model.atmega328p",
+  "name": "ATmega328P",
+  "category": "electronics/mcu",
+  "propertySchema": {
+    "maxClockSpeed": { "type": "number", "unit": "MHz", "min": 0 },
+    "flash": { "type": "integer", "min": 0, "description": "bytes" },
+    "sram": { "type": "integer", "min": 0, "description": "bytes" }
+  },
+  "properties": { "maxClockSpeed": 20, "flash": 32768, "sram": 2048 },
+  "capabilities": [
+    { "capability": "capability.gpio", "config": { "pinCount": 23, "logicLevel": 5 } }
+  ],
+  "metadata": {
+    "manufacturer": "Microchip",
+    "source": "https://www.microchip.com/en-us/product/atmega328p",
+    "fidelity": "approximate"
+  }
+}

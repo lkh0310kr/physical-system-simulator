@@ -1,0 +1,27 @@
+{
+  "id": "capability.gpio",
+  "name": "GPIO",
+  "description": "범용 디지털 입출력 핀. 신호는 핀 하나 기준.",
+  "inputs": {
+    "mode": { "type": "enum", "options": ["input", "output"], "default": "input" },
+    "write": {
+      "type": "boolean",
+      "default": false,
+      "description": "출력 모드에서 내보낼 논리 레벨"
+    },
+    "external": {
+      "type": "boolean",
+      "default": false,
+      "description": "입력 모드에서 외부가 주는 논리 레벨"
+    }
+  },
+  "outputs": {
+    "driving": { "type": "boolean", "description": "핀이 레벨을 직접 구동 중인지" },
+    "level": { "type": "boolean", "description": "핀의 현재 논리 레벨" }
+  },
+  "parameters": {
+    "pinCount": { "type": "integer", "min": 1 },
+    "logicLevel": { "type": "number", "unit": "V", "min": 0, "description": "HIGH 전압" }
+  },
+  "defaultBehavior": "behavior.digital-io"
+}

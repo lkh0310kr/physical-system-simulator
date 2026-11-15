@@ -150,3 +150,10 @@ export function resolveProperties(
   }
   return issues.length ? fail(issues) : ok(resolved);
 }
+
+/** 정규화된 값에서 숫자를 꺼낸다. 없거나 숫자가 아니면 throw (Model 검증이 보장해야 하는 불변 조건). */
+export function numberOf(values: ResolvedValues, key: string): number {
+  const v = values[key];
+  if (typeof v !== "number") throw new TypeError(`숫자 속성이 아니다: ${key}`);
+  return v;
+}

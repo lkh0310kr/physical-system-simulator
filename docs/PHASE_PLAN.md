@@ -51,7 +51,7 @@
 - [x] P1-T5 Registry (Model/Capability/Behavior 등록·조회·참조 무결성 검사, Components 순환 검출)
 - [x] P1-T6 JSON 로더 + 사람이 읽을 수 있는 검증 오류 메시지
 - [x] P1-T7 JSON Schema 내보내기 (`z.toJSONSchema`) — Agent·에디터용
-- [ ] P1-T8 `@physisim/models` 시작: `capability.gpio`, `model.led`, `model.resistor`, `model.arduino-uno` (+ `model.atmega328p` Component)
+- [x] P1-T8 `@physisim/models` 시작: `capability.gpio`, `model.led`, `model.resistor`, `model.arduino-uno` (+ `model.atmega328p` Component)
 
 🔶 결정 게이트
 - ~~G1-1 단위 시스템~~ → 자체 경량 구현
