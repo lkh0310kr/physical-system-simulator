@@ -1,0 +1,1225 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.line-floor",
+  "name": "Floor with a sine line (environment)",
+  "category": "mechanical/environment",
+  "description": "선 추종 시뮬레이션용 바닥. 검은 사인 곡선(진폭 0.25 m, 파장 2 m)이 점선으로 그려져 있다 — 선 센서 모델의 amplitude·wavelength와 맞춘 표시용 환경이다.",
+  "ports": [],
+  "capabilities": [],
+  "metadata": {
+    "fidelity": "ideal"
+  },
+  "body": {
+    "size": [3000, 1400, 2],
+    "parts": [
+      {
+        "name": "floor",
+        "shape": "box",
+        "position": [1000, 0, -1],
+        "size": [3000, 1400, 2],
+        "material": "plastic",
+        "color": "#d9d9d4"
+      },
+      {
+        "name": "line-0",
+        "shape": "box",
+        "position": [0, 0.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-1",
+        "shape": "box",
+        "position": [20, 15.7, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-2",
+        "shape": "box",
+        "position": [40, 31.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-3",
+        "shape": "box",
+        "position": [60, 46.8, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-4",
+        "shape": "box",
+        "position": [80, 62.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-5",
+        "shape": "box",
+        "position": [100, 77.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-6",
+        "shape": "box",
+        "position": [120, 92.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-7",
+        "shape": "box",
+        "position": [140, 106.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-8",
+        "shape": "box",
+        "position": [160, 120.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-9",
+        "shape": "box",
+        "position": [180, 134.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-10",
+        "shape": "box",
+        "position": [200, 146.9, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-11",
+        "shape": "box",
+        "position": [220, 159.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-12",
+        "shape": "box",
+        "position": [240, 171.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-13",
+        "shape": "box",
+        "position": [260, 182.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-14",
+        "shape": "box",
+        "position": [280, 192.6, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-15",
+        "shape": "box",
+        "position": [300, 202.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-16",
+        "shape": "box",
+        "position": [320, 211.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-17",
+        "shape": "box",
+        "position": [340, 219.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-18",
+        "shape": "box",
+        "position": [360, 226.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-19",
+        "shape": "box",
+        "position": [380, 232.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-20",
+        "shape": "box",
+        "position": [400, 237.8, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-21",
+        "shape": "box",
+        "position": [420, 242.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-22",
+        "shape": "box",
+        "position": [440, 245.6, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-23",
+        "shape": "box",
+        "position": [460, 248.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-24",
+        "shape": "box",
+        "position": [480, 249.5, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-25",
+        "shape": "box",
+        "position": [500, 250.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-26",
+        "shape": "box",
+        "position": [520, 249.5, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-27",
+        "shape": "box",
+        "position": [540, 248.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-28",
+        "shape": "box",
+        "position": [560, 245.6, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-29",
+        "shape": "box",
+        "position": [580, 242.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-30",
+        "shape": "box",
+        "position": [600, 237.8, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-31",
+        "shape": "box",
+        "position": [620, 232.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-32",
+        "shape": "box",
+        "position": [640, 226.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-33",
+        "shape": "box",
+        "position": [660, 219.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-34",
+        "shape": "box",
+        "position": [680, 211.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-35",
+        "shape": "box",
+        "position": [700, 202.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-36",
+        "shape": "box",
+        "position": [720, 192.6, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-37",
+        "shape": "box",
+        "position": [740, 182.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-38",
+        "shape": "box",
+        "position": [760, 171.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-39",
+        "shape": "box",
+        "position": [780, 159.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-40",
+        "shape": "box",
+        "position": [800, 146.9, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-41",
+        "shape": "box",
+        "position": [820, 134.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-42",
+        "shape": "box",
+        "position": [840, 120.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-43",
+        "shape": "box",
+        "position": [860, 106.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-44",
+        "shape": "box",
+        "position": [880, 92.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-45",
+        "shape": "box",
+        "position": [900, 77.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-46",
+        "shape": "box",
+        "position": [920, 62.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-47",
+        "shape": "box",
+        "position": [940, 46.8, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-48",
+        "shape": "box",
+        "position": [960, 31.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-49",
+        "shape": "box",
+        "position": [980, 15.7, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-50",
+        "shape": "box",
+        "position": [1000, 0.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-51",
+        "shape": "box",
+        "position": [1020, -15.7, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-52",
+        "shape": "box",
+        "position": [1040, -31.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-53",
+        "shape": "box",
+        "position": [1060, -46.8, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-54",
+        "shape": "box",
+        "position": [1080, -62.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-55",
+        "shape": "box",
+        "position": [1100, -77.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-56",
+        "shape": "box",
+        "position": [1120, -92.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-57",
+        "shape": "box",
+        "position": [1140, -106.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-58",
+        "shape": "box",
+        "position": [1160, -120.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-59",
+        "shape": "box",
+        "position": [1180, -134.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-60",
+        "shape": "box",
+        "position": [1200, -146.9, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-61",
+        "shape": "box",
+        "position": [1220, -159.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-62",
+        "shape": "box",
+        "position": [1240, -171.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-63",
+        "shape": "box",
+        "position": [1260, -182.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-64",
+        "shape": "box",
+        "position": [1280, -192.6, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-65",
+        "shape": "box",
+        "position": [1300, -202.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-66",
+        "shape": "box",
+        "position": [1320, -211.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-67",
+        "shape": "box",
+        "position": [1340, -219.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-68",
+        "shape": "box",
+        "position": [1360, -226.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-69",
+        "shape": "box",
+        "position": [1380, -232.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-70",
+        "shape": "box",
+        "position": [1400, -237.8, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-71",
+        "shape": "box",
+        "position": [1420, -242.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-72",
+        "shape": "box",
+        "position": [1440, -245.6, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-73",
+        "shape": "box",
+        "position": [1460, -248.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-74",
+        "shape": "box",
+        "position": [1480, -249.5, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-75",
+        "shape": "box",
+        "position": [1500, -250.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-76",
+        "shape": "box",
+        "position": [1520, -249.5, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-77",
+        "shape": "box",
+        "position": [1540, -248.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-78",
+        "shape": "box",
+        "position": [1560, -245.6, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-79",
+        "shape": "box",
+        "position": [1580, -242.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-80",
+        "shape": "box",
+        "position": [1600, -237.8, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-81",
+        "shape": "box",
+        "position": [1620, -232.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-82",
+        "shape": "box",
+        "position": [1640, -226.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-83",
+        "shape": "box",
+        "position": [1660, -219.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-84",
+        "shape": "box",
+        "position": [1680, -211.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-85",
+        "shape": "box",
+        "position": [1700, -202.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-86",
+        "shape": "box",
+        "position": [1720, -192.6, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-87",
+        "shape": "box",
+        "position": [1740, -182.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-88",
+        "shape": "box",
+        "position": [1760, -171.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-89",
+        "shape": "box",
+        "position": [1780, -159.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-90",
+        "shape": "box",
+        "position": [1800, -146.9, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-91",
+        "shape": "box",
+        "position": [1820, -134.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-92",
+        "shape": "box",
+        "position": [1840, -120.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-93",
+        "shape": "box",
+        "position": [1860, -106.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-94",
+        "shape": "box",
+        "position": [1880, -92.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-95",
+        "shape": "box",
+        "position": [1900, -77.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-96",
+        "shape": "box",
+        "position": [1920, -62.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-97",
+        "shape": "box",
+        "position": [1940, -46.8, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-98",
+        "shape": "box",
+        "position": [1960, -31.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-99",
+        "shape": "box",
+        "position": [1980, -15.7, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-100",
+        "shape": "box",
+        "position": [2000, -0.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-101",
+        "shape": "box",
+        "position": [2020, 15.7, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-102",
+        "shape": "box",
+        "position": [2040, 31.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-103",
+        "shape": "box",
+        "position": [2060, 46.8, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-104",
+        "shape": "box",
+        "position": [2080, 62.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-105",
+        "shape": "box",
+        "position": [2100, 77.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-106",
+        "shape": "box",
+        "position": [2120, 92.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-107",
+        "shape": "box",
+        "position": [2140, 106.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-108",
+        "shape": "box",
+        "position": [2160, 120.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-109",
+        "shape": "box",
+        "position": [2180, 134.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-110",
+        "shape": "box",
+        "position": [2200, 146.9, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-111",
+        "shape": "box",
+        "position": [2220, 159.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-112",
+        "shape": "box",
+        "position": [2240, 171.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-113",
+        "shape": "box",
+        "position": [2260, 182.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-114",
+        "shape": "box",
+        "position": [2280, 192.6, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-115",
+        "shape": "box",
+        "position": [2300, 202.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-116",
+        "shape": "box",
+        "position": [2320, 211.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-117",
+        "shape": "box",
+        "position": [2340, 219.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-118",
+        "shape": "box",
+        "position": [2360, 226.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-119",
+        "shape": "box",
+        "position": [2380, 232.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-120",
+        "shape": "box",
+        "position": [2400, 237.8, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-121",
+        "shape": "box",
+        "position": [2420, 242.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-122",
+        "shape": "box",
+        "position": [2440, 245.6, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-123",
+        "shape": "box",
+        "position": [2460, 248.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-124",
+        "shape": "box",
+        "position": [2480, 249.5, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-125",
+        "shape": "box",
+        "position": [2500, 250.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-126",
+        "shape": "box",
+        "position": [2520, 249.5, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-127",
+        "shape": "box",
+        "position": [2540, 248.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-128",
+        "shape": "box",
+        "position": [2560, 245.6, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-129",
+        "shape": "box",
+        "position": [2580, 242.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-130",
+        "shape": "box",
+        "position": [2600, 237.8, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-131",
+        "shape": "box",
+        "position": [2620, 232.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-132",
+        "shape": "box",
+        "position": [2640, 226.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-133",
+        "shape": "box",
+        "position": [2660, 219.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-134",
+        "shape": "box",
+        "position": [2680, 211.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-135",
+        "shape": "box",
+        "position": [2700, 202.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-136",
+        "shape": "box",
+        "position": [2720, 192.6, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-137",
+        "shape": "box",
+        "position": [2740, 182.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-138",
+        "shape": "box",
+        "position": [2760, 171.1, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-139",
+        "shape": "box",
+        "position": [2780, 159.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-140",
+        "shape": "box",
+        "position": [2800, 146.9, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-141",
+        "shape": "box",
+        "position": [2820, 134.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-142",
+        "shape": "box",
+        "position": [2840, 120.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-143",
+        "shape": "box",
+        "position": [2860, 106.4, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-144",
+        "shape": "box",
+        "position": [2880, 92.0, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-145",
+        "shape": "box",
+        "position": [2900, 77.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-146",
+        "shape": "box",
+        "position": [2920, 62.2, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-147",
+        "shape": "box",
+        "position": [2940, 46.8, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-148",
+        "shape": "box",
+        "position": [2960, 31.3, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "line-149",
+        "shape": "box",
+        "position": [2980, 15.7, 0.6],
+        "size": [22, 8, 1.2],
+        "material": "plastic",
+        "color": "#15181d"
+      }
+    ]
+  }
+}

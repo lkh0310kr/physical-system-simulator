@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.line-sensing",
+  "name": "Line Sensing",
+  "description": "센서 앞 한 점이 바닥 선에서 옆으로 얼마나 벗어나 있는지 잰다.",
+  "outputs": {
+    "offset": {
+      "type": "number",
+      "unit": "m",
+      "description": "센서 점의 옆 위치 − 선의 옆 위치 (로봇이 선의 왼쪽(+y)에 있으면 +)"
+    }
+  },
+  "defaultBehavior": "behavior.line-sensor"
+}

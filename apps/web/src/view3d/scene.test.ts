@@ -7,6 +7,7 @@ import {
   buildCables,
   buildScene3d,
   explodeLifts,
+  gridCell,
   PLACEHOLDER_SIZE,
   sceneBounds,
 } from "./scene.ts";
@@ -238,5 +239,15 @@ describe("animatedPoses", () => {
   it("leaves parts without pose signals where the assembly put them", () => {
     const poses = animatedPoses([box("a", 3, 4)], {}, {});
     expect(poses.get("a")).toEqual({ position: [3, 4, 0], heading: 0 });
+  });
+});
+
+describe("gridCell", () => {
+  it("keeps 10 mm cells for small scenes and grows them so a big scene never has more than 80 lines", () => {
+    expect(gridCell(0.05)).toBe(0.01);
+    expect(gridCell(3)).toBeGreaterThan(0.05);
+    for (const extent of [0.02, 0.2, 1, 3, 20]) {
+      expect(Math.max(extent * 3, 0.12) / gridCell(extent) <= 80).toBe(true);
+    }
   });
 });

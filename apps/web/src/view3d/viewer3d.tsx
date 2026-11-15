@@ -31,6 +31,7 @@ import {
   buildCables,
   buildScene3d,
   explodeLifts,
+  gridCell,
   type SceneBox,
   type SceneCable,
   type ScenePart,
@@ -554,7 +555,8 @@ export function Viewer3D({
   const extent = bounds
     ? Math.max(bounds[1][0] - bounds[0][0], bounds[1][1] - bounds[0][1], 0.04)
     : 0.04;
-  const gridSize = Math.ceil((extent * 3) / 0.01) * 0.01;
+  const cell = gridCell(extent);
+  const gridSize = Math.ceil((extent * 3) / cell) * cell;
   const floor = bounds ? bounds[0][2] : 0;
   const targetKey = center.join(",");
   // biome-ignore lint/correctness/useExhaustiveDependencies: 값이 같으면 같은 target 배열을 쓰도록 키로 고정한다.
@@ -597,7 +599,7 @@ export function Viewer3D({
           <shadowMaterial opacity={0.35} />
         </mesh>
         <gridHelper
-          args={[gridSize, Math.round(gridSize / 0.01), "#8a94a0", "#3a414b"]}
+          args={[gridSize, Math.round(gridSize / cell), "#8a94a0", "#3a414b"]}
           rotation={[Math.PI / 2, 0, 0]}
           position={[center[0], center[1], floor]}
         />

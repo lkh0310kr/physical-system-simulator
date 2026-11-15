@@ -151,3 +151,4 @@ Port `domain`이 `signal`이면 제어 신호 선이다. `direction`(`in`/`out`)
 ## PID 제어와 이득 탐색
 
 `model.pid-controller`는 `setpoint`(선택)·`measurement` 신호를 받아 `output`을 낸다(`target` 속성이 기본 목표). 오차 제곱 적분 `ise`도 신호로 나온다. 예: `examples/motor-pid.system.json`(모터 속도 제어). 이득은 탐색으로 고른다: `pnpm physisim tune examples/motor-pid.system.json --range ctrl.ki=0.05..5 --minimize ctrl.ise --stat final --duration 3s`. 누적 지표(ISE)는 `--stat final`로 마지막 값을 본다.
+- 선 추종 데모: `examples/line-follower.system.json` — 바닥 사인 곡선에서 벗어난 거리(`model.line-sensor`의 `offset`)를 PID가 조향으로, `model.steering-mixer`가 좌우 모터 명령으로 바꾼다. 이득 탐색: `pnpm physisim tune examples/line-follower.system.json --range pid.kp=0.3..10 --minimize pid.ise --stat final --duration 6s`.

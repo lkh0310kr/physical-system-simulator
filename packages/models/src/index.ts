@@ -13,10 +13,12 @@ import { digitalIo } from "./behaviors/digital-io.ts";
 import { driveBase } from "./behaviors/drive-base.ts";
 import { hBridge } from "./behaviors/h-bridge.ts";
 import { led as ledBehavior } from "./behaviors/led.ts";
+import { lineSensor } from "./behaviors/line-sensor.ts";
 import { pid } from "./behaviors/pid.ts";
 import { potentiometer } from "./behaviors/potentiometer.ts";
 import { powerSupply } from "./behaviors/power-supply.ts";
 import { resistor as resistorBehavior } from "./behaviors/resistor.ts";
+import { steeringMixer } from "./behaviors/steering-mixer.ts";
 import { switchBehavior } from "./behaviors/switch.ts";
 import { ultrasonic } from "./behaviors/ultrasonic.ts";
 import { voltmeter } from "./behaviors/voltmeter.ts";
@@ -28,12 +30,14 @@ import driveBaseCapability from "./capabilities/drive-base.json" with { type: "j
 import gpio from "./capabilities/gpio.json" with { type: "json" };
 import hBridgeCapability from "./capabilities/h-bridge.json" with { type: "json" };
 import lightEmission from "./capabilities/light-emission.json" with { type: "json" };
+import lineSensing from "./capabilities/line-sensing.json" with { type: "json" };
 import measurement from "./capabilities/measurement.json" with { type: "json" };
 import pidCapability from "./capabilities/pid.json" with { type: "json" };
 import potentiometry from "./capabilities/potentiometry.json" with { type: "json" };
 import powerSupplyCapability from "./capabilities/power-supply.json" with { type: "json" };
 import ranging from "./capabilities/ranging.json" with { type: "json" };
 import resistance from "./capabilities/resistance.json" with { type: "json" };
+import steeringMix from "./capabilities/steering-mix.json" with { type: "json" };
 import switching from "./capabilities/switching.json" with { type: "json" };
 import arduinoUno from "./models/arduino-uno.json" with { type: "json" };
 import atmega328p from "./models/atmega328p.json" with { type: "json" };
@@ -46,6 +50,8 @@ import esp32S3Chip from "./models/esp32-s3-qfn56.json" with { type: "json" };
 import hBridgeModel from "./models/h-bridge.json" with { type: "json" };
 import led from "./models/led.json" with { type: "json" };
 import liIonCell from "./models/li-ion-cell.json" with { type: "json" };
+import lineFloor from "./models/line-floor.json" with { type: "json" };
+import lineSensorModel from "./models/line-sensor.json" with { type: "json" };
 import lipo1317 from "./models/lipo-adafruit-1317.json" with { type: "json" };
 import multimeter from "./models/multimeter.json" with { type: "json" };
 import ov2640Sensor from "./models/ov2640-sensor.json" with { type: "json" };
@@ -55,6 +61,7 @@ import potentiometerModel from "./models/potentiometer.json" with { type: "json"
 import pushbutton from "./models/pushbutton.json" with { type: "json" };
 import resistor from "./models/resistor.json" with { type: "json" };
 import robotChassis from "./models/robot-chassis-2wd.json" with { type: "json" };
+import steeringMixerModel from "./models/steering-mixer.json" with { type: "json" };
 import tactile12 from "./models/tactile-12mm.json" with { type: "json" };
 import toggleSwitch from "./models/toggle-switch.json" with { type: "json" };
 import ttMotor from "./models/tt-motor.json" with { type: "json" };
@@ -88,7 +95,9 @@ export const standardLibrary: LibraryInput = {
     cameraNode,
     dcMotor,
     hBridge,
+    lineSensor,
     pid,
+    steeringMixer,
     ultrasonic,
     digitalIo,
     driveBase,
@@ -104,7 +113,9 @@ export const standardLibrary: LibraryInput = {
     batteryCapability,
     cameraNodeCapability,
     hBridgeCapability,
+    lineSensing,
     pidCapability,
+    steeringMix,
     ranging,
     dcMotorCapability,
     driveBaseCapability,
@@ -134,6 +145,9 @@ export const standardLibrary: LibraryInput = {
     hBridgeModel,
     avoiderController,
     pidModel,
+    lineSensorModel,
+    steeringMixerModel,
+    lineFloor,
     wallModel,
     resistor,
     multimeter,

@@ -254,7 +254,7 @@
 ## Phase 8 — Control & Agent v2
 
 - [x] P8-T1 Control 도메인 Model: 신호 도메인(출력→입력 신호 선, 한 스텝 지연), 반응형 제어기, PID 블록(적분 와인드업 방지, 측정값 미분, ISE 지표)
-- [ ] P8-T2 라인트레이서 데모 (PID 게인 튜닝)
+- [x] P8-T2 라인트레이서 데모 (`examples/line-follower.system.json`: 선 센서 → PID → 조향 믹서 → H-브리지 → 모터 → 차체, `tune`으로 kp 탐색)
 - [x] P8-T3 Agent 분석 tool: 파라미터 스윕(`physisim sweep`), 실행 결과 비교(`compare`)
 - [x] P8-T4 Agent 개선 제안 루프: `physisim tune`(범위 탐색 + 제약 + 목표, 제안과 근거 표). PID 게인 탐색은 P8-T1(PID Model) 이후
 - [x] P8-T5 Agent의 Model 작성 + 스키마 검증(`physisim check`: 오류 + 사람이 확인할 항목) + 사용자 승인(library에 추가)

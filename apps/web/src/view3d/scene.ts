@@ -342,3 +342,15 @@ export function animatedPoses(
   }
   return out;
 }
+
+/**
+ * 격자 한 칸 크기 [m]: 장면 크기에 맞춰 10 mm부터 1·2·5 배수로 키워, 격자 선이 80칸을 넘지 않게 한다
+ * (큰 장면에서 1 cm 격자가 빽빽해 보이는 현상을 막는다).
+ */
+export function gridCell(extent: number): number {
+  const target = Math.max(extent * 3, 0.12);
+  for (const cell of [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5]) {
+    if (target / cell <= 80) return cell;
+  }
+  return 10;
+}
