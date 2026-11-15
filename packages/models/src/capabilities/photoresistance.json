@@ -1,0 +1,11 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.photoresistance",
+  "name": "Photoresistance",
+  "description": "빛이 밝을수록 저항이 내려가는 두 단자 소자 (CdS 광저항).",
+  "outputs": {
+    "resistance": { "type": "number", "unit": "Ω", "description": "지금 저항" },
+    "current": { "type": "number", "unit": "A", "description": "단자 1 → 2 전류" }
+  },
+  "defaultBehavior": "behavior.photoresistor"
+}

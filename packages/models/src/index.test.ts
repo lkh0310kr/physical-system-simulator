@@ -29,6 +29,7 @@ describe("standard library", () => {
       "model.h-bridge",
       "model.avoider-controller",
       "model.pid-controller",
+      "model.photoresistor",
       "model.line-sensor",
       "model.steering-mixer",
       "model.line-floor",
