@@ -14,6 +14,7 @@ import { z } from "zod";
 import { InstanceDeclSchema } from "./instance.ts";
 import type { Result } from "./issues.ts";
 import { parseWith } from "./loader.ts";
+import { PlacementSchema } from "./mechanical.ts";
 
 /** `"<instance>:<port>"` 형식의 Port 참조. */
 export const PortRefSchema = z.string().regex(/^[a-z][a-z0-9_-]*:[A-Za-z0-9_.+-]+$/, {
@@ -37,10 +38,24 @@ export const SystemSchema = z
       .array(z.tuple([PortRefSchema, PortRefSchema]))
       .default([])
       .describe('두 Port를 잇는 선. 예: ["uno:D13", "r1:1"]'),
+    /** 3D 조립 배치 (Instance ID → 위치·회전). 시뮬레이션에는 영향 없고, 3D 뷰와 크기·간섭 검사가 쓴다. */
+    assembly: z
+      .record(z.string(), PlacementSchema)
+      .optional()
+      .describe('3D 조립 배치. 위치는 mm 숫자 또는 "25mm" 문자열.'),
     /** 에디터용 화면 정보. 엔진과 Agent는 해석하지 않는다. */
     layout: z.looseObject({}).optional().describe("에디터용 화면 정보. 시뮬레이션에 영향 없음."),
   })
   .superRefine((s, ctx) => {
+    for (const id of Object.keys(s.assembly ?? {})) {
+      if (!s.instances.some((i) => i.id === id)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["assembly", id],
+          message: `없는 Instance의 배치: ${id}`,
+        });
+      }
+    }
     const seen = new Set<string>();
     s.instances.forEach((inst, i) => {
       if (seen.has(inst.id))
