@@ -25,12 +25,12 @@
 
 **목표**: 모든 이후 작업이 올라갈 저장소 뼈대와 품질 게이트.
 
-- [ ] P0-T1 pnpm 모노레포 초기화 (`packages/*`, `apps/*`, `examples/`), Node 버전 고정
-- [ ] P0-T2 TypeScript strict + project references, 공통 tsconfig
-- [ ] P0-T3 Biome (lint/format), Vitest 설정, 루트 스크립트(`lint` `typecheck` `test` `build`)
-- [ ] P0-T4 빈 `@physisim/core` 패키지 + 샘플 테스트로 파이프라인 검증
-- [ ] P0-T5 GitHub Actions CI (lint·typecheck·test)
-- [ ] P0-T6 커밋 훅 (lint-staged / commitlint 등) — 경량으로
+- [x] P0-T1 pnpm 모노레포 초기화 (`packages/*`, `apps/*`, `examples/`), Node 버전 고정
+- [x] P0-T2 TypeScript strict + project references, 공통 tsconfig
+- [x] P0-T3 Biome (lint/format), Vitest 설정, 루트 스크립트(`lint` `typecheck` `test` `build`)
+- [x] P0-T4 빈 `@physisim/core` 패키지 + 샘플 테스트로 파이프라인 검증
+- [x] P0-T5 GitHub Actions CI (lint·typecheck·test)
+- [x] P0-T6 커밋 훅 (simple-git-hooks: pre-commit에서 lint·typecheck·test)
 
 🔶 결정 게이트
 - ~~G0-1 빌드 도구~~ → tsc만 사용, Node 22 LTS 확정
