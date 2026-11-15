@@ -16,6 +16,8 @@ export const PortSchema = z.strictObject({
   /** Model 안에서 유일한 이름 (예: "D13", "GND.1", "A"). */
   name: z.string().regex(/^[A-Za-z0-9_.+-]+$/, { message: "영문·숫자·_.+- 만 쓸 수 있다" }),
   domain: PortDomainSchema,
+  /** 회로의 기준 전위(0V)에 묶인 Port (보드 GND 등). */
+  ground: z.boolean().optional(),
   description: z.string().optional(),
 });
 

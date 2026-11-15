@@ -89,7 +89,7 @@
 - [ ] P3-T1 시뮬레이션 시계·스케줄러 (결정론적)
 - [ ] P3-T2 Behavior 실행 루프 + Instance State 관리
 - [ ] P3-T3 표준 Behavior의 회로 기여와 GPIO 이벤트 (저항·LED·GPIO 핀 구동)
-- [ ] P3-T4 DC 회로 Solver v0 (노드 해석: 저항·구동원 + 구간 선형 다이오드)
+- [x] P3-T4 DC 회로 Solver v0 (노드 해석: 저항·구동원 + 구간 선형 다이오드)
 - [ ] P3-T5 MCU 프로그램 런타임 (JS, `pinMode/digitalWrite/digitalRead/delay/millis`)
 - [ ] P3-T6 결과 기록 (시계열 trace, 이벤트 로그) + JSON 출력
 - [ ] P3-T7 CLI: `physisim validate|run <system.json> --duration 2s`
