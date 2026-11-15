@@ -9,7 +9,7 @@
       "type": "number",
       "min": 0.1,
       "default": 3.14159,
-      "description": "총 가동 각도 [rad] (중앙 ±90°로 가정 — 제품 페이지에 없음)"
+      "description": "총 가동 각도 [rad]: Adafruit 설명 '약 180° (좌우 90°)', 펄스 1.0~2.0 ms (확장 0.75~2.25 ms)"
     },
     "speed": {
       "type": "number",
@@ -70,9 +70,8 @@
   ],
   "metadata": {
     "fidelity": "approximate",
-    "source": "https://www.adafruit.com/product/169 (23×11×29 mm, 9 g, 4.8 V 정격(3~6 V), 0.1 s/60°, 토크 2.5 kg·cm, 데드밴드 1 µs)",
+    "source": "https://www.adafruit.com/product/169 (23×11×29 mm, 9 g, 4.8 V 정격(3~6 V), 0.1 s/60°, 토크 2.5 kg·cm, 데드밴드 1 µs) 가동 범위: 약 180°(좌우 90°), 펄스 1.0~2.0 ms — Adafruit 상품 설명",
     "assumptions": [
-      "총 가동 각도 180°",
       "전류(정지 10 mA·이동 200 mA)",
       "토크 한계·부하에 따른 속도 저하는 모델링하지 않음",
       "혼·축 위치와 모양은 제품 데이터가 아닌 표시용"

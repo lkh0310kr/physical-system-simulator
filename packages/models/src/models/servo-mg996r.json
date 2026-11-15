@@ -8,8 +8,8 @@
     "range": {
       "type": "number",
       "min": 0.1,
-      "default": 3.14159,
-      "description": "총 가동 각도 [rad] (중앙 ±90°로 가정 — 제품 페이지에 없음)"
+      "default": 2.0944,
+      "description": "총 가동 각도 [rad]: 데이터시트 '약 120° (좌우 60°)'"
     },
     "speed": {
       "type": "number",
@@ -34,14 +34,21 @@
       "type": "number",
       "unit": "mA",
       "min": 0,
-      "default": 500,
-      "description": "이동 중 전류 — 가정 (정지 전류는 약 2.5 A로 알려졌으나 이 판의 데이터시트에서 확인하지 못함)"
+      "default": 700,
+      "description": "이동 중 전류: 데이터시트 500~900 mA (6 V)의 중간값"
     },
     "stallTorque": {
       "type": "number",
       "min": 0,
       "default": 0.9217,
       "description": "정지 토크 [N·m]: 9.4 kgf·cm (4.8 V) = 0.9217 N·m (11 kgf·cm @6 V). 부하 토크 한계 모델에 쓴다"
+    },
+    "stallCurrent": {
+      "type": "number",
+      "unit": "A",
+      "min": 0,
+      "default": 2.5,
+      "description": "정지(과부하) 전류 2.5 A (6 V, 데이터시트)"
     }
   },
   "properties": {},
@@ -76,10 +83,9 @@
   ],
   "metadata": {
     "fidelity": "approximate",
-    "source": "MG996R Tower Pro 데이터시트 사본 (courses.ece.cornell.edu .../MG996R_Tower-Pro.pdf) 및 유통사 다수: 정지 토크 9.4 kgf·cm(4.8 V)/11(6 V), 속도 0.17 s/60°(4.8 V)/0.14(6 V), 55 g, 40.7×19.7×42.9 mm. 일부 판매처는 4.8 V 속도를 0.19 s/60°, 클론은 13 kg·cm·62 g으로 적어 불일치",
+    "source": "MG996R Tower Pro 데이터시트 (datasheets 사본: courses.ece.cornell.edu .../MG996R_Tower-Pro.pdf, pdftotext로 읽음): 약 120°(좌우 60°), 55 g, 40.7×19.7×42.9 mm, 정지 토크 9.4 kgf·cm(4.8 V)/11(6 V), 속도 0.17 s/60°(4.8 V)/0.14(6 V), 동작 전압 4.8~7.2 V, 동작 전류 500~900 mA(6 V), 정지 전류 2.5 A(6 V), 데드밴드 5 µs. 일부 판매처는 4.8 V 속도를 0.19 s/60°로 적어 불일치",
     "assumptions": [
-      "총 가동 각도 180°(제품 변형에 따라 120°~360°)",
-      "전류(정지·이동)",
+      "정지(대기) 전류",
       "부하에 따른 속도 저하는 모델링하지 않음(정지 토크는 속성으로만)",
       "혼·축 위치는 표시용"
     ]

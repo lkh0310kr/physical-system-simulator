@@ -39,6 +39,22 @@ export function forward(g: ArmGeometry, q: JointAngles): Point3 {
   return { x: r * Math.cos(q.base), y: r * Math.sin(q.base), z };
 }
 
+/** 관절별 허용 구간 [최소, 최대] rad (서보 가동 범위를 팔 관절 좌표로 옮긴 것: 중심 = 서보 혼 장착 오프셋). */
+export interface JointWindows {
+  readonly base: readonly [number, number];
+  readonly shoulder: readonly [number, number];
+  readonly elbow: readonly [number, number];
+  readonly wrist: readonly [number, number];
+}
+
+/** 모든 관절이 같은 대칭 한계 ±limit인 구간. */
+export const symmetricWindows = (limit: number): JointWindows => ({
+  base: [-limit, limit],
+  shoulder: [-limit, limit],
+  elbow: [-limit, limit],
+  wrist: [-limit, limit],
+});
+
 export interface IkResult {
   readonly angles: JointAngles;
   /** 목표가 팔이 닿는 범위이고 모든 관절이 한계 안인지. */
@@ -48,9 +64,14 @@ export interface IkResult {
 /**
  * 역기구학: 그리퍼를 수직 아래로 향한 채 끝을 (x, y, z)에 둔다. 팔꿈치는 아래팔이 앞으로 굽는 해(θ3 ≥ 0)를 고른다.
  * 닿지 않으면 가장 가까운 자세(팔을 쭉 폄)로 두고 `reachable: false`.
- * @param limit 관절 한계 ±[rad] (서보 총 가동 각도의 절반)
+ * @param limits 관절 허용 구간. 숫자면 모든 관절 ±limit [rad].
  */
-export function inverse(g: ArmGeometry, target: Point3, limit = Math.PI / 2): IkResult {
+export function inverse(
+  g: ArmGeometry,
+  target: Point3,
+  limits: number | JointWindows = Math.PI / 2,
+): IkResult {
+  const w = typeof limits === "number" ? symmetricWindows(limits) : limits;
   const base = Math.hypot(target.x, target.y) < 1e-9 ? 0 : Math.atan2(target.y, target.x);
   const r = Math.hypot(target.x, target.y);
   // 그리퍼가 아래를 보므로 손목 축은 목표보다 gripper만큼 위
@@ -62,6 +83,12 @@ export function inverse(g: ArmGeometry, target: Point3, limit = Math.PI / 2): Ik
   const shoulder =
     Math.atan2(r, h) - Math.atan2(g.link2 * Math.sin(elbow), g.link1 + g.link2 * Math.cos(elbow));
   const wrist = Math.PI / 2 - (shoulder + elbow);
-  const within = [base, shoulder, elbow, wrist].every((a) => Math.abs(a) <= limit + 1e-9);
+  const inside = (a: number, [lo, hi]: readonly [number, number]) =>
+    a >= lo - 1e-9 && a <= hi + 1e-9;
+  const within =
+    inside(base, w.base) &&
+    inside(shoulder, w.shoulder) &&
+    inside(elbow, w.elbow) &&
+    inside(wrist, w.wrist);
   return { angles: { base, shoulder, elbow, wrist }, reachable: inRange && within };
 }

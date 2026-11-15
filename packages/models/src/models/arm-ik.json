@@ -3,7 +3,7 @@
   "id": "model.arm-ik",
   "name": "Arm inverse kinematics (block)",
   "category": "control/block",
-  "description": "목표 끝 위치(targetX/Y/Z, m)를 베이스·어깨·팔꿈치·손목 각도 명령으로 바꾸는 역기구학 블록. 링크 길이는 프레임 Model과 같아야 한다.",
+  "description": "목표 끝 위치(targetX/Y/Z, m)를 베이스·어깨·팔꿈치·손목 서보 명령으로 바꾸는 역기구학 블록. 관절 각도 = 서보 명령 + 장착 오프셋, 서보는 오프셋 ± 반가동범위 안에서만 움직인다. 링크 길이·오프셋은 프레임 Model과 같아야 한다.",
   "propertySchema": {
     "baseHeight": {
       "type": "number",
@@ -33,11 +33,47 @@
       "default": 0.06,
       "description": "손목 축에서 집는 점까지. 가정"
     },
-    "jointLimit": {
+    "shoulderOffset": {
       "type": "number",
-      "min": 0.1,
+      "unit": "rad",
+      "default": 0.08727,
+      "description": "어깨 서보 혼 장착 오프셋 +5° (설계 해석 추천: arm-design.ts RECOMMENDED)"
+    },
+    "elbowOffset": {
+      "type": "number",
+      "unit": "rad",
+      "default": 1.0472,
+      "description": "팔꿈치 +60°"
+    },
+    "wristOffset": {
+      "type": "number",
+      "unit": "rad",
+      "default": -1.5708,
+      "description": "손목 −90°"
+    },
+    "baseHalfRange": {
+      "type": "number",
+      "unit": "rad",
       "default": 1.5708,
-      "description": "관절 한계 ±[rad] = 서보 가동 범위 180°의 절반"
+      "description": "베이스 서보(SG92R) 반(半)가동범위 90°"
+    },
+    "shoulderHalfRange": {
+      "type": "number",
+      "unit": "rad",
+      "default": 1.0472,
+      "description": "어깨 서보(MG996R) 반가동범위 60° (데이터시트 약 120°)"
+    },
+    "elbowHalfRange": {
+      "type": "number",
+      "unit": "rad",
+      "default": 1.0472,
+      "description": "팔꿈치 서보(MG996R) 반가동범위 60°"
+    },
+    "wristHalfRange": {
+      "type": "number",
+      "unit": "rad",
+      "default": 1.5708,
+      "description": "손목 서보(SG92R) 반가동범위 90°"
     }
   },
   "properties": {},

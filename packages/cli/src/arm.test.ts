@@ -48,8 +48,15 @@ describe("robot arm: IK → 5 servos → frame forward kinematics (A4)", () => {
 
   it("all targets are reachable and the commands stay within the servo range", () => {
     expect(t.final["ik.reachable"]).toBe(true);
-    for (const k of ["ik.base", "ik.shoulder", "ik.elbow", "ik.wrist"]) {
-      expect(Math.abs(Number(t.final[k]))).toBeLessThanOrEqual(Math.PI / 2 + 1e-9);
+    // MG996R(어깨·팔꿈치)는 ±60°, SG92R(베이스·손목)은 ±90° — 장착 오프셋을 뺀 명령이 가동 범위 안이어야 한다
+    const limit = {
+      "ik.base": 1.5708,
+      "ik.shoulder": 1.0472,
+      "ik.elbow": 1.0472,
+      "ik.wrist": 1.5708,
+    };
+    for (const [k, max] of Object.entries(limit)) {
+      expect(Math.abs(Number(t.final[k]))).toBeLessThanOrEqual(max + 1e-3);
     }
   });
 

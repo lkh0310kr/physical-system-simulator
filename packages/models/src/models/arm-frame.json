@@ -39,6 +39,24 @@
       "min": 0.1,
       "default": 1,
       "description": "그리퍼 서보가 이 각도일 때 완전히 닫힘으로 본다. 가정"
+    },
+    "shoulderOffset": {
+      "type": "number",
+      "unit": "rad",
+      "default": 0.08727,
+      "description": "어깨 서보 혼 장착 오프셋 +5° (설계 해석 추천: arm-design.ts RECOMMENDED)"
+    },
+    "elbowOffset": {
+      "type": "number",
+      "unit": "rad",
+      "default": 1.0472,
+      "description": "팔꿈치 +60°"
+    },
+    "wristOffset": {
+      "type": "number",
+      "unit": "rad",
+      "default": -1.5708,
+      "description": "손목 −90°"
     }
   },
   "properties": {},
