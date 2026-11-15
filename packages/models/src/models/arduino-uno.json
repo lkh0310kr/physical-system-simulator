@@ -3,13 +3,139 @@
   "name": "Arduino UNO R3",
   "category": "electronics/board",
   "propertySchema": {
-    "operatingVoltage": { "type": "number", "unit": "V" },
-    "clockSpeed": { "type": "number", "unit": "MHz" }
+    "operatingVoltage": {
+      "type": "number",
+      "unit": "V"
+    },
+    "clockSpeed": {
+      "type": "number",
+      "unit": "MHz"
+    }
   },
-  "properties": { "operatingVoltage": 5, "clockSpeed": 16 },
-  "components": [{ "name": "mcu", "model": "model.atmega328p" }],
+  "properties": {
+    "operatingVoltage": 5,
+    "clockSpeed": 16
+  },
+  "ports": [
+    {
+      "name": "D0",
+      "domain": "electrical"
+    },
+    {
+      "name": "D1",
+      "domain": "electrical"
+    },
+    {
+      "name": "D2",
+      "domain": "electrical"
+    },
+    {
+      "name": "D3",
+      "domain": "electrical"
+    },
+    {
+      "name": "D4",
+      "domain": "electrical"
+    },
+    {
+      "name": "D5",
+      "domain": "electrical"
+    },
+    {
+      "name": "D6",
+      "domain": "electrical"
+    },
+    {
+      "name": "D7",
+      "domain": "electrical"
+    },
+    {
+      "name": "D8",
+      "domain": "electrical"
+    },
+    {
+      "name": "D9",
+      "domain": "electrical"
+    },
+    {
+      "name": "D10",
+      "domain": "electrical"
+    },
+    {
+      "name": "D11",
+      "domain": "electrical"
+    },
+    {
+      "name": "D12",
+      "domain": "electrical"
+    },
+    {
+      "name": "D13",
+      "domain": "electrical"
+    },
+    {
+      "name": "A0",
+      "domain": "electrical"
+    },
+    {
+      "name": "A1",
+      "domain": "electrical"
+    },
+    {
+      "name": "A2",
+      "domain": "electrical"
+    },
+    {
+      "name": "A3",
+      "domain": "electrical"
+    },
+    {
+      "name": "A4",
+      "domain": "electrical"
+    },
+    {
+      "name": "A5",
+      "domain": "electrical"
+    },
+    {
+      "name": "5V",
+      "domain": "electrical"
+    },
+    {
+      "name": "3.3V",
+      "domain": "electrical"
+    },
+    {
+      "name": "VIN",
+      "domain": "electrical"
+    },
+    {
+      "name": "GND.1",
+      "domain": "electrical"
+    },
+    {
+      "name": "GND.2",
+      "domain": "electrical"
+    },
+    {
+      "name": "GND.3",
+      "domain": "electrical"
+    }
+  ],
+  "components": [
+    {
+      "name": "mcu",
+      "model": "model.atmega328p"
+    }
+  ],
   "capabilities": [
-    { "capability": "capability.gpio", "config": { "pinCount": 20, "logicLevel": 5 } }
+    {
+      "capability": "capability.gpio",
+      "config": {
+        "pinCount": 20,
+        "logicLevel": 5
+      }
+    }
   ],
   "metadata": {
     "manufacturer": "Arduino",

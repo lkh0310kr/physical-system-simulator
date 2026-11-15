@@ -4,11 +4,44 @@
   "category": "electronics/output",
   "description": "5mm 단색 LED",
   "propertySchema": {
-    "forwardVoltage": { "type": "number", "unit": "V", "min": 0 },
-    "maxCurrent": { "type": "number", "unit": "mA", "min": 0 },
-    "color": { "type": "enum", "options": ["red", "green", "blue", "yellow", "white"] }
+    "forwardVoltage": {
+      "type": "number",
+      "unit": "V",
+      "min": 0
+    },
+    "maxCurrent": {
+      "type": "number",
+      "unit": "mA",
+      "min": 0
+    },
+    "color": {
+      "type": "enum",
+      "options": ["red", "green", "blue", "yellow", "white"]
+    }
   },
-  "properties": { "forwardVoltage": 2.0, "maxCurrent": 20, "color": "red" },
-  "capabilities": [{ "capability": "capability.light-emission" }],
-  "metadata": { "fidelity": "approximate" }
+  "properties": {
+    "forwardVoltage": 2.0,
+    "maxCurrent": 20,
+    "color": "red"
+  },
+  "ports": [
+    {
+      "name": "A",
+      "domain": "electrical",
+      "description": "anode (+)"
+    },
+    {
+      "name": "C",
+      "domain": "electrical",
+      "description": "cathode (−)"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.light-emission"
+    }
+  ],
+  "metadata": {
+    "fidelity": "approximate"
+  }
 }

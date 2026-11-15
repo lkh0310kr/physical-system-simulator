@@ -66,17 +66,17 @@
 
 **목표**: 스펙 §7, §8 — Model로부터 Instance를 만들고, Port 간 연결로 System을 구성한다.
 
-- [ ] P2-T1 Port(핀/커넥터) 개념을 Model에 추가 — 도메인(electrical, mechanical, signal …) 구분
-- [ ] P2-T2 Instance 생성 (Model 참조 + 초기 State + 파라미터 override)
-- [ ] P2-T3 System 문서 포맷 (instances + connections) 스키마와 로더
-- [ ] P2-T4 연결 검증 (존재하는 Port인지, 도메인 호환, 단락 등 정적 오류)
-- [ ] P2-T5 계층 Composition: System을 다시 Model로 감싸기 (Robot = UNO + Motor + …)
-- [ ] P2-T6 `examples/blink-led.system.json`
+- [x] P2-T1 Port(핀/커넥터) 개념을 Model에 추가 — 도메인(electrical, mechanical, signal …) 구분
+- [x] P2-T2 Instance 생성 (Model 참조 + 초기 State + 파라미터 override)
+- [x] P2-T3 System 문서 포맷 (instances + connections) 스키마와 로더
+- [x] P2-T4 연결 검증과 Net 해석 (존재하는 Port인지, 도메인 호환). 단락 같은 전기적 검사는 Phase 3 Solver와 함께
+- [x] P2-T5 `examples/blink-led.system.json`
 
 🔶 결정 게이트
-- G2-1 Instance State 구조 (스펙 §12 "Instance 구조" 미결정)
-- G2-2 Composition / 연결 모델: Wokwi식 핀-핀 연결 vs Net(노드) 기반 vs Modelica식 across/through Port (스펙 §12 "Composition 구조" 미결정)
-- G2-3 System 문서에 레이아웃(좌표·색상) 정보를 함께 둘지, 분리할지
+- ~~G2-1 Instance State~~ → 바인딩별 State
+- ~~G2-2 연결 모델~~ → 핀-핀 작성 + 내부 Net
+- ~~G2-3 레이아웃~~ → 같은 파일, 선택적 `layout` 섹션
+- 계층 Composition은 Phase 7로 이동 (사용자 결정)
 
 **완료 기준**: 예제 System이 로드·검증되고, 잘못된 연결이 정적 검사에서 잡힌다.
 
@@ -168,6 +168,7 @@
 
 **목표**: 스펙 §9.1 — MCU → 회로 → 모터 → 바퀴 → 차체 → 센서 → MCU 폐루프.
 
+- [ ] P7-T0 계층 Composition: System을 Model로 감싸 Port 노출 (Phase 2에서 이동)
 - [ ] P7-T1 기계 Model 스키마: Body(질량·관성·형상), Joint, Gear, Wheel
 - [ ] P7-T2 물리 엔진 어댑터 (Domain Solver 인터페이스 뒤에 숨김)
 - [ ] P7-T3 전기↔기계 결합: 모터 토크·역기전력
