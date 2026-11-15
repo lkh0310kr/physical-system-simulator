@@ -54,9 +54,9 @@
 - [ ] P1-T8 `@physisim/models` 시작: `capability.gpio`, `model.led`, `model.resistor`, `model.arduino-uno` (+ `model.atmega328p` Component)
 
 🔶 결정 게이트
-- G1-1 단위 시스템: 자체 경량 구현 vs js-quantities / mathjs
-- G1-2 Behavior 실행 시그니처: 순수 함수 `step(state, inputs, dt)` vs 이벤트 핸들러 객체 vs 혼합 (스펙 §14.4)
-- G1-3 Capability 바인딩 하나에 Behavior 여러 개 허용 여부 (스펙 §14.4)
+- ~~G1-1 단위 시스템~~ → 자체 경량 구현
+- ~~G1-2 Behavior 실행 시그니처~~ → 순수 함수 `step` + 선택적 이벤트 훅
+- ~~G1-3 바인딩당 Behavior 수~~ → 1개
 
 **완료 기준**: 표준 Model 4종이 검증 통과, 잘못된 Model은 명확한 오류. 테스트가 해석 규칙을 문장으로 설명.
 

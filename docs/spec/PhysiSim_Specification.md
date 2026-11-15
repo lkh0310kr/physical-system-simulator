@@ -1,6 +1,6 @@
 # PhysiSim 프로젝트 전체 설계 명세 (Specification)
 
-> **현재 설계 기준:** v0.5 (2026-11-15)  
+> **현재 설계 기준:** v0.6 (2026-11-15)  
 > **프로젝트 유형:** Model-driven Physical Systems Simulator  
 > **개발 방향:** AI Agentic Simulation Platform  
 > **핵심 철학:** Model 중심 설계
@@ -475,6 +475,9 @@ AI Agent는 필요한 Model을 검색하고 Instance를 생성하며 연결 관�
 | 개발·디자인 철학 | 핵심만, 미니멀·모던 (`docs/DESIGN.md`) | 확정 (v0.5) |
 | 공개 범위 / 라이선스 | Public GitHub 저장소, MIT | 확정 (v0.5) |
 | 빌드 도구 | tsc만 사용 (npm 배포 시 tsdown 재검토) | 확정 (v0.5) |
+| 물리 단위 | 자체 경량 구현 (SI 차원 벡터, 내부값은 SI) | 확정 (v0.6) |
+| Behavior 형태 | 순수 함수 `step` + 선택적 이벤트 훅 | 확정 (v0.6) |
+| 바인딩당 Behavior 수 | 1개 | 확정 (v0.6) |
 | Instance 구조 | 미결정 | 대기 |
 | Behavior 인터페이스 | 미결정 | 대기 |
 | Composition 구조 | 미결정 | 대기 |
@@ -554,11 +557,11 @@ interface ModelCapabilityBinding {
 }
 ```
 
-### 14.4 남은 하위 결정 (Phase 1에서 결정)
+### 14.4 하위 결정 (v0.6)
 
-- 하나의 Capability 바인딩이 여러 Behavior를 동시에 가질 수 있는가
-- Behavior 실행 시그니처 (순수 함수 `step(state, inputs, dt)` vs 객체/이벤트 핸들러)
-- Behavior 버전 관리 방식
+- **바인딩당 Behavior는 1개.** 여러 동작이 필요하면 Capability를 나누거나 Behavior 안에서 조합한다.
+- **Behavior = 순수 함수 + 선택적 이벤트 훅.** 기본은 `step(state, inputs, ctx) → { state, outputs }`. 인터럽트·타이머처럼 이벤트성 동작만 `onEvent` 훅을 쓴다. 상태는 Behavior가 아니라 Instance가 가진다.
+- Behavior 버전 관리: 미결정 (필요해질 때 결정).
 
 ## 15. 기술 스택 및 개발 전략 (v0.5)
 
@@ -582,6 +585,7 @@ interface ModelCapabilityBinding {
 | 버전 | 날짜 | 변경 내용 |
 |---|---|---|
 | v0.4 | — | 초기 기준선 (Model 구조, Properties, Capability 확정) |
+| v0.6 | 2026-11-15 | Phase 1 결정: 자체 단위 시스템, Behavior = 순수 함수 + 이벤트 훅, 바인딩당 Behavior 1개 |
 | v0.5 | 2026-11-15 | §14 Behavior↔Capability A' 하이브리드 확정, §15 기술 스택·개발 전략 추가, §12·§13 갱신, 문서 주도 개발 원칙(문서는 목표·구조, 세부는 코드) |
 
 ---
