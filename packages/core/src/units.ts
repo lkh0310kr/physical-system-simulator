@@ -151,3 +151,24 @@ export function parseQuantity(text: string): { value: number; unit: Unit } {
   const unit = parseUnit(match[2] ?? "");
   return { value: Number(match[1]) * unit.scale, unit };
 }
+
+const DISPLAY_PREFIXES: readonly [number, string][] = [
+  [1e9, "G"],
+  [1e6, "M"],
+  [1e3, "k"],
+  [1, ""],
+  [1e-3, "m"],
+  [1e-6, "µ"],
+  [1e-9, "n"],
+];
+
+/** SI 값을 접두어 붙여 사람이 읽기 좋게 (0.0118, "A" → "11.8 mA"). 유효숫자 3자리. 단위가 없으면 접두어도 없다. */
+export function formatQuantity(value: number, unit: string): string {
+  if (!unit) return String(Number(value.toPrecision(3)));
+  if (value === 0 || !Number.isFinite(value)) return `${value} ${unit}`;
+  const [scale, prefix] = DISPLAY_PREFIXES.find(([s]) => Math.abs(value) >= s * 0.9995) ?? [
+    1e-9,
+    "n",
+  ];
+  return `${Number((value / scale).toPrecision(3))} ${prefix}${unit}`;
+}
