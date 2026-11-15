@@ -2,6 +2,8 @@
  * 열린 System 파일과 그 의존 파일을 dev 서버에서 불러오고, 파일이 바뀌면 다시 불러온다.
  * 같은 파일을 에이전트와 에디터가 함께 고치므로 "파일 = 진실"이다. 화면 상태는 파일에서 다시 만든다.
  */
+
+import { isSketch } from "@physisim/avr";
 import {
   type Issue,
   type LoadedSystem,
@@ -12,7 +14,15 @@ import {
 import { createStandardRegistry } from "@physisim/models";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatJson } from "./edit.ts";
-import { dirOf, joinPath, listFiles, onFileChange, readFile, writeFile } from "./project-client.ts";
+import {
+  compile,
+  dirOf,
+  joinPath,
+  listFiles,
+  onFileChange,
+  readFile,
+  writeFile,
+} from "./project-client.ts";
 
 export interface ProjectState {
   readonly files: readonly string[];
@@ -23,6 +33,10 @@ export interface ProjectState {
   readonly loaded: LoadedSystem | undefined;
   /** 문서가 참조하는 파일 내용 (문서 기준 상대 경로 → 내용). 시뮬레이션 Worker에 넘긴다. */
   readonly refs: Readonly<Record<string, string>>;
+  /** Instance ID → 컴파일된 펌웨어(Intel HEX). `.ino` 프로그램용. */
+  readonly firmware: Readonly<Record<string, string>>;
+  /** 스케치를 컴파일하는 중인지. */
+  readonly compiling: boolean;
   readonly issues: readonly Issue[];
   /** 마지막으로 불러온 시각 — 다시 불러올 때마다 바뀐다. */
   readonly revision: number;
@@ -35,17 +49,20 @@ const EMPTY: ProjectState = {
   docJson: undefined,
   loaded: undefined,
   refs: {},
+  firmware: {},
+  compiling: false,
   issues: [],
   revision: 0,
 };
 
-type Loaded = Pick<ProjectState, "docJson" | "loaded" | "refs" | "issues">;
+type Loaded = Pick<ProjectState, "docJson" | "loaded" | "refs" | "firmware" | "issues">;
 
 async function load(path: string): Promise<Loaded> {
   const failed = (message: string): Loaded => ({
     docJson: undefined,
     loaded: undefined,
     refs: {},
+    firmware: {},
     issues: [{ path, message }],
   });
   const text = await readFile(path);
@@ -66,9 +83,20 @@ async function load(path: string): Promise<Loaded> {
     }),
   );
   const r = loadSystemProject(json, (rel) => refs[rel], createStandardRegistry);
-  return r.ok
-    ? { docJson: json, loaded: r.value, refs, issues: [] }
-    : { docJson: json, loaded: undefined, refs, issues: r.issues };
+  if (!r.ok) return { docJson: json, loaded: undefined, refs, firmware: {}, issues: r.issues };
+
+  // Arduino 스케치는 dev 서버가 컴파일한다 (같은 소스는 캐시되어 빠르다).
+  const firmware: Record<string, string> = {};
+  const issues: Issue[] = [];
+  await Promise.all(
+    r.value.doc.instances.map(async (inst) => {
+      if (!inst.program || !isSketch(inst.program)) return;
+      const c = await compile(joinPath(dirOf(path), inst.program));
+      if (c.ok) firmware[inst.id] = c.hex;
+      else issues.push(...c.issues);
+    }),
+  );
+  return { docJson: json, loaded: r.value, refs, firmware, issues };
 }
 
 export function useProject() {
@@ -123,6 +151,7 @@ export function useProject() {
       future.current = [];
     }
     pathRef.current = path;
+    setState((s) => ({ ...s, compiling: true }));
     const result = await load(path);
     if (pathRef.current !== path) return;
     const url = new URL(location.href);
@@ -135,13 +164,20 @@ export function useProject() {
         JSON.stringify(s.docJson) === JSON.stringify(result.docJson) &&
         result.loaded
       ) {
-        return { ...s, refs: result.refs };
+        return {
+          ...s,
+          refs: result.refs,
+          firmware: result.firmware,
+          issues: result.issues,
+          compiling: false,
+        };
       }
       return {
         ...s,
         path,
         ...result,
         loaded: result.loaded ?? (s.path === path ? s.loaded : undefined),
+        compiling: false,
         revision: s.revision + 1,
       };
     });

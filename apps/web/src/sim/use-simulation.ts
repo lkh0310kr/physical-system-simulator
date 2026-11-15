@@ -3,7 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import type { ProjectState } from "../use-project.ts";
 import type { Frame, FromWorker, ToWorker } from "./protocol.ts";
 
-export function useSimulation(project: Pick<ProjectState, "docJson" | "refs" | "loaded">) {
+export function useSimulation(
+  project: Pick<ProjectState, "docJson" | "refs" | "firmware" | "loaded">,
+) {
   const worker = useRef<Worker | undefined>(undefined);
   const [frame, setFrame] = useState<Frame | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
@@ -21,15 +23,28 @@ export function useSimulation(project: Pick<ProjectState, "docJson" | "refs" | "
   const send = (m: ToWorker) => worker.current?.postMessage(m);
 
   // 회로가 바뀔 때만 다시 만든다. 화면 배치(layout)만 바뀌면 실행 중인 시뮬레이션을 건드리지 않는다.
-  const { docJson, refs, loaded } = project;
+  const { docJson, refs, firmware, loaded } = project;
   const circuitKey = loaded
-    ? JSON.stringify([{ ...(docJson as Record<string, unknown>), layout: undefined }, refs])
+    ? JSON.stringify([
+        { ...(docJson as Record<string, unknown>), layout: undefined },
+        refs,
+        firmware,
+      ])
     : "";
   useEffect(() => {
     setError(undefined);
     if (!circuitKey) return;
-    const [doc, files] = JSON.parse(circuitKey) as [unknown, Record<string, string>];
-    worker.current?.postMessage({ type: "load", docJson: doc, refs: files } satisfies ToWorker);
+    const [doc, files, hex] = JSON.parse(circuitKey) as [
+      unknown,
+      Record<string, string>,
+      Record<string, string>,
+    ];
+    worker.current?.postMessage({
+      type: "load",
+      docJson: doc,
+      refs: files,
+      firmware: hex,
+    } satisfies ToWorker);
   }, [circuitKey]);
 
   return {

@@ -103,19 +103,19 @@ export function setProgram(doc: unknown, id: string, path: string): Json {
   };
 }
 
-/** 새 프로그램 파일의 기본 내용. */
-export const PROGRAM_TEMPLATE = `function setup() {
+/** 새 Arduino 스케치의 기본 내용. */
+export const PROGRAM_TEMPLATE = `void setup() {
   pinMode(13, OUTPUT);
   Serial.begin(9600);
 }
 
-function* loop() {
+void loop() {
   digitalWrite(13, HIGH);
   Serial.println("on");
-  yield delay(500);
+  delay(500);
   digitalWrite(13, LOW);
   Serial.println("off");
-  yield delay(500);
+  delay(500);
 }
 `;
 

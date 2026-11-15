@@ -4,14 +4,16 @@
  *   GET  /api/files              프로젝트 안의 .json/.js 파일 목록
  *   GET  /api/file?path=…        파일 읽기
  *   PUT  /api/file?path=…        파일 쓰기 (본문 = 내용)
+ *   POST /api/compile?path=…     Arduino 스케치(.ino) 컴파일 → { ok, hex } | { ok: false, issues }
  *   HMR 이벤트 "physisim:file"   파일이 바뀌면 { path } 알림
  */
 import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { compileSketch } from "@physisim/avr/compile";
 import type { Plugin } from "vite";
 
-const EXTENSIONS = new Set([".json", ".js"]);
+const EXTENSIONS = new Set([".json", ".js", ".ino"]);
 const SKIP = new Set(["node_modules", ".git", "dist"]);
 
 /** 프로젝트 기준 상대 경로를 절대 경로로. 프로젝트 밖을 가리키면 `undefined`. */
@@ -79,6 +81,24 @@ export function projectApi(root: string): Plugin {
             res,
             200,
             JSON.stringify({ root, files: listProjectFiles(root) }),
+            "application/json",
+          );
+        }
+        if (url.pathname === "/api/compile" && req.method === "POST") {
+          const rel = url.searchParams.get("path") ?? "";
+          const abs = resolveInside(root, rel);
+          if (!abs) return send(res, 400, "프로젝트 밖의 경로");
+          let source: string;
+          try {
+            source = readFileSync(abs, "utf8");
+          } catch (e) {
+            return send(res, 404, (e as Error).message);
+          }
+          const r = await compileSketch(source, { fileName: rel });
+          return send(
+            res,
+            200,
+            JSON.stringify(r.ok ? { ok: true, hex: r.value } : r),
             "application/json",
           );
         }

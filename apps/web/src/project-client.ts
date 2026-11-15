@@ -40,3 +40,12 @@ export function joinPath(dir: string, rel: string): string {
   }
   return parts.join("/");
 }
+
+/** 프로젝트의 Arduino 스케치를 dev 서버에서 컴파일한다. */
+export async function compile(
+  path: string,
+): Promise<{ ok: true; hex: string } | { ok: false; issues: { path: string; message: string }[] }> {
+  const res = await fetch(`/api/compile?path=${encodeURIComponent(path)}`, { method: "POST" });
+  if (!res.ok) return { ok: false, issues: [{ path, message: await res.text() }] };
+  return res.json();
+}
