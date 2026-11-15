@@ -1,6 +1,6 @@
 # PhysiSim 프로젝트 전체 설계 명세 (Specification)
 
-> **현재 설계 기준:** v0.6 (2026-11-15)  
+> **현재 설계 기준:** v0.7 (2026-11-15)  
 > **프로젝트 유형:** Model-driven Physical Systems Simulator  
 > **개발 방향:** AI Agentic Simulation Platform  
 > **핵심 철학:** Model 중심 설계
@@ -361,7 +361,15 @@ interface ModelInstance {
 }
 ```
 
-현재 State 구조와 Runtime Context는 미결정이다.
+**확정 (v0.7):** Instance는 Model을 참조하고, 속성 override와 Capability 바인딩별 State를 가진다. State는 순수 JSON이라 스냅샷·되감기·Agent 조회가 가능하다.
+
+```text
+led1 (Instance)
+├── model: model.led
+├── properties: { color: green }        ← Model 값 override
+└── state
+    └── capability.light-emission: {…}  ← 바인딩의 Behavior가 관리
+```
 
 ## 8. Model Composition
 
@@ -381,7 +389,13 @@ Robot Model
 
 다양한 물리적 시스템을 구성할 수 있도록 설계한다.
 
-단순히 Model 목록을 포함하는 것뿐 아니라, 연결 관계와 구성 방식도 추후 정의해야 한다.
+**확정 (v0.7): Port + 핀-핀 연결 + Net 해석**
+
+- Model은 도메인(electrical, mechanical …)이 있는 **Port**를 선언한다.
+- System 문서는 Instance 목록과 **핀-핀 연결**(`"uno:D13"` ↔ `"r1:1"`)로 작성한다. 사람과 Agent가 쓰기 쉽다 (Wokwi `diagram.json` 참고).
+- 엔진은 연결을 **Net**(같은 전위·같은 노드로 묶인 Port 집합)으로 해석한다. 전기 Port는 전압(across)·전류(through)로 다룬다 (Modelica connector 참고).
+- 화면 정보(좌표, 선 색)는 같은 파일의 선택적 `layout` 섹션에 두고, 엔진과 Agent는 무시한다.
+- System을 다시 Model로 감싸는 계층 Composition은 실제 수요가 생기는 Phase 7에서 설계한다.
 
 ## 9. Simulation Engine
 
@@ -478,9 +492,11 @@ AI Agent는 필요한 Model을 검색하고 Instance를 생성하며 연결 관�
 | 물리 단위 | 자체 경량 구현 (SI 차원 벡터, 내부값은 SI) | 확정 (v0.6) |
 | Behavior 형태 | 순수 함수 `step` + 선택적 이벤트 훅 | 확정 (v0.6) |
 | 바인딩당 Behavior 수 | 1개 | 확정 (v0.6) |
-| Instance 구조 | 미결정 | 대기 |
-| Behavior 인터페이스 | 미결정 | 대기 |
-| Composition 구조 | 미결정 | 대기 |
+| Instance 구조 | Model 참조 + 속성 override + Capability 바인딩별 State (순수 JSON) | 확정 (v0.7) |
+| Behavior 인터페이스 | 순수 함수 `step` + 선택적 `onEvent` (§14.4) | 확정 (v0.6) |
+| Composition 구조 | Model이 도메인별 Port 선언, 문서는 핀-핀 연결, 엔진은 Net으로 해석 | 확정 (v0.7) |
+| System 문서 레이아웃 | 같은 파일의 선택적 `layout` 섹션 (엔진·Agent는 무시) | 확정 (v0.7) |
+| 계층 Composition (System → Model) | Phase 7로 연기 | 확정 (v0.7) |
 | Simulation Engine | 미결정 | 대기 |
 | AI Agent 연동 | 미결정 | 대기 |
 
@@ -585,6 +601,7 @@ interface ModelCapabilityBinding {
 | 버전 | 날짜 | 변경 내용 |
 |---|---|---|
 | v0.4 | — | 초기 기준선 (Model 구조, Properties, Capability 확정) |
+| v0.7 | 2026-11-15 | Phase 2 결정: Instance 바인딩별 State, Port·핀-핀 연결·Net 해석, layout 섹션, 계층 Composition은 Phase 7로 |
 | v0.6 | 2026-11-15 | Phase 1 결정: 자체 단위 시스템, Behavior = 순수 함수 + 이벤트 훅, 바인딩당 Behavior 1개 |
 | v0.5 | 2026-11-15 | §14 Behavior↔Capability A' 하이브리드 확정, §15 기술 스택·개발 전략 추가, §12·§13 갱신, 문서 주도 개발 원칙(문서는 목표·구조, 세부는 코드) |
 
