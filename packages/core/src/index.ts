@@ -11,6 +11,7 @@ export * from "./issues.ts";
 export * from "./json-schema.ts";
 export * from "./loader.ts";
 export * from "./model.ts";
+export * from "./project.ts";
 export * from "./property.ts";
 export * from "./registry.ts";
 export * from "./system.ts";
