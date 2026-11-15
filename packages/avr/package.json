@@ -1,0 +1,20 @@
+{
+  "name": "@physisim/avr",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Runs compiled AVR (ATmega328P) firmware inside a PhysiSim simulation using avr8js",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./compile": "./src/compile.ts"
+  },
+  "dependencies": {
+    "@physisim/core": "workspace:*",
+    "@physisim/engine": "workspace:*",
+    "avr8js": "^0.21.1"
+  },
+  "devDependencies": {
+    "@physisim/models": "workspace:*"
+  }
+}

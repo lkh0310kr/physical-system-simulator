@@ -3,8 +3,10 @@
  * 시뮬레이션 Worker: 엔진을 메인 스레드 밖에서 실시간(벽시계 속도)으로 돌리고 화면용 프레임을 보낸다.
  * MCU 프로그램도 여기서 실행되므로 UI를 멈추게 하지 않는다.
  */
+
+import { startPrograms } from "@physisim/avr";
 import { type LoadedSystem, loadSystemProject, type PropertyValue } from "@physisim/core";
-import { createSimulation, loadProgram, type Program, type Simulation } from "@physisim/engine";
+import { createSimulation, type Program, type Simulation } from "@physisim/engine";
 import { createStandardRegistry } from "@physisim/models";
 import type { FromWorker, ToWorker } from "./protocol.ts";
 
@@ -19,6 +21,7 @@ const SERIAL_LINES = 200;
 let loaded: LoadedSystem | undefined;
 let sim: Simulation | undefined;
 let programs: [string, Program][] = [];
+let firmware: ReadonlyMap<string, string> = new Map();
 let signals: Record<string, PropertyValue> = {};
 let running = false;
 let last = performance.now();
@@ -39,10 +42,7 @@ function start() {
         for (const [k, v] of Object.entries(out)) signals[`${instance}.${k}`] = v;
     }
   });
-  programs = [...loaded.programs].map(([id, source]) => [
-    id,
-    loadProgram(sim as Simulation, id, source),
-  ]);
+  programs = startPrograms(sim, loaded, firmware);
   sim.run(0); // t=0 상태
 }
 
@@ -87,6 +87,7 @@ self.onmessage = (e: MessageEvent<ToWorker>) => {
   switch (m.type) {
     case "load": {
       const r = loadSystemProject(m.docJson, (path) => m.refs[path], createStandardRegistry);
+      firmware = new Map(Object.entries(m.firmware));
       loaded = r.ok ? r.value : undefined;
       if (!r.ok) running = false;
       start();

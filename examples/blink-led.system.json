@@ -6,7 +6,7 @@
     {
       "id": "uno",
       "model": "model.arduino-uno",
-      "program": "blink.js"
+      "program": "blink.ino"
     },
     {
       "id": "r1",

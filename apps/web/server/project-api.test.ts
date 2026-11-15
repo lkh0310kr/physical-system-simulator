@@ -26,6 +26,7 @@ describe("listProjectFiles", () => {
     for (const f of [
       "a.system.json",
       "blink.js",
+      "blink.ino",
       "notes.md",
       "models/led.json",
       "node_modules/x/y.json",
@@ -33,6 +34,11 @@ describe("listProjectFiles", () => {
     ]) {
       writeFileSync(join(root, f), "{}");
     }
-    expect(listProjectFiles(root)).toEqual(["a.system.json", "blink.js", "models/led.json"]);
+    expect(listProjectFiles(root)).toEqual([
+      "a.system.json",
+      "blink.ino",
+      "blink.js",
+      "models/led.json",
+    ]);
   });
 });

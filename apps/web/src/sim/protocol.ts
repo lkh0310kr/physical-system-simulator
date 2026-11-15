@@ -7,6 +7,8 @@ export type ToWorker =
       readonly type: "load";
       readonly docJson: unknown;
       readonly refs: Readonly<Record<string, string>>;
+      /** Instance ID → 컴파일된 펌웨어 (`.ino` 프로그램). */
+      readonly firmware: Readonly<Record<string, string>>;
     }
   | { readonly type: "play" }
   | { readonly type: "pause" }

@@ -1,6 +1,6 @@
 # PhysiSim 프로젝트 전체 설계 명세 (Specification)
 
-> **현재 설계 기준:** v0.10 (2026-11-15)  
+> **현재 설계 기준:** v0.11 (2026-11-15)  
 > **프로젝트 유형:** Model-driven Physical Systems Simulator  
 > **개발 방향:** AI Agentic Simulation Platform  
 > **핵심 철학:** Model 중심 설계
@@ -424,7 +424,9 @@ Simulation Engine은 실제 시뮬레이션 실행을 담당한다.
 - **혼합 시간 모델**: 연속 현상(회로, 이후 물리)은 고정 스텝으로, 이산 현상(타이머, `delay`)은 정확한 시각의 이벤트로 처리한다. 시간은 정수 마이크로초로 관리해 누적 오차가 없다.
 - **도메인 기여**: Behavior는 `step` 외에 자기 Port 기준의 도메인 요소(예: 회로 요소)를 선택적으로 내놓는다. 엔진의 Domain Solver가 이를 Net 위에서 풀고, 결과를 Behavior가 읽는다.
 - **회로 해석**: 저항·구동원·다이오드(LED)를 노드 해석으로 푼다. 정밀 해석(SPICE)은 Phase 6에서 다시 검토한다.
-- **MCU 프로그램**: Arduino식 API의 JS 스크립트. `delay`는 `yield`로 시뮬레이션 시간을 양보한다. 엔진은 파일 I/O 없이 소스 문자열만 받는다(브라우저에서도 동작).
+- **MCU 프로그램 (v0.11)**: 실제 Arduino 스케치(`.ino`). arduino-cli로 컴파일한 펌웨어(hex)를 avr8js가 명령어 단위로 실행해 실제 보드와 호환된다. 포트 레지스터 변화는 GPIO 이벤트로, USART는 시리얼 출력으로 이어진다. 엔진·실행기는 hex만 받고, 컴파일은 실행 도구(CLI, dev 서버)가 맡는다.
+  - 변경 이유: 실제 보드·예제·라이브러리와의 호환성, 에이전트가 가장 잘 아는 언어 (사용자 결정, 2026-11-15).
+  - 영향: arduino-cli(외부 도구, GPL-3, 호출만 함)가 필요하다. 가벼운 실험용 JS 런타임(`.js`)은 남긴다.
 - **결정론**: 같은 System·프로그램·설정이면 같은 trace.
 
 ### 9.2 통합 시뮬레이션 예시
@@ -534,7 +536,7 @@ PhysiSim 전용 Agent 프로토콜을 만들지 않는다. **AI 코딩 에이전
 | 계층 Composition (System → Model) | Phase 7로 연기 | 확정 (v0.7) |
 | Simulation Engine 시간 모델 | 혼합: 고정 스텝 + 정확한 시각의 이벤트 | 확정 (v0.8) |
 | 회로 해석 | 직접 구현 (노드 해석 + 구간 선형 다이오드) | 확정 (v0.8) |
-| MCU 사용자 코드 | JS 스크립트 + Arduino식 API (`setup`/`loop`, `delay`는 `yield`) | 확정 (v0.8) |
+| MCU 사용자 코드 | ~~JS 스크립트 + Arduino식 API~~ → **Arduino 스케치(.ino)를 arduino-cli로 컴파일, avr8js로 실제 펌웨어 실행** (JS 런타임은 `.js` 파일용으로 유지) | 변경 (v0.11) |
 | AI Agent 연동 | 파일 기반: 에이전트가 파일을 수정하면 도구가 감지·반영. MCP는 보류 | 확정 (v0.9) |
 | 사용자 Model | System 옆 로컬 Model/Capability JSON 허용 (Behavior 코드는 표준만) | 확정 (v0.9) |
 | 웹 UI | React + Vite, 캔버스는 직접 SVG, 부품 그래픽은 자체 라인아트 | 확정 (v0.10) |
@@ -641,6 +643,7 @@ interface ModelCapabilityBinding {
 | 버전 | 날짜 | 변경 내용 |
 |---|---|---|
 | v0.4 | — | 초기 기준선 (Model 구조, Properties, Capability 확정) |
+| v0.11 | 2026-11-15 | MCU 코드를 Arduino 스케치(.ino) + avr8js 실펌웨어로 변경 (Phase 6 G6-1을 앞당김) |
 | v0.10 | 2026-11-15 | Phase 5 결정: React+Vite, 직접 SVG 캔버스, 자체 라인아트 부품, 로컬 파일 + dev 서버 |
 | v0.9 | 2026-11-15 | Phase 4 결정: 파일 기반 Agent 연동(§10.1), 로컬 사용자 Model 허용, MCP 보류 |
 | v0.8 | 2026-11-15 | Phase 3 결정: 혼합 시간 모델, 직접 구현 회로 해석, JS Arduino식 MCU 프로그램. §9.1 실행 모델 |

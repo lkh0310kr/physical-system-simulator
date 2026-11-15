@@ -124,6 +124,7 @@ export function App() {
               </option>
             ))}
           </select>
+          {project.compiling && <span className="muted">· 컴파일 중…</span>}
         </div>
       </div>
 
@@ -176,7 +177,7 @@ export function App() {
           serial={frame?.serial ?? {}}
           onSave={(path, content) => project.saveFile(path, content)}
           onCreate={async (id) => {
-            const path = `${id}.js`;
+            const path = `${id}.ino`;
             await project.saveFile(path, PROGRAM_TEMPLATE);
             update(setProgram(docJson, id, path));
           }}
