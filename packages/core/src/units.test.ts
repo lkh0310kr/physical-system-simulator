@@ -55,6 +55,14 @@ describe("units", () => {
   });
 });
 
+describe("battery units", () => {
+  it("converts mAh to coulombs and Wh to joules", () => {
+    expect(toSI(1000, "mAh")).toBe(3600);
+    expect(toSI(1, "Wh")).toBe(3600);
+    expect(convert(3600, "C", "mAh")).toBeCloseTo(1000);
+  });
+});
+
 describe("formatQuantity", () => {
   it("picks a metric prefix and keeps three significant digits", () => {
     expect(formatQuantity(3 / 255, "A")).toBe("11.8 mA");
