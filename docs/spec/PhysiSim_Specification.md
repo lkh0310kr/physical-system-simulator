@@ -470,7 +470,9 @@ AI Agent는 필요한 Model을 검색하고 Instance를 생성하며 연결 관�
 | 개발 전략 | Headless 코어 우선 | 확정 (v0.5) |
 | 런타임 Schema 검증 | Zod v4 | 확정 (v0.5) |
 | 저장소 / 툴체인 | pnpm 모노레포 | 확정 (v0.5) |
+| 플랫폼 | 웹 앱 (브라우저에서 시뮬레이션 실행) | 확정 (v0.5) |
 | 런타임 | Node.js 22 LTS | 확정 (v0.5) |
+| 개발·디자인 철학 | 핵심만, 미니멀·모던 (`docs/DESIGN.md`) | 확정 (v0.5) |
 | 공개 범위 / 라이선스 | Public GitHub 저장소, MIT | 확정 (v0.5) |
 | 빌드 도구 | tsc만 사용 (npm 배포 시 tsdown 재검토) | 확정 (v0.5) |
 | Instance 구조 | 미결정 | 대기 |
@@ -562,6 +564,7 @@ interface ModelCapabilityBinding {
 
 | 항목 | 결정 | 비고 |
 |---|---|---|
+| 플랫폼 | 웹 앱 | 설치 없이 브라우저에서 사용. 시뮬레이션도 브라우저 안에서 실행. 코어는 Node(CLI·Agent)에서도 동작 |
 | 언어 | TypeScript (strict, ESM) | §11 |
 | 런타임 | Node.js 22 LTS | 코어는 Node와 브라우저 양쪽에서 동작 |
 | 라이선스 | MIT | Public 저장소 |
@@ -572,7 +575,7 @@ interface ModelCapabilityBinding {
 | Lint / Format | Biome | |
 | 개발 전략 | Headless 코어 우선 | 코어(테스트·CLI) → Agent → 2D 에디터 → 3D·물리 |
 
-세부 일정은 `docs/PHASE_PLAN.md`를 따른다.
+세부 일정은 `docs/PHASE_PLAN.md`를, 개발·디자인 철학은 `docs/DESIGN.md`를 따른다.
 
 ## 16. 변경 이력
 

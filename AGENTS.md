@@ -15,6 +15,7 @@ Model(정의) / Behavior(실행 로직) / Instance(런타임 객체)를 분리�
 |---|---|
 | `docs/spec/PhysiSim_Specification.md` | 핵심 목표, 설계 철학, 시스템 구조, **확정된 결정** |
 | `docs/PHASE_PLAN.md` | Phase별 목표, 마일스톤, 결정 게이트 |
+| `docs/DESIGN.md` | **개발·디자인 철학** — 핵심만 남기기, 미니멀·모던 UI |
 | `docs/adr/` | 되돌리기 어려운 결정의 배경과 이유 |
 | `docs/references.md` | 참고 서비스·오픈소스와 차용 포인트 |
 | **코드** | 그 외 전부 — 인터페이스, 규칙, 예외 처리, 알고리즘 |
@@ -106,6 +107,8 @@ Model(정의) / Behavior(실행 로직) / Instance(런타임 객체)를 분리�
 - 특정 상용 서비스의 브랜드, UI 디자인, 에셋을 그대로 복제하지 않는다.
 
 ## 5. 아키텍처 원칙
+
+- **핵심만.** 기능·코드·의존성은 필요가 증명될 때만 추가한다. 가장 좋은 부품은 없는 부품이다(`docs/DESIGN.md` §1).
 
 - **Model은 데이터다.** Model·Capability 정의는 JSON + Zod 스키마로 표현하고 런타임에 검증한다.
 - **Behavior는 코드다.** Model 안에 로직을 넣지 않는다. Capability가 기본 Behavior를 참조하고 Model이 override한다(스펙 §14, ADR-0001).
