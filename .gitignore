@@ -8,3 +8,6 @@ coverage/
 .turbo/
 .vite/
 *.tsbuildinfo
+
+# local editor/workspace state
+.workspace/
