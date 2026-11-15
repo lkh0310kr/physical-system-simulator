@@ -102,3 +102,7 @@ void loop() {
 
 - 앞부분은 위치다: `connections[2][1]`은 세 번째 연결의 두 번째 Port, `model.x:...`는 그 Model 파일 안의 위치.
 - 오류를 모두 고친 뒤 `validate`가 `✓`를 내면 실행할 수 있다.
+
+## 6. 부품 값의 출처
+
+부품 Model의 값(전류, 전압, 시간 등)은 실제 제품 데이터시트에서 가져온다. 확인한 값은 `metadata.source`에 문서·표 번호를 적고, 확인하지 못한 값은 가정이라고 설명(description)에 쓴다. 예: `docs/scenarios/wearable-camera-specs.md`.

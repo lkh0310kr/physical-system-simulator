@@ -114,6 +114,7 @@ Model(정의) / Behavior(실행 로직) / Instance(런타임 객체)를 분리�
 - **Model은 데이터다.** Model·Capability 정의는 JSON + Zod 스키마로 표현하고 런타임에 검증한다.
 - **Behavior는 코드다.** Model 안에 로직을 넣지 않는다. Capability가 기본 Behavior를 참조하고 Model이 override한다(스펙 §14, ADR-0001).
 - **Instance는 상태다.** Model을 참조만 하고 복사하지 않는다.
+- **부품 사양은 실제 제품에서.** 모델 값은 데이터시트 등 실제 제품 자료로 확인한다. 확인 못 한 값은 가정이라고 표시하고 출처(`metadata.source`)를 남긴다 (`docs/scenarios/wearable-camera-specs.md` 참고). 웹에서 받은 PDF가 텍스트로 안 읽히면 `pdftotext -layout`으로 변환한다.
 - **물리량은 단위와 함께** 다룬다. 공개 API에 단위 없는 숫자를 노출하지 않는다.
 - **결정론**: 같은 입력·시드면 같은 결과. 시뮬레이션 코어에서 `Date.now()`, `Math.random()`을 직접 쓰지 않는다.
 - **Headless 우선**: 코어 패키지는 DOM·브라우저 API에 의존하지 않는다. UI·CLI·Agent는 코어를 소비만 한다.
