@@ -1,6 +1,6 @@
 # PhysiSim 프로젝트 전체 설계 명세 (Specification)
 
-> **현재 설계 기준:** v0.4  
+> **현재 설계 기준:** v0.5 (2026-11-15)  
 > **프로젝트 유형:** Model-driven Physical Systems Simulator  
 > **개발 방향:** AI Agentic Simulation Platform  
 > **핵심 철학:** Model 중심 설계
@@ -291,7 +291,7 @@ interface Capability {
 
 아직 최종 인터페이스는 아니다.
 
-Capability가 실제 실행 로직을 직접 포함할지, 별도의 Behavior가 이를 실행할지는 이후 Behavior System 설계에서 결정한다.
+Capability는 실행 로직을 직접 포함하지 않는다. 실행은 Behavior가 담당하며, 연결 방식은 §14에서 확정했다(A' 하이브리드).
 
 ## 6. Behavior System
 
@@ -466,6 +466,10 @@ AI Agent는 필요한 Model을 검색하고 Instance를 생성하며 연결 관�
 | Model 구조 | 하이브리드(C) | 확정 |
 | Properties | Schema 기반(C) | 확정 |
 | Capability | 독립 정의(B) | 확정 |
+| Behavior ↔ Capability 연결 | A' 하이브리드 (기본 참조 + Model override) | 확정 (v0.5) |
+| 개발 전략 | Headless 코어 우선 | 확정 (v0.5) |
+| 런타임 Schema 검증 | Zod v4 | 확정 (v0.5) |
+| 저장소 / 툴체인 | pnpm 모노레포 | 확정 (v0.5) |
 | Instance 구조 | 미결정 | 대기 |
 | Behavior 인터페이스 | 미결정 | 대기 |
 | Composition 구조 | 미결정 | 대기 |
@@ -477,45 +481,99 @@ AI Agent는 필요한 Model을 검색하고 Instance를 생성하며 연결 관�
 1. **Model 구조** — 확정: 하이브리드 구조
 2. **Properties 타입 시스템** — 확정: Schema 기반
 3. **Capability 정의 및 확장** — 확정: 독립적인 Capability 정의
-4. **Behavior 인터페이스** — 다음 결정
-5. **Instance와 State**
-6. **Model Composition**
-7. **Simulation Engine**
-8. **AI Agent Integration**
+4. **Behavior ↔ Capability 연결** — 확정: A' 하이브리드
+5. **Behavior 인터페이스 (시그니처·실행 모델)** — 다음 결정 (Phase 1)
+6. **Instance와 State**
+7. **Model Composition (Port / Connection)**
+8. **Simulation Engine**
+9. **AI Agent Integration**
 
-## 14. 다음 결정 사항: Behavior와 Capability의 관계
+## 14. Behavior와 Capability의 관계
 
-Capability는 기능의 정의이고 Behavior는 실제 동작 로직이다. 둘을 어떻게 연결할지 결정해야 한다.
+**확정 (v0.5): A' 하이브리드 — Capability가 기본 Behavior를 참조하고, Model이 이를 override할 수 있다.**
 
-### A. Capability가 Behavior를 직접 참조
+검토했던 대안:
+
+| 안 | 내용 | 결과 |
+|---|---|---|
+| A | Capability가 Behavior를 직접 참조 | 기반으로 채택 |
+| B | Model이 Capability와 Behavior를 각각 참조 | override 요소만 채택 |
+| C | 별도 Registry에서 연결 | 미채택 (간접 계층 과다) |
+
+### 14.1 구조
 
 ```text
 GPIO Capability
-└── Behavior Reference
-    └── DigitalWriteBehavior
-```
+└── defaultBehavior → DigitalIOBehavior
 
-### B. Model이 Capability와 Behavior를 각각 참조
-
-```text
 Arduino UNO Model
-├── Capabilities
-│   └── GPIO
-└── Behaviors
-    └── DigitalWriteBehavior
+└── Capabilities
+    └── GPIO
+        ├── config: { pinCount: 20, logicLevel: 5V }   ← Model별 설정
+        └── behavior: (생략 → Capability 기본값 사용)
+
+ESP32 Model
+└── Capabilities
+    └── GPIO
+        ├── config: { pinCount: 34, logicLevel: 3.3V }
+        └── behavior → Esp32DigitalIOBehavior          ← override
 ```
 
-### C. Capability와 Behavior를 별도의 Registry에서 연결
+### 14.2 Behavior 해석 규칙
 
-```text
-Model
-└── GPIO Capability
+1. Model의 Capability 바인딩에 `behavior`가 있으면 그것을 사용한다.
+2. 없으면 Capability 정의의 `defaultBehavior`를 사용한다.
+3. 둘 다 없으면 Model 검증 단계에서 오류로 처리한다.
 
-Capability Registry
-└── GPIO → DigitalWriteBehavior
+### 14.3 개념 인터페이스 (초안)
+
+```ts
+interface BehaviorRef {
+    id: string;          // 예: "behavior.digital-io"
+    version?: string;
+}
+
+interface CapabilityDefinition {
+    id: string;
+    name: string;
+    inputs: Record<string, unknown>;
+    outputs: Record<string, unknown>;
+    parameters: Record<string, unknown>;
+    defaultBehavior?: BehaviorRef;
+}
+
+interface ModelCapabilityBinding {
+    capability: string;               // CapabilityDefinition.id
+    config?: Record<string, unknown>; // Model별 설정 (핀 수, 전압 등)
+    behavior?: BehaviorRef;           // override
+}
 ```
 
-현재 추천은 **A**다. Capability가 제공하는 기능과 그 기능을 실행하는 Behavior 사이의 관계가 명확하기 때문이다. 다만 하나의 Capability가 여러 Behavior를 가질 수 있는지, Model마다 실행 구현을 교체할 수 있는지는 추가로 설계해야 한다.
+### 14.4 남은 하위 결정 (Phase 1에서 결정)
+
+- 하나의 Capability 바인딩이 여러 Behavior를 동시에 가질 수 있는가
+- Behavior 실행 시그니처 (순수 함수 `step(state, inputs, dt)` vs 객체/이벤트 핸들러)
+- Behavior 버전 관리 방식
+
+## 15. 기술 스택 및 개발 전략 (v0.5)
+
+| 항목 | 결정 | 비고 |
+|---|---|---|
+| 언어 | TypeScript (strict, ESM) | §11 |
+| 런타임 Schema | Zod v4 | `z.toJSONSchema()`로 Agent tool schema 생성 |
+| 저장소 | pnpm workspaces 모노레포 | packages/*, apps/* |
+| 테스트 | Vitest | |
+| Lint / Format | Biome | |
+| 개발 전략 | Headless 코어 우선 | 코어(테스트·CLI) → Agent → 2D 에디터 → 3D·물리 |
+
+세부 일정은 `docs/PHASE_PLAN.md`를 따른다.
+
+## 16. 변경 이력
+
+| 버전 | 날짜 | 변경 내용 |
+|---|---|---|
+| v0.4 | — | 초기 기준선 (Model 구조, Properties, Capability 확정) |
+| v0.5 | 2026-11-15 | §14 Behavior↔Capability A' 하이브리드 확정, §15 기술 스택·개발 전략 추가, §12·§13 갱신 |
 
 ---
 
@@ -526,3 +584,4 @@ Capability Registry
 - 기존 결정을 변경하면 변경 이유와 영향을 기록한다.
 - 사용자가 **"스펙"**이라고 요청하면 이 문서를 기준으로 프로젝트 전체 명세를 갱신하여 제공한다.
 - 이 문서는 현재까지 합의한 설계 기준이며, 코드 인터페이스 예시는 일부 개념 검증용 초안이다.
+- 이 문서는 저장소의 단일 진실 공급원(Single Source of Truth)이다. 구현이 스펙과 다르면 구현이 아니라 스펙을 먼저 (사용자 승인 후) 갱신한다.
