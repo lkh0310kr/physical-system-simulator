@@ -116,3 +116,4 @@ Model에 `body`(박스 크기, mm)와 `mounts`를 쓰고, System의 `assembly`�
 - `pnpm physisim case <system.json>` — 검증을 통과하면 `out/`에 베이스·뚜껑 STL, 3MF, BOM CSV를 쓴다. 검증 실패 시 이유를 보여 주고 파일을 쓰지 않는다. 웹 3D 화면의 `케이스`(단면, 다운로드)로도 볼 수 있다.
 - 공정 규칙(벽 두께, 틈새, 최소 구멍, 브리지 한계, 출력 크기)은 프로필: `--process fdm`(기본) 또는 `--profile my.json`(기본값에 덮어쓸 항목만).
 - 예제: `examples/camera-case-xiao-s3-sense.system.json`.
+- 3D 화면에서 더 실물처럼 보이게 하려면 Model `body.parts`에 세부 형상(box/cylinder, `material`은 pcb·metal·plastic·glass·rubber)을 mm로 적는다. 표시 전용이고 케이스 계산은 `body.size` 박스를 쓰므로, 모든 세부 형상은 박스 안에 들어가야 한다. 예: `xiao-esp32s3-sense.json`.

@@ -184,6 +184,121 @@
         },
         "color": {
           "type": "string"
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "shape": {
+                    "type": "string",
+                    "const": "box"
+                  },
+                  "position": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": ["number", "string"]
+                      },
+                      {
+                        "type": ["number", "string"]
+                      },
+                      {
+                        "type": ["number", "string"]
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "size": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": ["number", "string"]
+                      },
+                      {
+                        "type": ["number", "string"]
+                      },
+                      {
+                        "type": ["number", "string"]
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "material": {
+                    "default": "plastic",
+                    "type": "string",
+                    "enum": ["pcb", "metal", "plastic", "glass", "rubber"]
+                  },
+                  "color": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "shape", "position", "size"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "shape": {
+                    "type": "string",
+                    "const": "cylinder"
+                  },
+                  "position": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": ["number", "string"]
+                      },
+                      {
+                        "type": ["number", "string"]
+                      },
+                      {
+                        "type": ["number", "string"]
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "diameter": {
+                    "type": ["number", "string"]
+                  },
+                  "length": {
+                    "type": ["number", "string"]
+                  },
+                  "axis": {
+                    "default": "z",
+                    "type": "string",
+                    "enum": ["x", "y", "z"]
+                  },
+                  "material": {
+                    "default": "plastic",
+                    "type": "string",
+                    "enum": ["pcb", "metal", "plastic", "glass", "rubber"]
+                  },
+                  "color": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "shape", "position", "diameter", "length"],
+                "additionalProperties": false
+              }
+            ]
+          }
         }
       },
       "required": ["size"],

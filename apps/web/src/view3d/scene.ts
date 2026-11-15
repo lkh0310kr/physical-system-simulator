@@ -2,12 +2,40 @@
  * 3D 장면 데이터 (순수 함수): 로드된 System → 렌더할 박스 목록.
  * body가 있으면 실치수 박스, 없으면 "자동 박스"(자리표시, 치수는 가정)로 표시한다 — 가정을 실물처럼 보이게 하지 않는다.
  */
-import { bodySize, type LoadedSystem, placementPosition, type Vec3 } from "@physisim/core";
+import {
+  bodySize,
+  type LoadedSystem,
+  type MaterialKind,
+  placementPosition,
+  toMeters,
+  type Vec3,
+} from "@physisim/core";
 
 /** body가 없는 부품의 자리표시 크기 [m]. 실제 치수가 아니다. */
 export const PLACEHOLDER_SIZE: Vec3 = [0.01, 0.01, 0.004];
 /** 자동 배치 간격 [m]. */
 const GAP = 0.005;
+
+/** 부품 안의 세부 형상 (body 중심 기준 [m]). 박스 또는 축 방향 원기둥. */
+export type ScenePart =
+  | {
+      readonly kind: "box";
+      readonly name: string;
+      readonly position: Vec3;
+      readonly size: Vec3;
+      readonly material: MaterialKind;
+      readonly color: string | undefined;
+    }
+  | {
+      readonly kind: "cylinder";
+      readonly name: string;
+      readonly position: Vec3;
+      readonly diameter: number;
+      readonly length: number;
+      readonly axis: "x" | "y" | "z";
+      readonly material: MaterialKind;
+      readonly color: string | undefined;
+    };
 
 export interface SceneBox {
   readonly id: string;
@@ -23,7 +51,15 @@ export interface SceneBox {
   /** 실치수(body 선언)인지, 자리표시인지. */
   readonly real: boolean;
   readonly color: string | undefined;
+  /** 세부 형상. 비어 있으면 박스 하나로 그린다. */
+  readonly parts: readonly ScenePart[];
 }
+
+const v3 = (v: readonly [number | string, number | string, number | string]): Vec3 => [
+  toMeters(v[0]),
+  toMeters(v[1]),
+  toMeters(v[2]),
+];
 
 export function buildScene3d(loaded: LoadedSystem): SceneBox[] {
   const assembly = loaded.doc.assembly ?? {};
@@ -51,6 +87,28 @@ export function buildScene3d(loaded: LoadedSystem): SceneBox[] {
       switchable,
       real: !!body,
       color: body?.color,
+      parts: (body?.parts ?? []).map(
+        (p): ScenePart =>
+          p.shape === "box"
+            ? {
+                kind: "box",
+                name: p.name,
+                position: v3(p.position),
+                size: v3(p.size),
+                material: p.material,
+                color: p.color,
+              }
+            : {
+                kind: "cylinder",
+                name: p.name,
+                position: v3(p.position),
+                diameter: toMeters(p.diameter),
+                length: toMeters(p.length),
+                axis: p.axis,
+                material: p.material,
+                color: p.color,
+              },
+      ),
     };
   });
 }

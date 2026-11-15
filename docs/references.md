@@ -105,3 +105,16 @@
 - Velxio: https://forum.arduino.cc/t/velxio-an-open-source-arduino-rp2040-emulator-running-entirely-in-the-browser/1434847
 - EEcircuit: https://github.com/eelab-dev/EEcircuit
 - OpenHW Studio simulation engine: https://openhw-studio.fossee.in/docs/references/simulation-engine.html
+
+## 3D 표현 조사 (2026-11-15, Phase 7d)
+
+| 대상 | 확인한 것 | 우리 프로젝트에 적용 |
+|---|---|---|
+| BenchTwin (benchtwin.com, 직접 열어 봄) | 어두운 벤치 바닥 + 격자, 실제 부품(브레드보드·Arduino·OLED·서보)을 세부 형상으로 표현, 전선이 곡선 케이블로 3D 배선, 화면 부품은 실시간 동작 | 세부 형상(`body.parts`), 바닥 그림자, 금속 반사. 케이블 3D는 후속 |
+| Constructa | constructa.io가 만료·주차 상태라 사이트를 못 열었다. 이전 조사(조립→배선→코딩→실행 흐름)만 유효 | 직접 확인 못 함 — 표현 기법은 근거 없음 |
+| Tinkercad Circuits | 회로 편집기는 2D. 3D는 별도 3D 디자인 편집기에서 부품 둘레에 맞는 형상을 만드는 쪽 | 우리는 3D 조립 + 케이스 생성으로 두 흐름을 한 문서에 합친다 |
+| react-three-fiber / drei 커뮤니티 문서 | 이미지 기반 조명(Environment)이 PBR 반사의 핵심, ContactShadows·Stage는 접지감, HDR은 PMREM 처리 후 환경으로 사용 | three 내장 `RoomEnvironment` + PMREM + 그림자 판으로 같은 효과를 의존성 없이 구현 (drei 미도입) |
+| Claude Code로 3D 만들기(커뮤니티 글) | 렌더를 스크린샷으로 찍어 되먹임하는 루프가 핵심. "검증했다"고 말만 하는 실패 사례가 있어 실제 화면 증거를 요구해야 함 | 개발 중 브라우저로 직접 3D 화면을 보고 고친다 (이번 작업이 그 방식) |
+| realvirtual WEB | 브라우저 3D HMI, 렌더·시뮬레이션이 사용자 기기에서 동작 (AGPL — 코드는 안 가져옴) | 구조 참고만 |
+
+실제 부품 형상: Seeed XIAO 모듈은 공식 STEP의 **부품별 치수**만 옮겨 프리미티브로 구성했다 (STEP 메시를 배포하지 않으므로 라이선스 문제 없음).

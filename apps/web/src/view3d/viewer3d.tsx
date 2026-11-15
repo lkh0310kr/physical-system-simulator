@@ -3,17 +3,22 @@ import type { LoadedSystem } from "@physisim/core";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useState } from "react";
 import {
+  ACESFilmicToneMapping,
   BoxGeometry,
   BufferGeometry,
+  CylinderGeometry,
   DoubleSide,
   EdgesGeometry,
   Float32BufferAttribute,
+  PCFSoftShadowMap,
   Plane,
+  PMREMGenerator,
   Vector3,
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { Selection } from "../canvas/canvas.tsx";
-import { activityOf, buildScene3d, type SceneBox, sceneBounds } from "./scene.ts";
+import { activityOf, buildScene3d, type SceneBox, type ScenePart, sceneBounds } from "./scene.ts";
 import { type CaseMesh, downloadUrl, useCase } from "./use-case.ts";
 
 const ACCENT = "#2f6bff";
@@ -57,6 +62,53 @@ function Orbit({ radius, target }: { radius: number; target: [number, number, nu
   return null;
 }
 
+/** 재질 분류별 PBR 값. 형상 데이터에는 분류만 두고 셰이더 값은 여기서 정한다. */
+const MATERIALS = {
+  pcb: { color: "#171b21", roughness: 0.55, metalness: 0.1 },
+  metal: { color: "#c3c9d1", roughness: 0.28, metalness: 0.95 },
+  plastic: { color: "#2a2f38", roughness: 0.55, metalness: 0 },
+  glass: { color: "#1a2233", roughness: 0.05, metalness: 0.2 },
+  rubber: { color: "#1b1d20", roughness: 0.9, metalness: 0 },
+} as const;
+
+function PartMaterial({ part, glow }: { part: ScenePart; glow: number }) {
+  const m = MATERIALS[part.material];
+  return (
+    <meshPhysicalMaterial
+      color={part.color ?? m.color}
+      roughness={m.roughness}
+      metalness={m.metalness}
+      clearcoat={part.material === "glass" ? 1 : 0}
+      emissive={ACCENT}
+      emissiveIntensity={glow}
+    />
+  );
+}
+
+/** 세부 형상 하나. 원기둥은 three의 기본 y축을 요청한 축으로 눕힌다. */
+function Shape({ part, glow }: { part: ScenePart; glow: number }) {
+  const geometry = useMemo(
+    () =>
+      part.kind === "box"
+        ? new BoxGeometry(...part.size)
+        : new CylinderGeometry(part.diameter / 2, part.diameter / 2, part.length, 40),
+    [part],
+  );
+  const rotation: [number, number, number] =
+    part.kind === "cylinder"
+      ? part.axis === "z"
+        ? [Math.PI / 2, 0, 0]
+        : part.axis === "x"
+          ? [0, 0, Math.PI / 2]
+          : [0, 0, 0]
+      : [0, 0, 0];
+  return (
+    <mesh geometry={geometry} position={part.position} rotation={rotation} castShadow receiveShadow>
+      <PartMaterial part={part} glow={glow} />
+    </mesh>
+  );
+}
+
 function Part({
   box,
   selected,
@@ -76,39 +128,65 @@ function Part({
   const geometry = useMemo(() => new BoxGeometry(...box.size), [box.size]);
   const edges = useMemo(() => new EdgesGeometry(geometry), [geometry]);
   const rotation = box.rotation.map((d) => (d * Math.PI) / 180) as [number, number, number];
+  const detailed = box.parts.length > 0;
   return (
-    <group position={box.position} rotation={rotation}>
-      {/* biome-ignore lint/a11y/noStaticElementInteractions: three.js 객체이지 DOM 요소가 아니다 — r3f의 이벤트는 레이캐스트 이벤트다. */}
-      <mesh
-        geometry={geometry}
-        onClick={(e) => {
-          e.stopPropagation();
-          onSelect();
-        }}
-        onPointerDown={(e) => {
-          if (!pressable) return;
-          e.stopPropagation();
-          onPress("press");
-        }}
-        onPointerUp={() => pressable && onPress("release")}
-        onPointerOut={() => pressable && onPress("release")}
-      >
-        {/* 실치수는 채운 면, 자리표시(치수 가정)는 투명하게 — 가정을 실물처럼 보이게 하지 않는다.
-            살아 있는 부품은 강조색으로 발광한다 (강조색은 살아 있는 것에만). */}
-        <meshStandardMaterial
-          color={selected ? ACCENT : (box.color ?? REAL)}
-          emissive={ACCENT}
-          emissiveIntensity={activity * 1.2}
-          transparent={!box.real}
-          opacity={box.real ? 1 : 0.18 + activity * 0.5}
-          roughness={0.7}
-        />
-      </mesh>
-      <lineSegments geometry={edges}>
-        <lineBasicMaterial color={selected || activity > 0 ? ACCENT : EDGE} />
-      </lineSegments>
+    // biome-ignore lint/a11y/noStaticElementInteractions: three.js 객체이지 DOM 요소가 아니다 — r3f의 이벤트는 레이캐스트 이벤트다.
+    <group
+      position={box.position}
+      rotation={rotation}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect();
+      }}
+      onPointerDown={(e) => {
+        if (!pressable) return;
+        e.stopPropagation();
+        onPress("press");
+      }}
+      onPointerUp={() => pressable && onPress("release")}
+      onPointerOut={() => pressable && onPress("release")}
+    >
+      {detailed ? (
+        box.parts.map((p) => <Shape key={p.name} part={p} glow={activity * 0.35} />)
+      ) : (
+        <mesh geometry={geometry} castShadow receiveShadow>
+          {/* 실치수는 채운 면, 자리표시(치수 가정)는 투명하게 — 가정을 실물처럼 보이게 하지 않는다.
+              살아 있는 부품은 강조색으로 발광한다 (강조색은 살아 있는 것에만). */}
+          <meshStandardMaterial
+            color={selected ? ACCENT : (box.color ?? REAL)}
+            emissive={ACCENT}
+            emissiveIntensity={activity * 1.2}
+            transparent={!box.real}
+            opacity={box.real ? 1 : 0.18 + activity * 0.5}
+            roughness={0.6}
+            metalness={0.05}
+          />
+        </mesh>
+      )}
+      {/* 세부 형상이 있으면 박스는 안 그리고, 선택·활성일 때만 바깥 윤곽을 강조색으로 보인다 */}
+      {(!detailed || selected || activity > 0) && (
+        <lineSegments geometry={edges}>
+          <lineBasicMaterial color={selected || activity > 0 ? ACCENT : EDGE} />
+        </lineSegments>
+      )}
     </group>
   );
+}
+
+/** 이미지 기반 조명: 방 모양 장면을 PMREM으로 만들어 금속 반사와 부드러운 채움광을 낸다 (외부 파일·의존성 없음). */
+function Environment() {
+  const { gl, scene } = useThree();
+  useEffect(() => {
+    const pmrem = new PMREMGenerator(gl);
+    const texture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environment = texture;
+    return () => {
+      scene.environment = null;
+      texture.dispose();
+      pmrem.dispose();
+    };
+  }, [gl, scene]);
+  return null;
 }
 
 /** 케이스 메시(mm)를 장면 단위(m)로. 단면이 켜지면 중심 y 평면 앞쪽을 잘라 안을 보여 준다. */
@@ -136,11 +214,12 @@ function CaseSolid({
   }, [mesh]);
   return (
     <mesh geometry={geometry}>
-      <meshStandardMaterial
+      <meshPhysicalMaterial
         color={color}
         transparent
-        opacity={0.55}
-        roughness={0.8}
+        opacity={0.5}
+        roughness={0.45}
+        clearcoat={0.4}
         side={DoubleSide}
         clippingPlanes={clip ? [clip] : []}
       />
@@ -160,7 +239,9 @@ export function Viewer3D({
   const [showCase, setShowCase] = useState(false);
   const [section, setSection] = useState(false);
   const caseState = useCase(systemPath, showCase, loaded);
-  const boxes = useMemo(() => buildScene3d(loaded), [loaded]);
+  const all = useMemo(() => buildScene3d(loaded), [loaded]);
+  // 케이스를 보는 동안은 치수 없는 자리표시를 숨긴다 — 케이스에 들어가지 않는 가정 크기가 섞여 보이지 않게
+  const boxes = useMemo(() => (showCase ? all.filter((b) => b.real) : all), [all, showCase]);
   const bounds = useMemo(() => sceneBounds(boxes), [boxes]);
   const center: [number, number, number] = bounds
     ? [
@@ -193,11 +274,31 @@ export function Viewer3D({
       <Canvas
         className="view3d"
         camera={{ fov: 40, near: 0.001, far: 5 }}
-        gl={{ localClippingEnabled: true }}
+        shadows={{ type: PCFSoftShadowMap }}
+        gl={{ localClippingEnabled: true, toneMapping: ACESFilmicToneMapping }}
         onPointerMissed={() => onSelect?.(undefined)}
       >
-        <ambientLight intensity={0.9} />
-        <directionalLight position={[0.2, -0.3, 0.5]} intensity={1.4} />
+        <Environment />
+        <ambientLight intensity={0.25} />
+        <directionalLight
+          position={[center[0] + 0.08, center[1] - 0.1, floor + 0.2]}
+          intensity={2.2}
+          castShadow
+          shadow-mapSize={[2048, 2048]}
+          shadow-bias={-0.0004}
+          shadow-camera-left={-0.1}
+          shadow-camera-right={0.1}
+          shadow-camera-top={0.1}
+          shadow-camera-bottom={-0.1}
+          shadow-camera-near={0.01}
+          shadow-camera-far={0.6}
+          target-position={[center[0], center[1], floor]}
+        />
+        {/* 바닥 그림자: 부품이 떠 보이지 않게 한다 */}
+        <mesh position={[center[0], center[1], floor - 0.00005]} receiveShadow>
+          <planeGeometry args={[gridSize, gridSize]} />
+          <shadowMaterial opacity={0.35} />
+        </mesh>
         <gridHelper
           args={[gridSize, Math.round(gridSize / 0.01), "#8a94a0", "#3a414b"]}
           rotation={[Math.PI / 2, 0, 0]}

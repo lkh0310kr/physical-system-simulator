@@ -8,7 +8,7 @@
   "capabilities": [],
   "metadata": {
     "fidelity": "approximate",
-    "source": "https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/ (21×17.8 mm, 확장 포함 높이 15 mm), https://files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/res/seeed-studio-xiao-esp32s3-sense-3d_model.zip (STEP: 부품별 좌표). docs/scenarios/wearable-camera-specs.md 참조",
+    "source": "https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/ (21×17.8 mm, 확장 포함 높이 15 mm), https://files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/res/seeed-studio-xiao-esp32s3-sense-3d_model.zip (STEP: 부품별 좌표). docs/scenarios/wearable-camera-specs.md 참조 세부 형상(parts)은 STEP 부품별 외곽 상자와 렌즈 통 원기둥 치수에서 옮긴 것 — 형상 데이터가 아니라 치수만 사용.",
     "assumptions": [
       "STEP 높이 14.0 mm (사양표는 15 mm) — 케이스는 STEP 기준",
       "USB-C 개구부 12.4×6.5 mm = 플러그 오버몰드 최대 크기 가정 (USB Type-C 규격, 재확인 안 함)",
@@ -25,7 +25,143 @@
   },
   "body": {
     "size": [24.38, 17.8, 13.98],
-    "color": "#2b3a55"
+    "color": "#2b3a55",
+    "parts": [
+      {
+        "name": "pcb-main",
+        "shape": "box",
+        "position": [-1.405, -0.0, -6.355],
+        "size": [20.95, 17.78, 1.25],
+        "material": "pcb",
+        "color": "#171b21"
+      },
+      {
+        "name": "rf-shield",
+        "shape": "box",
+        "position": [-2.94, -0.0, -5.08],
+        "size": [10.6, 12.6, 2.7],
+        "material": "metal",
+        "color": "#c3c9d1"
+      },
+      {
+        "name": "button-a",
+        "shape": "box",
+        "position": [7.5, 5.93, -5.315],
+        "size": [2.6, 1.6, 0.63],
+        "material": "metal",
+        "color": "#d5d9df"
+      },
+      {
+        "name": "button-b",
+        "shape": "box",
+        "position": [7.48, -5.92, -5.315],
+        "size": [2.6, 1.6, 0.63],
+        "material": "metal",
+        "color": "#d5d9df"
+      },
+      {
+        "name": "usb-c",
+        "shape": "box",
+        "position": [6.95, 0.01, -4.62],
+        "size": [7.3, 8.94, 4.2],
+        "material": "metal",
+        "color": "#aeb5be"
+      },
+      {
+        "name": "u-fl",
+        "shape": "box",
+        "position": [-10.16, 4.73, -5.105],
+        "size": [3.0, 3.1, 1.25],
+        "material": "metal",
+        "color": "#c8b04a"
+      },
+      {
+        "name": "board-connector",
+        "shape": "box",
+        "position": [-9.935, -2.145, -4.26],
+        "size": [3.39, 8.61, 2.94],
+        "material": "plastic",
+        "color": "#2a2f38"
+      },
+      {
+        "name": "pcb-expansion",
+        "shape": "box",
+        "position": [-4.845, -0.0, -2.175],
+        "size": [14.67, 16.78, 1.25],
+        "material": "pcb",
+        "color": "#171b21"
+      },
+      {
+        "name": "fpc-connector",
+        "shape": "box",
+        "position": [-0.35, 0.285, -0.275],
+        "size": [5.52, 11.43, 2.67],
+        "material": "plastic",
+        "color": "#e8e2d4"
+      },
+      {
+        "name": "microsd",
+        "shape": "box",
+        "position": [4.65, 0.815, 0.695],
+        "size": [15.06, 12.09, 1.65],
+        "material": "metal",
+        "color": "#c9ced6"
+      },
+      {
+        "name": "fpc-tail",
+        "shape": "box",
+        "position": [-7.91, 0.64, -0.99],
+        "size": [5.0, 12.5, 0.28],
+        "material": "plastic",
+        "color": "#c47a2c"
+      },
+      {
+        "name": "camera-board",
+        "shape": "box",
+        "position": [5.54, 0.64, 2.27],
+        "size": [8.0, 8.0, 2.1],
+        "material": "pcb",
+        "color": "#171b21"
+      },
+      {
+        "name": "camera-flange",
+        "shape": "cylinder",
+        "position": [5.54, 0.64, 4.27],
+        "diameter": 7.84,
+        "length": 1.9,
+        "axis": "z",
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "camera-barrel",
+        "shape": "cylinder",
+        "position": [5.59, 0.69, 5.595],
+        "diameter": 6.32,
+        "length": 0.75,
+        "axis": "z",
+        "material": "plastic",
+        "color": "#15181d"
+      },
+      {
+        "name": "camera-top",
+        "shape": "cylinder",
+        "position": [5.59, 0.69, 6.35],
+        "diameter": 5.3,
+        "length": 0.76,
+        "axis": "z",
+        "material": "plastic",
+        "color": "#0d0f12"
+      },
+      {
+        "name": "camera-lens",
+        "shape": "box",
+        "position": [5.54, 0.64, 6.85],
+        "size": [4.0, 4.0, 0.26],
+        "material": "glass",
+        "color": "#1a2233"
+      }
+    ]
   },
   "mounts": [
     {
@@ -33,28 +169,41 @@
       "position": [5.59, 0.69, 6.98],
       "normal": [0, 0, 1],
       "description": "카메라 렌즈 끝 (STEP 렌즈 통 윗면 지름 5.3 mm)",
-      "opening": { "shape": "round", "diameter": 5.3 }
+      "opening": {
+        "shape": "round",
+        "diameter": 5.3
+      }
     },
     {
       "name": "usb-c",
       "position": [10.6, 0.01, -4.62],
       "normal": [1, 0, 0],
       "description": "USB-C 리셉터클 끝면",
-      "opening": { "shape": "rect", "width": 12.4, "height": 6.5 }
+      "opening": {
+        "shape": "rect",
+        "width": 12.4,
+        "height": 6.5
+      }
     },
     {
       "name": "button-a",
       "position": [10.71, 5.93, -5.0],
       "normal": [0, 0, 1],
       "description": "보드 가장자리 택트 버튼 (+y쪽), 윗면",
-      "opening": { "shape": "round", "diameter": 2.2 }
+      "opening": {
+        "shape": "round",
+        "diameter": 2.2
+      }
     },
     {
       "name": "button-b",
       "position": [10.71, -5.92, -5.0],
       "normal": [0, 0, 1],
       "description": "보드 가장자리 택트 버튼 (−y쪽), 윗면",
-      "opening": { "shape": "round", "diameter": 2.2 }
+      "opening": {
+        "shape": "round",
+        "diameter": 2.2
+      }
     }
   ]
 }

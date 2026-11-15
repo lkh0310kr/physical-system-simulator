@@ -230,6 +230,17 @@
 
 ---
 
+## Phase 7d — 3D 표현 (목표: 보면 실물이라고 알아볼 수 있게)
+
+- [x] P7-T20 조사: BenchTwin 직접 확인, r3f 조명·그림자 기법, Claude Code 시각 검증 루프 (`docs/references.md`)
+- [x] P7-T21 부품 세부 형상 `body.parts`(표시 전용 프리미티브 + 재질 분류), XIAO 모듈 적용
+- [x] P7-T22 렌더링: 이미지 기반 조명(RoomEnvironment), 부드러운 그림자, PBR 재질, ACES 톤매핑
+- [ ] P7-T23 배터리·커넥터 등 나머지 부품 세부 형상, 3D 케이블(배선을 곡선 케이블로)
+- [ ] P7-T24 glTF/STL 메시 가져오기 (라이선스가 허용하는 형상만)
+- [ ] P7-T25 케이스 뷰: 조립 분해(exploded) 애니메이션, 부품 라벨
+
+---
+
 ## Phase 8 — Control & Agent v2
 
 - [ ] P8-T1 Control 도메인 Model: PID 컨트롤러 (블록 Behavior)

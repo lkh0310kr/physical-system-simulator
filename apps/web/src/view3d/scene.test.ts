@@ -84,3 +84,32 @@ describe("activityOf", () => {
     ]);
   });
 });
+
+describe("detailed parts", () => {
+  it("converts XIAO module parts to metres relative to the body centre", () => {
+    const r = loadSystemProject(
+      {
+        name: "t",
+        instances: [{ id: "xiao", model: "model.xiao-esp32s3-sense" }],
+        connections: [],
+      },
+      () => undefined,
+      createStandardRegistry,
+    );
+    if (!r.ok) throw new Error(JSON.stringify(r.issues));
+    const [box] = buildScene3d(r.value);
+    const parts = box?.parts ?? [];
+    expect(parts.length).toBeGreaterThan(10);
+    const pcb = parts.find((p) => p.name === "pcb-main");
+    expect(pcb?.kind === "box" && pcb.size[0]).toBeCloseTo(0.02095, 5);
+    // 모든 세부 형상이 body 상자 안에 있어야 한다 (표시와 계산이 어긋나지 않게)
+    const half = (box?.size ?? [0, 0, 0]).map((v) => v / 2 + 1e-6);
+    for (const p of parts) {
+      const ext = p.kind === "box" ? p.size : [p.diameter, p.diameter, p.length];
+      const e = p.kind === "cylinder" && p.axis !== "z" ? ext : ext;
+      for (let i = 0; i < 3; i++) {
+        expect(Math.abs(p.position[i] ?? 0) + (e[i] ?? 0) / 2).toBeLessThanOrEqual(half[i] ?? 0);
+      }
+    }
+  });
+});

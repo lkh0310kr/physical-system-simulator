@@ -29,6 +29,34 @@ export function toMeters(v: number | string): number {
 export const Vec3Schema = z.tuple([LengthSchema, LengthSchema, LengthSchema]);
 export type Vec3 = readonly [number, number, number];
 
+/** 표면 재질 분류. 렌더러가 분류별 PBR 값을 고른다 (형상 데이터에 셰이더를 넣지 않는다). */
+export const MaterialKindSchema = z.enum(["pcb", "metal", "plastic", "glass", "rubber"]);
+
+/**
+ * 부품 안의 세부 형상 (보드, 커넥터, 렌즈 통 등). 표시 전용이며 케이스·간섭 계산은 `body` 박스를 쓴다.
+ * 위치는 body 중심 기준 mm, `axis`는 원기둥의 축(기본 z).
+ */
+export const PartShapeSchema = z.discriminatedUnion("shape", [
+  z.strictObject({
+    name: z.string().min(1),
+    shape: z.literal("box"),
+    position: Vec3Schema,
+    size: Vec3Schema,
+    material: MaterialKindSchema.default("plastic"),
+    color: z.string().optional(),
+  }),
+  z.strictObject({
+    name: z.string().min(1),
+    shape: z.literal("cylinder"),
+    position: Vec3Schema,
+    diameter: LengthSchema,
+    length: LengthSchema,
+    axis: z.enum(["x", "y", "z"]).default("z"),
+    material: MaterialKindSchema.default("plastic"),
+    color: z.string().optional(),
+  }),
+]);
+
 /** 기구 형상: 박스(필수 크기) + 선택적 외부 메시. 메시가 없으면 박스로 그린다. */
 export const BodySchema = z.strictObject({
   /** 가로(x)·세로(y)·높이(z) 크기. */
@@ -39,6 +67,8 @@ export const BodySchema = z.strictObject({
   mesh: z.string().min(1).optional(),
   /** 표시 색 (CSS 색). 없으면 분류별 기본색. */
   color: z.string().optional(),
+  /** 표시용 세부 형상. 있으면 박스 대신 이것들을 그린다 (박스는 계산에만 쓴다). */
+  parts: z.array(PartShapeSchema).optional(),
 });
 
 /**
@@ -70,6 +100,8 @@ export const PlacementSchema = z.strictObject({
 });
 
 export type Body = z.output<typeof BodySchema>;
+export type PartShape = z.output<typeof PartShapeSchema>;
+export type MaterialKind = z.output<typeof MaterialKindSchema>;
 export type Opening = z.output<typeof OpeningSchema>;
 export type Mount = z.output<typeof MountSchema>;
 export type Placement3D = z.output<typeof PlacementSchema>;
