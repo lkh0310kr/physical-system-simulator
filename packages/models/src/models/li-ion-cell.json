@@ -1,0 +1,43 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.li-ion-cell",
+  "name": "Li-ion Cell",
+  "category": "electrical/power",
+  "description": "단일 셀 리튬이온 배터리 (전압은 SOC에 따라 선형으로 근사).",
+  "propertySchema": {
+    "capacity": { "type": "number", "unit": "mAh", "min": 0, "description": "용량" },
+    "fullVoltage": {
+      "type": "number",
+      "unit": "V",
+      "default": 4.2,
+      "description": "만충 개방 전압"
+    },
+    "emptyVoltage": {
+      "type": "number",
+      "unit": "V",
+      "default": 3.0,
+      "description": "방전 종지 개방 전압"
+    },
+    "internalResistance": {
+      "type": "number",
+      "unit": "Ω",
+      "min": 0,
+      "default": 0.15,
+      "description": "내부 저항"
+    },
+    "initialSoc": {
+      "type": "number",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "description": "시작 충전 상태"
+    }
+  },
+  "properties": { "capacity": 500 },
+  "ports": [
+    { "name": "+", "domain": "electrical" },
+    { "name": "-", "domain": "electrical", "ground": true }
+  ],
+  "capabilities": [{ "capability": "capability.battery" }],
+  "metadata": { "fidelity": "approximate" }
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.battery",
+  "name": "Battery",
+  "description": "충전 상태(SOC)에 따라 전압이 변하고 내부 저항으로 전압이 처지는 전원. 나간 전하·에너지를 적분한다.",
+  "outputs": {
+    "voltage": { "type": "number", "unit": "V", "description": "단자 전압 (내부 저항 강하 반영)" },
+    "current": { "type": "number", "unit": "A", "description": "배터리에서 나가는 전류" },
+    "soc": { "type": "number", "min": 0, "max": 1, "description": "충전 상태 (1 = 만충)" },
+    "charge": { "type": "number", "unit": "C", "description": "지금까지 나간 전하" },
+    "energy": { "type": "number", "unit": "J", "description": "지금까지 나간 에너지" }
+  },
+  "defaultBehavior": "behavior.battery"
+}
