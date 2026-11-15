@@ -139,6 +139,12 @@
         "pinCount": 14,
         "logicLevel": 5
       }
+    },
+    {
+      "capability": "capability.power-supply",
+      "config": {
+        "rails": "5V=5,3.3V=3.3"
+      }
     }
   ],
   "metadata": {
