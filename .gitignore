@@ -11,3 +11,7 @@ coverage/
 
 # local editor/workspace state
 .workspace/
+
+# 제조사 데이터시트·브로슈어는 재배포 금지 — 값과 출처만 문서에 남긴다
+*.pdf
+datasheets/

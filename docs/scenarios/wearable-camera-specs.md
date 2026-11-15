@@ -31,8 +31,17 @@
 | nRF9160 | LTE-M 업링크 / NB-IoT 업링크 | 375 / 60 kbps | nRF9160 Product Brief v2.1 |
 | | PSM 바닥 전류 | 2.7 µA (LTE-M, NB-IoT) | 같은 문서 |
 | | 공급 전압 / 크기 | 3.0–5.5 V / 10×16×1.04 mm | 같은 문서 |
-| Quectel BG95-M3 | 업링크 최대 (Cat M1) | 1119 kbps, 51×30×4.9 mm | quectel.com 제품 페이지 |
-| Quectel EC200U | 업링크 최대 / 크기 | 5 Mbps, 28×31×2.4 mm | quectel.com 제품 페이지 |
+| Quectel BG95 시리즈 | 업링크 최대 Cat M1 / Cat NB2 | 1119 / 158.5 kbps | Quectel Product Brochure V8.6, LPWA modules 표 |
+| | PSM 전류 (BG95 시리즈 / BG95xA-GL) | 3.9 µA / 1.5 µA | 같은 표 (BG96은 10 µA) |
+| | 공급 전압 (BG95xA-GL) | 2.2–4.35 V, typ 3.3 V (다른 변종은 Hardware Design 참조) | 같은 표 |
+| | 최대 출력 / 크기 | 23 dBm (Power class 3) / 23.6×19.9×2.2 mm LGA | 같은 표 |
+| | BG95-M3 전류 (3.8 V 공급, 상온) — LTE Cat M1 데이터 전송 | B1 @21.29 dBm 193.65 mA · B3 @20.67 dBm 185.89 mA · B8 @21.02 dBm 197.31 mA · B13 @20.99 dBm 198.75 mA (대역별 약 185–199 mA) | BG95 Series Hardware Design V1.8, Table 43 |
+| | PSM / 누설(전원 끔) / Rock Bottom (AT+CFUN=0) | 3.89 µA / 12.99 µA / 0.575 mA | 같은 표 |
+| | 슬립 DRX 1.28 s (Cat M1 / NB1) · 유휴 DRX 1.28 s (Cat M1) | 1.89 / 1.49 mA · 18.9 mA | 같은 표 |
+| | 유휴 e-I-DRX 81.92 s (Cat M1, PTW 2.56 s) | 18.2 mA 유휴 / 0.63 mA 슬립 | 같은 표 |
+| Quectel EC200U (Cat 1 bis) | 업링크 최대 | 5 Mbps (LTE-FDD) | Brochure Cat 1 bis 표 |
+| | 전력 | 전원 꺼짐 30 µA, LTE 슬립 1.35 mA (PF=256), 유휴 13 mA | 같은 표 |
+| | 크기 | 28.0×31.0×2.4 mm | 같은 표 |
 | Adafruit 1317 LiPo | 용량 / 전압 / 크기 | 150 mAh, 3.7 V 공칭, 만충 4.2 V, 종지 3.0 V, 19.75×26.02×3.8 mm | adafruit.com/product/1317 |
 | TI TPS62840 | 무부하 Iq / 효율 | 60 nA / 1 µA 출력에서 80% | datasheet SLVSEC6D §7.5, §1 |
 | TI BQ25185 | 배터리 전용 누설 / 충전 전류 | 4 µA / 5 mA–1 A | datasheet SLUSF65B §5.5 |
@@ -54,7 +63,9 @@
 | JPEG 파일 크기 | UXGA 90 kB 가정 | 센서 문서에 없음, 장면·압축 설정 의존 |
 | 실효 업로드 속도 | 2.5 MB/s (실험실 TCP TX 20 Mbit/s) | 실제 HTTP 업로드는 더 느림 |
 | 센서 전원 차단 | 로드 스위치로 완전 차단 가정 | OV2640 스탠바이 600 µA는 켜 두면 절전 전류가 수십 배 |
-| 셀룰러 TX 전류 | **없음** | Quectel 데이터시트는 로그인 뒤, nRF9160 TX 표는 브리프에 없음 |
+| 셀룰러 연결(attach) 시간 | **없음** | BG95 Hardware Design에도 시간은 없음 (Network/eDRX/PSM Application Note 필요) |
+| EC200U(Cat 1 bis) TX 전류 | **없음** | Hardware Design이 다운로드 존 검색에 없음 |
+| nRF9160 TX 전류 | **없음** | Product Brief에 TX 표 없음 |
 | ESP32-P4 촬영+인코딩 전류, 카메라 SoC 가격 | **없음** | P4 데이터시트에는 CPU 활성 전류만 있음 |
 | 배터리 내부 저항·최대 방전율 | 0.15 Ω 가정 | Adafruit 1317 페이지에 없음 (셀 PDF 미조회) |
 | Himax WiseEye2 HX6538, Alif E1 | — | 요약 페이지만 확인 (Alif E1: STOP 1.7 µA, ISP/JPEG 없음) |

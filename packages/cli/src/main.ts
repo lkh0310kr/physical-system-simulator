@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 /** physisim CLI. 사용법은 USAGE 참고. */
 import { parseArgs } from "node:util";
-import { formatIssues, parseQuantity, type Registry, resolveProperties } from "@physisim/core";
+import { formatIssues, parseQuantity, type Registry } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
 import { describeModel, searchModels } from "./catalog.ts";
+import { compareSystems, formatComparison } from "./compare.ts";
 import { formatTime, formatValue, unitOf } from "./format.ts";
-import { analyzeCaptures, formatReport, parsePress } from "./report.ts";
+import { analyzeCaptures, capacityMah, formatReport, parsePress } from "./report.ts";
 import {
   compileFirmware,
   type Loaded,
@@ -20,6 +21,7 @@ const USAGE = `사용법:
   physisim validate <system.json>                              검증
   physisim run <system.json> [--duration 2s] [--dt 1ms] [--json] [--limit 40]
   physisim report <system.json> --press btn@1s [--duration 4s] [--node node] [--battery bat] [--per-day 10,100]
+  physisim compare <a.json> <b.json> ... --press btn@1s [--duration 4s] [--per-day 100]   같은 조건에서 비교
   physisim watch <system.json> [run 옵션]                       파일이 바뀔 때마다 다시 실행`;
 
 function seconds(text: string, name: string): number {
@@ -27,15 +29,6 @@ function seconds(text: string, name: string): number {
   if (q.unit.dimension.some((d, i) => d !== (i === 2 ? 1 : 0)))
     throw new Error(`--${name}은 시간이어야 한다 (예: 2s, 500ms)`);
   return q.value;
-}
-
-/** 배터리 Instance의 용량 [mAh] (Model 값 + Instance override). 없으면 0. */
-function capacityMah(loaded: Loaded, batteryId: string): number {
-  const inst = loaded.doc.instances.find((i) => i.id === batteryId);
-  const model = loaded.registry.getModel(inst?.model ?? "");
-  if (!inst || !model) return 0;
-  const r = resolveProperties(model.propertySchema, { ...model.properties, ...inst.properties });
-  return r.ok ? Number(r.value.capacity ?? 0) / 3.6 : 0;
 }
 
 async function main(argv: string[]): Promise<number> {
@@ -61,7 +54,7 @@ async function main(argv: string[]): Promise<number> {
     values.help ||
     !command ||
     !file ||
-    !["validate", "run", "watch", "report"].includes(command)
+    !["validate", "run", "watch", "report", "compare"].includes(command)
   ) {
     console.log(USAGE);
     return values.help ? 0 : 2;
@@ -80,6 +73,25 @@ async function main(argv: string[]): Promise<number> {
       if (!r.ok) console.error(`✗ 검증 실패\n${formatIssues(r.issues)}`);
       else printRun(r.loaded, r.run, duration, values.json, limit);
     });
+    return 0;
+  }
+
+  if (command === "compare") {
+    const files = positionals.slice(1);
+    const presses = (values.press ?? []).map((p) => parsePress(p, (t) => seconds(t, "press")));
+    const perDay = Number(values["per-day"].split(",")[0]);
+    const rows = await compareSystems(
+      files,
+      { duration, dt, presses },
+      values.node,
+      values.battery,
+      perDay,
+    );
+    if (!rows.ok) {
+      console.error(`✗ ${formatIssues(rows.issues)}`);
+      return 1;
+    }
+    console.log(formatComparison(rows.value, perDay));
     return 0;
   }
 

@@ -1,0 +1,44 @@
+{
+  "$schema": "../schemas/system.schema.json",
+  "name": "Wearable Camera — Case B (ESP32-P4 + C6 + OV5640)",
+  "description": "전용 카메라 SoC형: P4(하드웨어 ISP·JPEG) + C6(Wi-Fi 6) + OV5640. 값은 docs/scenarios/wearable-camera-specs.md 참조, 가정은 모델 metadata.assumptions.",
+  "instances": [
+    {
+      "id": "bat",
+      "model": "model.li-ion-cell",
+      "properties": {
+        "capacity": 500
+      }
+    },
+    {
+      "id": "node",
+      "model": "model.esp32-p4-c6-camera-node"
+    },
+    {
+      "id": "btn",
+      "model": "model.pushbutton"
+    }
+  ],
+  "connections": [
+    ["bat:+", "node:VCC"],
+    ["bat:-", "node:GND"],
+    ["node:WAKE", "btn:1"],
+    ["btn:2", "node:GND"]
+  ],
+  "layout": {
+    "instances": {
+      "bat": {
+        "x": 0,
+        "y": 0
+      },
+      "node": {
+        "x": 160,
+        "y": -20
+      },
+      "btn": {
+        "x": 160,
+        "y": -140
+      }
+    }
+  }
+}

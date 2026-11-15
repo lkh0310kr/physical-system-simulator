@@ -14,6 +14,7 @@ describe("standard library", () => {
     expect(registry.models().map((m) => m.id)).toEqual([
       "model.led",
       "model.esp32-s3-camera-node",
+      "model.esp32-p4-c6-camera-node",
       "model.li-ion-cell",
       "model.resistor",
       "model.pushbutton",
