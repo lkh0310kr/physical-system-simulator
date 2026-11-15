@@ -255,7 +255,7 @@
 
 - [ ] P8-T1 Control 도메인 Model: PID 컨트롤러 (블록 Behavior)
 - [ ] P8-T2 라인트레이서 데모 (PID 게인 튜닝)
-- [ ] P8-T3 Agent 분석 tool: 실행 결과 비교, 파라미터 스윕
+- [x] P8-T3 Agent 분석 tool: 파라미터 스윕(`physisim sweep`), 실행 결과 비교(`compare`)
 - [ ] P8-T4 Agent 개선 제안 루프 (예: PID 게인 자동 탐색)
 - [ ] P8-T5 Agent의 Model 작성 + 스키마 검증 + 사용자 승인 흐름
 

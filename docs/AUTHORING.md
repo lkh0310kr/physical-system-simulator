@@ -120,3 +120,7 @@ Model에 `body`(박스 크기, mm)와 `mounts`를 쓰고, System의 `assembly`�
 - 제작사 CAD가 있으면 `tools/step-to-glb.py`로 glb를 만들어 `apps/web/public/meshes/`에 두고 Model `body.mesh`에 파일 이름을 쓴다. 메시를 못 읽으면 `parts`, 그것도 없으면 박스로 대신 그린다. 메시는 `body.size` 박스 안에 들어와야 한다(테스트가 확인).
 - Port가 닿는 물리 지점은 Model `body.pins`(`port`, `position` mm, 보드에 적힌 `label`)로 적는다. 연결(connections)의 두 끝이 모두 pins를 가지면 3D에서 케이블로 보인다. XIAO 보드는 위키 핀맵 그림과 STEP 뒷면 패드 위치가 일치하는 BAT± 패드를 쓴다.
 - `body.mesh`가 있으면 `case`가 박스뿐 아니라 실제 형상으로도 케이스 간섭을 검사한다 (`--meshes <폴더>`, 기본 `apps/web/public/meshes`). 파일을 못 읽으면 경고하고 박스로만 검사한다.
+
+## 파라미터 스윕 (에이전트용)
+
+값을 바꿔 가며 같은 시뮬레이션을 반복해 비교한다: `pnpm physisim sweep <system.json> --set r1.resistance=100,220,1000 --watch led1.brightness,r1.current --duration 2s`. `--set`은 여러 번 쓰면 모든 조합을 돈다. 표는 신호별 최종·최대 값을 보여 준다(LED가 탔는지는 `led1.burnt`를 watch).
