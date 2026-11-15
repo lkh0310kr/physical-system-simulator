@@ -35,5 +35,25 @@
     ["drv:B", "m:B"],
     ["m:omega", "ctrl:measurement"],
     ["ctrl:output", "drv:cmd"]
-  ]
+  ],
+  "layout": {
+    "instances": {
+      "bat": {
+        "x": 0,
+        "y": 0
+      },
+      "ctrl": {
+        "x": 200,
+        "y": -160
+      },
+      "drv": {
+        "x": 220,
+        "y": 40
+      },
+      "m": {
+        "x": 460,
+        "y": 40
+      }
+    }
+  }
 }
