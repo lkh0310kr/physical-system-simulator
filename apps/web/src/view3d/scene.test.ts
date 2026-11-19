@@ -9,6 +9,7 @@ import {
   explodeLifts,
   followPose,
   gridCell,
+  isLogicBlock,
   PLACEHOLDER_SIZE,
   sceneBounds,
 } from "./scene.ts";
@@ -115,6 +116,7 @@ describe("detailed parts", () => {
     // 모든 세부 형상이 body 상자 안에 있어야 한다 (표시와 계산이 어긋나지 않게)
     const half = (box?.size ?? [0, 0, 0]).map((v) => v / 2 + 1e-6);
     for (const p of parts) {
+      if (p.kind === "mesh") continue;
       const ext = p.kind === "box" ? p.size : [p.diameter, p.diameter, p.length];
       const e = p.kind === "cylinder" && p.axis !== "z" ? ext : ext;
       for (let i = 0; i < 3; i++) {
@@ -263,5 +265,28 @@ describe("followPose", () => {
 
   it("leaves the pin alone when the part does not move", () => {
     expect(followPose([1, 2, 3], [0, 0, 0], undefined)).toEqual([1, 2, 3]);
+  });
+});
+
+describe("logic blocks", () => {
+  it("hides pure signal blocks (no body, only signal ports) from the 3D scene but keeps physical parts and placeholders", () => {
+    const r = loadSystemProject(
+      {
+        name: "t",
+        instances: [
+          { id: "gen", model: "model.signal-generator" },
+          { id: "ik", model: "model.arm-ik" },
+          { id: "psu", model: "model.dc-supply" },
+          { id: "sv", model: "model.servo-sg92r" },
+        ],
+        connections: [],
+      },
+      () => undefined,
+      createStandardRegistry,
+    );
+    if (!r.ok) throw new Error(JSON.stringify(r.issues));
+    expect(buildScene3d(r.value).map((b) => b.id)).toEqual(["psu", "sv"]);
+    expect(isLogicBlock(r.value, "model.pid-controller")).toBe(true);
+    expect(isLogicBlock(r.value, "model.servo-sg92r")).toBe(false);
   });
 });

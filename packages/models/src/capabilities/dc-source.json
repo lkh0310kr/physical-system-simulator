@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.dc-source",
+  "name": "DC Source",
+  "description": "일정한 전압을 내는 외부 전원(어댑터·벤치 전원).",
+  "outputs": {
+    "current": { "type": "number", "unit": "A", "description": "내보내는 전류" }
+  },
+  "defaultBehavior": "behavior.dc-source"
+}

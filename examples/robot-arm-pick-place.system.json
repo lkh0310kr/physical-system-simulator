@@ -1,0 +1,108 @@
+{
+  "$schema": "../schemas/system.schema.json",
+  "name": "Robot arm — pick & place",
+  "description": "팔이 바닥의 큐브를 집어 다른 자리에 놓는다. 시퀀서(위로 이동 → 내려가기 → 잡기 → 들어올리기 → 이동 → 내려가기 → 놓기 → 올리기)가 목표를 내고, 역기구학 → 서보 5개 → 팔 프레임의 순기구학 끝점이 도착해야 다음 단계로 간다. 그리퍼가 닫히면 큐브가 따라오고(단순 부착) 열리면 떨어진다. 링크 길이·큐브·시퀀스는 가정 — 실제 팔 치수 확인 후 맞춘다.",
+  "instances": [
+    {
+      "id": "psu",
+      "model": "model.dc-supply",
+      "properties": {
+        "voltage": 6
+      }
+    },
+    {
+      "id": "seq",
+      "model": "model.pick-place-sequencer"
+    },
+    {
+      "id": "ik",
+      "model": "model.arm-ik"
+    },
+    {
+      "id": "s1",
+      "model": "model.servo-sg92r"
+    },
+    {
+      "id": "s2",
+      "model": "model.servo-mg996r"
+    },
+    {
+      "id": "s3",
+      "model": "model.servo-mg996r"
+    },
+    {
+      "id": "s4",
+      "model": "model.servo-sg92r"
+    },
+    {
+      "id": "s5",
+      "model": "model.servo-sg92r"
+    },
+    {
+      "id": "arm",
+      "model": "model.arm-frame"
+    },
+    {
+      "id": "cube",
+      "model": "model.cube-object"
+    }
+  ],
+  "connections": [
+    ["psu:+", "s1:VCC"],
+    ["psu:-", "s1:GND"],
+    ["psu:+", "s2:VCC"],
+    ["psu:-", "s2:GND"],
+    ["psu:+", "s3:VCC"],
+    ["psu:-", "s3:GND"],
+    ["psu:+", "s4:VCC"],
+    ["psu:-", "s4:GND"],
+    ["psu:+", "s5:VCC"],
+    ["psu:-", "s5:GND"],
+    ["arm:tipX", "seq:tipX"],
+    ["arm:tipY", "seq:tipY"],
+    ["arm:tipZ", "seq:tipZ"],
+    ["seq:targetX", "ik:targetX"],
+    ["seq:targetY", "ik:targetY"],
+    ["seq:targetZ", "ik:targetZ"],
+    ["ik:base", "s1:command"],
+    ["ik:shoulder", "s2:command"],
+    ["ik:elbow", "s3:command"],
+    ["ik:wrist", "s4:command"],
+    ["seq:gripCommand", "s5:command"],
+    ["s1:angle", "arm:j1"],
+    ["s2:angle", "arm:j2"],
+    ["s3:angle", "arm:j3"],
+    ["s4:angle", "arm:j4"],
+    ["s5:angle", "arm:j5"],
+    ["arm:tipX", "cube:tipX"],
+    ["arm:tipY", "cube:tipY"],
+    ["arm:tipZ", "cube:tipZ"],
+    ["arm:grip", "cube:grip"]
+  ],
+  "assembly": {
+    "arm": {
+      "position": [0, 0, 150]
+    },
+    "cube": {
+      "position": [150, 70, 15]
+    },
+    "s1": {
+      "position": [-180, -220, 15]
+    },
+    "s2": {
+      "position": [-120, -220, 15]
+    },
+    "s3": {
+      "position": [-60, -220, 15]
+    },
+    "s4": {
+      "position": [0, -220, 15]
+    },
+    "s5": {
+      "position": [60, -220, 15]
+    },
+    "psu": {
+      "position": [-180, -300, 10]
+    }
+  }
+}

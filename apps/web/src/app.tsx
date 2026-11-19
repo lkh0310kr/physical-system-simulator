@@ -13,6 +13,7 @@ import {
   setProgram,
   setProperty,
 } from "./edit.ts";
+import { ExamplesPanel } from "./examples-panel.tsx";
 import {
   CodeIcon,
   PauseIcon,
@@ -51,6 +52,7 @@ export function App() {
   const [adding, setAdding] = useState(false);
   const [coding, setCoding] = useState(false);
   const [scoping, setScoping] = useState(false);
+  const [gallery, setGallery] = useState(false);
   const [view, setView] = useState<"2d" | "3d">("2d");
   const center = useRef(() => ({ x: 0, y: 0 }));
 
@@ -142,6 +144,9 @@ export function App() {
               </option>
             ))}
           </select>
+          <button type="button" className="gallery-btn" onClick={() => setGallery((g) => !g)}>
+            예제
+          </button>
           {project.compiling && <span className="muted">· 컴파일 중…</span>}
           <span className="muted">/</span>
           <span className="seg">
@@ -198,6 +203,13 @@ export function App() {
             <span>스코프</span>
           </button>
         </div>
+      )}
+      {gallery && (
+        <ExamplesPanel
+          current={project.path}
+          onOpen={(path) => project.open(path)}
+          onClose={() => setGallery(false)}
+        />
       )}
       {scoping && loaded && <ScopePanel frame={frame} onClose={() => setScoping(false)} />}
       {adding && loaded && (

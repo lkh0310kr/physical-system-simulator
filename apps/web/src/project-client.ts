@@ -6,6 +6,20 @@ export async function listFiles(): Promise<{ root: string; files: string[] }> {
   return res.json();
 }
 
+export interface SystemSummary {
+  readonly path: string;
+  readonly name: string;
+  readonly description: string;
+  readonly parts: number;
+}
+
+/** 프로젝트의 모든 System 파일 요약 (예제 갤러리). */
+export async function listSystems(): Promise<SystemSummary[]> {
+  const res = await fetch("/api/systems");
+  if (!res.ok) throw new Error(`예제 목록을 가져올 수 없다 (${res.status})`);
+  return (await res.json()).systems;
+}
+
 export async function readFile(path: string): Promise<string | undefined> {
   const res = await fetch(`/api/file?path=${encodeURIComponent(path)}`);
   return res.ok ? res.text() : undefined;

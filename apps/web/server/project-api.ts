@@ -4,6 +4,7 @@
  *   GET  /api/files              프로젝트 안의 .json/.js 파일 목록
  *   GET  /api/file?path=…        파일 읽기
  *   PUT  /api/file?path=…        파일 쓰기 (본문 = 내용)
+ *   GET  /api/systems            모든 System 파일의 이름·설명 (예제 갤러리)
  *   GET  /api/case(/download)    케이스 메시·STL/3MF/BOM (case-api.ts)
  *   POST /api/compile?path=…     Arduino 스케치(.ino) 컴파일 → { ok, hex } | { ok: false, issues }
  *   HMR 이벤트 "physisim:file"   파일이 바뀌면 { path } 알림
@@ -95,6 +96,25 @@ export function projectApi(root: string): Plugin {
           } catch (e) {
             return send(res, 500, (e as Error).message);
           }
+        }
+        if (url.pathname === "/api/systems" && req.method === "GET") {
+          // 예제 갤러리용: 모든 System 파일의 이름·설명 (잘못된 JSON은 파일 이름만)
+          const systems = listProjectFiles(root)
+            .filter((f) => f.endsWith(".system.json"))
+            .map((path) => {
+              try {
+                const doc = JSON.parse(readFileSync(join(root, path), "utf8"));
+                return {
+                  path,
+                  name: String(doc.name ?? path),
+                  description: String(doc.description ?? ""),
+                  parts: Array.isArray(doc.instances) ? doc.instances.length : 0,
+                };
+              } catch {
+                return { path, name: path, description: "(읽을 수 없는 파일)", parts: 0 };
+              }
+            });
+          return send(res, 200, JSON.stringify({ systems }), "application/json");
         }
         if (url.pathname === "/api/compile" && req.method === "POST") {
           const rel = url.searchParams.get("path") ?? "";

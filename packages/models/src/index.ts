@@ -5,30 +5,41 @@ import {
   loadLibrary,
   type Registry,
 } from "@physisim/core";
+import { armController } from "./behaviors/arm-controller.ts";
+import { armFrame } from "./behaviors/arm-frame.ts";
+import { armIk } from "./behaviors/arm-ik.ts";
 import { avoider } from "./behaviors/avoider.ts";
 import { battery } from "./behaviors/battery.ts";
 import { cameraNode } from "./behaviors/camera-node.ts";
 import { dcMotor } from "./behaviors/dc-motor.ts";
+import { dcSource } from "./behaviors/dc-source.ts";
 import { digitalIo } from "./behaviors/digital-io.ts";
 import { driveBase } from "./behaviors/drive-base.ts";
 import { hBridge } from "./behaviors/h-bridge.ts";
 import { led as ledBehavior } from "./behaviors/led.ts";
 import { lineSensor } from "./behaviors/line-sensor.ts";
 import { photoresistor } from "./behaviors/photoresistor.ts";
+import { pickPlace } from "./behaviors/pick-place.ts";
+import { pickable } from "./behaviors/pickable.ts";
 import { pid } from "./behaviors/pid.ts";
 import { potentiometer } from "./behaviors/potentiometer.ts";
 import { powerSupply } from "./behaviors/power-supply.ts";
 import { resistor as resistorBehavior } from "./behaviors/resistor.ts";
+import { serialHost } from "./behaviors/serial-host.ts";
 import { servo } from "./behaviors/servo.ts";
 import { signalSource } from "./behaviors/signal-source.ts";
 import { steeringMixer } from "./behaviors/steering-mixer.ts";
 import { switchBehavior } from "./behaviors/switch.ts";
 import { ultrasonic } from "./behaviors/ultrasonic.ts";
 import { voltmeter } from "./behaviors/voltmeter.ts";
+import armControllerCapability from "./capabilities/arm-controller.json" with { type: "json" };
+import armFrameCapability from "./capabilities/arm-frame.json" with { type: "json" };
+import armIkCapability from "./capabilities/arm-ik.json" with { type: "json" };
 import avoiderCapability from "./capabilities/avoider.json" with { type: "json" };
 import batteryCapability from "./capabilities/battery.json" with { type: "json" };
 import cameraNodeCapability from "./capabilities/camera-node.json" with { type: "json" };
 import dcMotorCapability from "./capabilities/dc-motor.json" with { type: "json" };
+import dcSourceCapability from "./capabilities/dc-source.json" with { type: "json" };
 import driveBaseCapability from "./capabilities/drive-base.json" with { type: "json" };
 import gpio from "./capabilities/gpio.json" with { type: "json" };
 import hBridgeCapability from "./capabilities/h-bridge.json" with { type: "json" };
@@ -36,18 +47,26 @@ import lightEmission from "./capabilities/light-emission.json" with { type: "jso
 import lineSensing from "./capabilities/line-sensing.json" with { type: "json" };
 import measurement from "./capabilities/measurement.json" with { type: "json" };
 import photoresistance from "./capabilities/photoresistance.json" with { type: "json" };
+import pickPlaceCapability from "./capabilities/pick-place.json" with { type: "json" };
+import pickableCapability from "./capabilities/pickable.json" with { type: "json" };
 import pidCapability from "./capabilities/pid.json" with { type: "json" };
 import potentiometry from "./capabilities/potentiometry.json" with { type: "json" };
 import powerSupplyCapability from "./capabilities/power-supply.json" with { type: "json" };
 import ranging from "./capabilities/ranging.json" with { type: "json" };
 import resistance from "./capabilities/resistance.json" with { type: "json" };
+import serialHostCapability from "./capabilities/serial-host.json" with { type: "json" };
 import servoCapability from "./capabilities/servo.json" with { type: "json" };
 import signalSourceCapability from "./capabilities/signal-source.json" with { type: "json" };
 import steeringMix from "./capabilities/steering-mix.json" with { type: "json" };
 import switching from "./capabilities/switching.json" with { type: "json" };
 import arduinoUno from "./models/arduino-uno.json" with { type: "json" };
+import armControllerModel from "./models/arm-controller-uno.json" with { type: "json" };
+import armFrameModel from "./models/arm-frame.json" with { type: "json" };
+import armIkModel from "./models/arm-ik.json" with { type: "json" };
 import atmega328p from "./models/atmega328p.json" with { type: "json" };
 import avoiderController from "./models/avoider-controller.json" with { type: "json" };
+import cubeObject from "./models/cube-object.json" with { type: "json" };
+import dcSupply from "./models/dc-supply.json" with { type: "json" };
 import esp32C6Chip from "./models/esp32-c6-qfn32.json" with { type: "json" };
 import esp32P4Camera from "./models/esp32-p4-c6-camera-node.json" with { type: "json" };
 import esp32P4Chip from "./models/esp32-p4-qfn104.json" with { type: "json" };
@@ -63,11 +82,14 @@ import multimeter from "./models/multimeter.json" with { type: "json" };
 import ov2640Sensor from "./models/ov2640-sensor.json" with { type: "json" };
 import ov5640Sensor from "./models/ov5640-sensor.json" with { type: "json" };
 import photoresistorModel from "./models/photoresistor.json" with { type: "json" };
+import pickPlaceSequencer from "./models/pick-place-sequencer.json" with { type: "json" };
 import pidModel from "./models/pid-controller.json" with { type: "json" };
 import potentiometerModel from "./models/potentiometer.json" with { type: "json" };
 import pushbutton from "./models/pushbutton.json" with { type: "json" };
 import resistor from "./models/resistor.json" with { type: "json" };
 import robotChassis from "./models/robot-chassis-2wd.json" with { type: "json" };
+import serialHostModel from "./models/serial-host.json" with { type: "json" };
+import servoMg996r from "./models/servo-mg996r.json" with { type: "json" };
 import servoModel from "./models/servo-sg92r.json" with { type: "json" };
 import signalGenerator from "./models/signal-generator.json" with { type: "json" };
 import steeringMixerModel from "./models/steering-mixer.json" with { type: "json" };
@@ -78,6 +100,10 @@ import ultrasonicModel from "./models/ultrasonic-rcwl-1601.json" with { type: "j
 import wallModel from "./models/wall.json" with { type: "json" };
 import xiaoSense from "./models/xiao-esp32s3-sense.json" with { type: "json" };
 
+export * from "./arm-design.ts";
+export * from "./arm-kinematics.ts";
+export * from "./arm-protocol.ts";
+export * from "./arm-script.ts";
 export { type DigitalIoEvent, type DigitalIoState, pinPort } from "./behaviors/digital-io.ts";
 export { parseRails, type Rail } from "./behaviors/power-supply.ts";
 export {
@@ -100,13 +126,20 @@ export {
 /** 표준 라이브러리 정의 묶음. */
 export const standardLibrary: LibraryInput = {
   behaviors: [
+    armController,
+    armFrame,
+    armIk,
+    serialHost,
     avoider,
     battery,
     cameraNode,
     dcMotor,
+    dcSource,
     hBridge,
     lineSensor,
     photoresistor,
+    pickPlace,
+    pickable,
     pid,
     servo,
     signalSource,
@@ -122,18 +155,25 @@ export const standardLibrary: LibraryInput = {
     powerSupply,
   ],
   capabilities: [
+    armControllerCapability,
+    armFrameCapability,
+    armIkCapability,
+    serialHostCapability,
     avoiderCapability,
     batteryCapability,
     cameraNodeCapability,
     hBridgeCapability,
     lineSensing,
     photoresistance,
+    pickPlaceCapability,
+    pickableCapability,
     pidCapability,
     servoCapability,
     signalSourceCapability,
     steeringMix,
     ranging,
     dcMotorCapability,
+    dcSourceCapability,
     driveBaseCapability,
     gpio,
     lightEmission,
@@ -156,15 +196,23 @@ export const standardLibrary: LibraryInput = {
     ov5640Sensor,
     xiaoSense,
     ttMotor,
+    dcSupply,
     robotChassis,
     ultrasonicModel,
     hBridgeModel,
     avoiderController,
+    armControllerModel,
+    serialHostModel,
+    armFrameModel,
+    armIkModel,
+    pickPlaceSequencer,
+    cubeObject,
     pidModel,
     photoresistorModel,
     lineSensorModel,
     steeringMixerModel,
     servoModel,
+    servoMg996r,
     signalGenerator,
     lineFloor,
     wallModel,

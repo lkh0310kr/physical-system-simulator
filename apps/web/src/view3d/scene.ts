@@ -42,7 +42,7 @@ export type ScenePart =
       readonly size: Vec3;
       readonly material: MaterialKind;
       readonly color: string | undefined;
-      readonly motion: SceneMotion | undefined;
+      readonly motions: readonly SceneMotion[];
     }
   | {
       readonly kind: "cylinder";
@@ -53,7 +53,17 @@ export type ScenePart =
       readonly axis: "x" | "y" | "z";
       readonly material: MaterialKind;
       readonly color: string | undefined;
-      readonly motion: SceneMotion | undefined;
+      readonly motions: readonly SceneMotion[];
+    }
+  | {
+      /** body 좌표계(m)로 구워진 glb. 위치는 glb 안에 있어 position은 항상 원점. */
+      readonly kind: "mesh";
+      readonly name: string;
+      readonly position: Vec3;
+      readonly url: string;
+      readonly material: MaterialKind;
+      readonly color: string | undefined;
+      readonly motions: readonly SceneMotion[];
     };
 
 export interface SceneBox {
@@ -100,65 +110,94 @@ const motionOf = (
   return { kind: "translate", signal: m.signal, axis: m.axis, distance: toMeters(m.distance) };
 };
 
+type MotionInput = Parameters<typeof motionOf>[0];
+const motionsOf = (m: MotionInput | NonNullable<MotionInput>[] | undefined): SceneMotion[] =>
+  (Array.isArray(m) ? m : [m]).flatMap((x) => {
+    const v = motionOf(x);
+    return v ? [v] : [];
+  });
+
 const v3 = (v: readonly [number | string, number | string, number | string]): Vec3 => [
   toMeters(v[0]),
   toMeters(v[1]),
   toMeters(v[2]),
 ];
 
+/**
+ * 3D에 그릴 실체가 없는 순수 논리 블록인지: 형상이 없고 Port가 전부 신호 선인 Model (신호 발생기·IK·제어기 등).
+ * 자리표시 상자를 그리면 장면이 어지러워지므로 3D에서는 숨긴다 (2D 블록 다이어그램에는 나온다).
+ */
+export function isLogicBlock(loaded: LoadedSystem, modelId: string): boolean {
+  const model = loaded.registry.getModel(modelId);
+  if (!model || model.body) return false;
+  return model.ports.length > 0 && model.ports.every((p) => p.domain === "signal");
+}
+
 export function buildScene3d(loaded: LoadedSystem): SceneBox[] {
   const assembly = loaded.doc.assembly ?? {};
   let cursor = 0; // 배치가 없는 부품은 x축으로 나란히 놓는다
-  return loaded.system.instances.map((inst) => {
-    const model = loaded.registry.getModel(inst.model);
-    const body = model?.body;
-    const size: Vec3 = body ? bodySize(body) : PLACEHOLDER_SIZE;
-    const placed = assembly[inst.id];
-    let position: Vec3;
-    if (placed) {
-      position = placementPosition(placed);
-    } else {
-      position = [cursor + size[0] / 2, 0, size[2] / 2];
-      cursor += size[0] + GAP;
-    }
-    const rotation = (placed?.rotation ?? [0, 0, 0]) as Vec3;
-    const switchable = !!model?.capabilities.some((c) => c.capability === "capability.switching");
-    return {
-      id: inst.id,
-      model: inst.model,
-      position,
-      rotation,
-      size,
-      switchable,
-      real: !!body,
-      color: body?.color,
-      mesh: body?.mesh ? `/meshes/${body.mesh}` : undefined,
-      parts: (body?.parts ?? []).map(
-        (p): ScenePart =>
-          p.shape === "box"
-            ? {
-                kind: "box",
-                name: p.name,
-                position: v3(p.position),
-                size: v3(p.size),
-                material: p.material,
-                color: p.color,
-                motion: motionOf(p.motion),
-              }
-            : {
-                kind: "cylinder",
-                name: p.name,
-                position: v3(p.position),
-                diameter: toMeters(p.diameter),
-                length: toMeters(p.length),
-                axis: p.axis,
-                material: p.material,
-                color: p.color,
-                motion: motionOf(p.motion),
-              },
-      ),
-    };
-  });
+  return loaded.system.instances
+    .filter((inst) => !isLogicBlock(loaded, inst.model))
+    .map((inst) => {
+      const model = loaded.registry.getModel(inst.model);
+      const body = model?.body;
+      const size: Vec3 = body ? bodySize(body) : PLACEHOLDER_SIZE;
+      const placed = assembly[inst.id];
+      let position: Vec3;
+      if (placed) {
+        position = placementPosition(placed);
+      } else {
+        position = [cursor + size[0] / 2, 0, size[2] / 2];
+        cursor += size[0] + GAP;
+      }
+      const rotation = (placed?.rotation ?? [0, 0, 0]) as Vec3;
+      const switchable = !!model?.capabilities.some((c) => c.capability === "capability.switching");
+      return {
+        id: inst.id,
+        model: inst.model,
+        position,
+        rotation,
+        size,
+        switchable,
+        real: !!body,
+        color: body?.color,
+        mesh: body?.mesh ? `/meshes/${body.mesh}` : undefined,
+        parts: (body?.parts ?? []).map(
+          (p): ScenePart =>
+            p.shape === "box"
+              ? {
+                  kind: "box",
+                  name: p.name,
+                  position: v3(p.position),
+                  size: v3(p.size),
+                  material: p.material,
+                  color: p.color,
+                  motions: motionsOf(p.motion),
+                }
+              : p.shape === "mesh"
+                ? {
+                    kind: "mesh",
+                    name: p.name,
+                    position: [0, 0, 0],
+                    url: `/meshes/${p.file}`,
+                    material: p.material,
+                    color: p.color,
+                    motions: motionsOf(p.motion),
+                  }
+                : {
+                    kind: "cylinder",
+                    name: p.name,
+                    position: v3(p.position),
+                    diameter: toMeters(p.diameter),
+                    length: toMeters(p.length),
+                    axis: p.axis,
+                    material: p.material,
+                    color: p.color,
+                    motions: motionsOf(p.motion),
+                  },
+        ),
+      };
+    });
 }
 
 /** 모든 박스를 감싸는 바깥 상자 [m]: [최소, 최대]. 박스가 없으면 undefined. */
@@ -295,7 +334,7 @@ export interface AnimatedPose {
 }
 
 /**
- * 부품의 신호 `<id>.x`, `<id>.y`, `<id>.heading`(차체 같은 구동 부품의 출력)으로 자세를 계산한다.
+ * 부품의 신호 `<id>.x`, `<id>.y`, `<id>.z`, `<id>.heading`(차체·집힌 물체 같은 움직이는 부품의 출력, 시작 위치 기준 변위)으로 자세를 계산한다.
  * `parents`(assembly의 parent)로 연결된 부품은 부모와 같은 변위·회전을 받는다: 부모 위치를 중심으로 돌고 평행 이동한다.
  * 신호가 없으면 정적 배치 그대로다.
  */
@@ -311,9 +350,10 @@ export function animatedPoses(
     const x = num(`${id}.x`);
     const y = num(`${id}.y`);
     const h = num(`${id}.heading`);
-    return x === undefined && y === undefined && h === undefined
+    const z = num(`${id}.z`);
+    return x === undefined && y === undefined && h === undefined && z === undefined
       ? undefined
-      : { x: x ?? 0, y: y ?? 0, h: h ?? 0 };
+      : { x: x ?? 0, y: y ?? 0, z: z ?? 0, h: h ?? 0 };
   };
   const out = new Map<string, AnimatedPose>();
   for (const b of boxes) {
@@ -335,7 +375,7 @@ export function animatedPoses(
       position: [
         pivot[0] + dx * c - dy * sn + ps.x,
         pivot[1] + dx * sn + dy * c + ps.y,
-        b.position[2],
+        b.position[2] + ps.z,
       ],
       heading: ps.h,
     });

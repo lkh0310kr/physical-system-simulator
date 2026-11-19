@@ -279,62 +279,132 @@
                   "motion": {
                     "anyOf": [
                       {
-                        "type": "object",
-                        "properties": {
-                          "signal": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "axis": {
-                            "type": "string",
-                            "enum": ["x", "y", "z"]
-                          },
-                          "rotate": {
-                            "type": "boolean",
-                            "const": true
-                          },
-                          "scale": {
-                            "default": 1,
-                            "type": "number"
-                          },
-                          "pivot": {
-                            "type": "array",
-                            "prefixItems": [
-                              {
-                                "type": ["number", "string"]
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "signal": {
+                                "type": "string",
+                                "minLength": 1
                               },
-                              {
-                                "type": ["number", "string"]
+                              "axis": {
+                                "type": "string",
+                                "enum": ["x", "y", "z"]
                               },
-                              {
+                              "rotate": {
+                                "type": "boolean",
+                                "const": true
+                              },
+                              "scale": {
+                                "default": 1,
+                                "type": "number"
+                              },
+                              "pivot": {
+                                "type": "array",
+                                "prefixItems": [
+                                  {
+                                    "type": ["number", "string"]
+                                  },
+                                  {
+                                    "type": ["number", "string"]
+                                  },
+                                  {
+                                    "type": ["number", "string"]
+                                  }
+                                ],
+                                "items": false,
+                                "minItems": 3,
+                                "maxItems": 3
+                              }
+                            },
+                            "required": ["signal", "axis", "rotate"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "signal": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "axis": {
+                                "type": "string",
+                                "enum": ["x", "y", "z"]
+                              },
+                              "distance": {
                                 "type": ["number", "string"]
                               }
-                            ],
-                            "items": false,
-                            "minItems": 3,
-                            "maxItems": 3
+                            },
+                            "required": ["signal", "axis", "distance"],
+                            "additionalProperties": false
                           }
-                        },
-                        "required": ["signal", "axis", "rotate"],
-                        "additionalProperties": false
+                        ]
                       },
                       {
-                        "type": "object",
-                        "properties": {
-                          "signal": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "axis": {
-                            "type": "string",
-                            "enum": ["x", "y", "z"]
-                          },
-                          "distance": {
-                            "type": ["number", "string"]
-                          }
-                        },
-                        "required": ["signal", "axis", "distance"],
-                        "additionalProperties": false
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "signal": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "axis": {
+                                  "type": "string",
+                                  "enum": ["x", "y", "z"]
+                                },
+                                "rotate": {
+                                  "type": "boolean",
+                                  "const": true
+                                },
+                                "scale": {
+                                  "default": 1,
+                                  "type": "number"
+                                },
+                                "pivot": {
+                                  "type": "array",
+                                  "prefixItems": [
+                                    {
+                                      "type": ["number", "string"]
+                                    },
+                                    {
+                                      "type": ["number", "string"]
+                                    },
+                                    {
+                                      "type": ["number", "string"]
+                                    }
+                                  ],
+                                  "items": false,
+                                  "minItems": 3,
+                                  "maxItems": 3
+                                }
+                              },
+                              "required": ["signal", "axis", "rotate"],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "signal": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "axis": {
+                                  "type": "string",
+                                  "enum": ["x", "y", "z"]
+                                },
+                                "distance": {
+                                  "type": ["number", "string"]
+                                }
+                              },
+                              "required": ["signal", "axis", "distance"],
+                              "additionalProperties": false
+                            }
+                          ]
+                        }
                       }
                     ]
                   }
@@ -392,67 +462,296 @@
                   "motion": {
                     "anyOf": [
                       {
-                        "type": "object",
-                        "properties": {
-                          "signal": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "axis": {
-                            "type": "string",
-                            "enum": ["x", "y", "z"]
-                          },
-                          "rotate": {
-                            "type": "boolean",
-                            "const": true
-                          },
-                          "scale": {
-                            "default": 1,
-                            "type": "number"
-                          },
-                          "pivot": {
-                            "type": "array",
-                            "prefixItems": [
-                              {
-                                "type": ["number", "string"]
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "signal": {
+                                "type": "string",
+                                "minLength": 1
                               },
-                              {
-                                "type": ["number", "string"]
+                              "axis": {
+                                "type": "string",
+                                "enum": ["x", "y", "z"]
                               },
-                              {
+                              "rotate": {
+                                "type": "boolean",
+                                "const": true
+                              },
+                              "scale": {
+                                "default": 1,
+                                "type": "number"
+                              },
+                              "pivot": {
+                                "type": "array",
+                                "prefixItems": [
+                                  {
+                                    "type": ["number", "string"]
+                                  },
+                                  {
+                                    "type": ["number", "string"]
+                                  },
+                                  {
+                                    "type": ["number", "string"]
+                                  }
+                                ],
+                                "items": false,
+                                "minItems": 3,
+                                "maxItems": 3
+                              }
+                            },
+                            "required": ["signal", "axis", "rotate"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "signal": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "axis": {
+                                "type": "string",
+                                "enum": ["x", "y", "z"]
+                              },
+                              "distance": {
                                 "type": ["number", "string"]
                               }
-                            ],
-                            "items": false,
-                            "minItems": 3,
-                            "maxItems": 3
+                            },
+                            "required": ["signal", "axis", "distance"],
+                            "additionalProperties": false
                           }
-                        },
-                        "required": ["signal", "axis", "rotate"],
-                        "additionalProperties": false
+                        ]
                       },
                       {
-                        "type": "object",
-                        "properties": {
-                          "signal": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "axis": {
-                            "type": "string",
-                            "enum": ["x", "y", "z"]
-                          },
-                          "distance": {
-                            "type": ["number", "string"]
-                          }
-                        },
-                        "required": ["signal", "axis", "distance"],
-                        "additionalProperties": false
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "signal": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "axis": {
+                                  "type": "string",
+                                  "enum": ["x", "y", "z"]
+                                },
+                                "rotate": {
+                                  "type": "boolean",
+                                  "const": true
+                                },
+                                "scale": {
+                                  "default": 1,
+                                  "type": "number"
+                                },
+                                "pivot": {
+                                  "type": "array",
+                                  "prefixItems": [
+                                    {
+                                      "type": ["number", "string"]
+                                    },
+                                    {
+                                      "type": ["number", "string"]
+                                    },
+                                    {
+                                      "type": ["number", "string"]
+                                    }
+                                  ],
+                                  "items": false,
+                                  "minItems": 3,
+                                  "maxItems": 3
+                                }
+                              },
+                              "required": ["signal", "axis", "rotate"],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "signal": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "axis": {
+                                  "type": "string",
+                                  "enum": ["x", "y", "z"]
+                                },
+                                "distance": {
+                                  "type": ["number", "string"]
+                                }
+                              },
+                              "required": ["signal", "axis", "distance"],
+                              "additionalProperties": false
+                            }
+                          ]
+                        }
                       }
                     ]
                   }
                 },
                 "required": ["name", "shape", "position", "diameter", "length"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "shape": {
+                    "type": "string",
+                    "const": "mesh"
+                  },
+                  "file": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "material": {
+                    "default": "plastic",
+                    "type": "string",
+                    "enum": ["pcb", "metal", "plastic", "glass", "rubber"]
+                  },
+                  "color": {
+                    "type": "string"
+                  },
+                  "motion": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "signal": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "axis": {
+                                "type": "string",
+                                "enum": ["x", "y", "z"]
+                              },
+                              "rotate": {
+                                "type": "boolean",
+                                "const": true
+                              },
+                              "scale": {
+                                "default": 1,
+                                "type": "number"
+                              },
+                              "pivot": {
+                                "type": "array",
+                                "prefixItems": [
+                                  {
+                                    "type": ["number", "string"]
+                                  },
+                                  {
+                                    "type": ["number", "string"]
+                                  },
+                                  {
+                                    "type": ["number", "string"]
+                                  }
+                                ],
+                                "items": false,
+                                "minItems": 3,
+                                "maxItems": 3
+                              }
+                            },
+                            "required": ["signal", "axis", "rotate"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "signal": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "axis": {
+                                "type": "string",
+                                "enum": ["x", "y", "z"]
+                              },
+                              "distance": {
+                                "type": ["number", "string"]
+                              }
+                            },
+                            "required": ["signal", "axis", "distance"],
+                            "additionalProperties": false
+                          }
+                        ]
+                      },
+                      {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "signal": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "axis": {
+                                  "type": "string",
+                                  "enum": ["x", "y", "z"]
+                                },
+                                "rotate": {
+                                  "type": "boolean",
+                                  "const": true
+                                },
+                                "scale": {
+                                  "default": 1,
+                                  "type": "number"
+                                },
+                                "pivot": {
+                                  "type": "array",
+                                  "prefixItems": [
+                                    {
+                                      "type": ["number", "string"]
+                                    },
+                                    {
+                                      "type": ["number", "string"]
+                                    },
+                                    {
+                                      "type": ["number", "string"]
+                                    }
+                                  ],
+                                  "items": false,
+                                  "minItems": 3,
+                                  "maxItems": 3
+                                }
+                              },
+                              "required": ["signal", "axis", "rotate"],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "signal": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "axis": {
+                                  "type": "string",
+                                  "enum": ["x", "y", "z"]
+                                },
+                                "distance": {
+                                  "type": ["number", "string"]
+                                }
+                              },
+                              "required": ["signal", "axis", "distance"],
+                              "additionalProperties": false
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "required": ["name", "shape", "file"],
                 "additionalProperties": false
               }
             ]

@@ -55,6 +55,13 @@ export const RotateMotionSchema = z.strictObject({
 export const MotionSchema = z.union([RotateMotionSchema, TranslateMotionSchema]);
 
 /**
+ * 한 형상의 움직임: 하나이거나 목록. 목록은 **안쪽(형상에 가까운) 관절부터** 적용한다 —
+ * 로봇팔의 아래팔은 [팔꿈치 회전, 어깨 회전, 베이스 회전] 순으로 쓰면 상위 관절이 하위 관절을 데리고 돈다.
+ * 회전 중심(pivot)은 모두 정지 자세 좌표다.
+ */
+export const MotionInputSchema = z.union([MotionSchema, z.array(MotionSchema).min(1)]);
+
+/**
  * 부품 안의 세부 형상 (보드, 커넥터, 렌즈 통 등). 표시 전용이며 케이스·간섭 계산은 `body` 박스를 쓴다.
  * 위치는 body 중심 기준 mm, `axis`는 원기둥의 축(기본 z).
  */
@@ -66,7 +73,7 @@ export const PartShapeSchema = z.discriminatedUnion("shape", [
     size: Vec3Schema,
     material: MaterialKindSchema.default("plastic"),
     color: z.string().optional(),
-    motion: MotionSchema.optional(),
+    motion: MotionInputSchema.optional(),
   }),
   z.strictObject({
     name: z.string().min(1),
@@ -77,7 +84,16 @@ export const PartShapeSchema = z.discriminatedUnion("shape", [
     axis: z.enum(["x", "y", "z"]).default("z"),
     material: MaterialKindSchema.default("plastic"),
     color: z.string().optional(),
-    motion: MotionSchema.optional(),
+    motion: MotionInputSchema.optional(),
+  }),
+  z.strictObject({
+    name: z.string().min(1),
+    shape: z.literal("mesh"),
+    /** 형상 파일 이름(glb, PhysiSim body 좌표계 m). 웹은 `/meshes/<파일>`에서 읽는다. 여러 개를 한 Model에 둘 수 있어 부품마다 따로 움직인다. */
+    file: z.string().min(1),
+    material: MaterialKindSchema.default("plastic"),
+    color: z.string().optional(),
+    motion: MotionInputSchema.optional(),
   }),
 ]);
 

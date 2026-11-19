@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.serial-host",
+  "name": "Serial Host (PC / Agent)",
+  "description": "PC 쪽: 스크립트(MOVE·GRIP·WAIT·DWELL·원시 명령)를 컴파일해(역기구학 포함) Serial 줄로 하나씩 보낸다. 컨트롤러가 멈출 때까지 기다리는 WAIT를 지원한다.",
+  "outputs": {
+    "line": { "type": "string", "description": "지금 보낸 Serial 줄" },
+    "lineId": { "type": "number", "description": "줄을 보낼 때마다 1씩 증가" },
+    "step": { "type": "number", "description": "실행 중인 스크립트 단계 번호" },
+    "done": { "type": "boolean" },
+    "errors": { "type": "number", "description": "스크립트 컴파일 오류 수" },
+    "lastReply": { "type": "string", "description": "컨트롤러의 마지막 응답" }
+  },
+  "defaultBehavior": "behavior.serial-host"
+}

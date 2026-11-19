@@ -13,6 +13,7 @@ import {
   Float32BufferAttribute,
   type Group,
   Mesh,
+  MeshPhysicalMaterial,
   PCFShadowMap,
   Plane,
   PMREMGenerator,
@@ -35,6 +36,7 @@ import {
   gridCell,
   type SceneBox,
   type SceneCable,
+  type SceneMotion,
   type ScenePart,
   sceneBounds,
 } from "./scene.ts";
@@ -137,17 +139,39 @@ function Shape({
     () =>
       part.kind === "box"
         ? new BoxGeometry(...part.size)
-        : new CylinderGeometry(part.diameter / 2, part.diameter / 2, part.length, 40),
+        : part.kind === "cylinder"
+          ? new CylinderGeometry(part.diameter / 2, part.diameter / 2, part.length, 40)
+          : undefined,
     [part],
   );
-  // 신호를 따라 움직이는 부품: 평행 이동(눌리는 플런저) 또는 축 회전(바퀴)
-  const m = part.motion;
-  const value = m ? Number(signals[`${id}.${m.signal}`] ?? 0) : 0;
-  const moved = m?.kind === "translate" ? value * m.distance : 0;
+  const glbSource = useGlb(part.kind === "mesh" ? part.url : undefined);
+  const glb = useMemo(() => {
+    const g = glbSource?.clone();
+    if (g && part.kind === "mesh") {
+      // 파일의 재질 대신 Model의 재질·색을 쓴다 (밝은 배경에서 사라지지 않게)
+      const m = MATERIALS[part.material];
+      const material = new MeshPhysicalMaterial({
+        color: part.color ?? m.color,
+        roughness: m.roughness,
+        metalness: m.metalness,
+      });
+      g.traverse((o) => {
+        if (o instanceof Mesh) o.material = material;
+      });
+    }
+    return g;
+  }, [glbSource, part]);
+  // 신호를 따라 움직이는 부품: 평행 이동(눌리는 플런저)과 축 회전(바퀴·관절). 회전 목록은 안쪽 관절부터.
+  const signalValue = (signal: string) => Number(signals[`${id}.${signal}`] ?? 0);
+  const shift: [number, number, number] = [0, 0, 0];
+  for (const m of part.motions) {
+    if (m.kind !== "translate") continue;
+    shift[m.axis === "x" ? 0 : m.axis === "y" ? 1 : 2] += signalValue(m.signal) * m.distance;
+  }
   const position: [number, number, number] = [
-    part.position[0] + (m?.kind === "translate" && m.axis === "x" ? moved : 0),
-    part.position[1] + (m?.kind === "translate" && m.axis === "y" ? moved : 0),
-    part.position[2] + (m?.kind === "translate" && m.axis === "z" ? moved : 0),
+    part.position[0] + shift[0],
+    part.position[1] + shift[1],
+    part.position[2] + shift[2],
   ];
   const shapeRotation: [number, number, number] =
     part.kind === "cylinder"
@@ -157,37 +181,58 @@ function Shape({
           ? [0, 0, Math.PI / 2]
           : [0, 0, 0]
       : [0, 0, 0];
-  if (m?.kind === "rotate") {
-    // 회전 중심에 둔 그룹을 돌리고, 형상은 그 안에서 중심과의 차이만큼 떨어져 있다
-    const pivot = m.pivot ?? part.position;
+  const rotations = part.motions.filter(
+    (m): m is Extract<SceneMotion, { kind: "rotate" }> => m.kind === "rotate",
+  );
+  const mesh = (at: readonly number[]) =>
+    part.kind === "mesh" ? (
+      glb ? (
+        <group position={[-(at[0] ?? 0), -(at[1] ?? 0), -(at[2] ?? 0)]}>
+          <primitive object={glb} />
+        </group>
+      ) : null
+    ) : geometry ? (
+      <mesh
+        geometry={geometry}
+        position={[
+          position[0] - (at[0] ?? 0),
+          position[1] - (at[1] ?? 0),
+          position[2] - (at[2] ?? 0),
+        ]}
+        rotation={shapeRotation}
+        castShadow
+        receiveShadow
+      >
+        <PartMaterial part={part} glow={glow} />
+      </mesh>
+    ) : null;
+  if (rotations.length === 0) return mesh([0, 0, 0]);
+  // 안쪽 회전부터 바깥쪽 그룹으로 감싼다: 바깥 그룹이 안쪽 그룹 전체를 돌린다
+  const pivots = rotations.map((m) => m.pivot ?? part.position);
+  let node = mesh(pivots[0] ?? part.position);
+  rotations.forEach((m, i) => {
+    const pivot = pivots[i] ?? part.position;
+    const parent = pivots[i + 1] ?? [0, 0, 0];
     const spin: [number, number, number] = [
-      m.axis === "x" ? value * m.scale : 0,
-      m.axis === "y" ? value * m.scale : 0,
-      m.axis === "z" ? value * m.scale : 0,
+      m.axis === "x" ? signalValue(m.signal) * m.scale : 0,
+      m.axis === "y" ? signalValue(m.signal) * m.scale : 0,
+      m.axis === "z" ? signalValue(m.signal) * m.scale : 0,
     ];
-    return (
-      <group position={[pivot[0], pivot[1], pivot[2]]} rotation={spin}>
-        <mesh
-          geometry={geometry}
-          position={[
-            part.position[0] - pivot[0],
-            part.position[1] - pivot[1],
-            part.position[2] - pivot[2],
-          ]}
-          rotation={shapeRotation}
-          castShadow
-          receiveShadow
-        >
-          <PartMaterial part={part} glow={glow} />
-        </mesh>
+    // i번째 그룹은 자기 pivot에서 돌고, 위치는 바깥 pivot 기준 (바깥이 없으면 월드 기준)
+    node = (
+      <group
+        position={[
+          pivot[0] - (parent[0] ?? 0),
+          pivot[1] - (parent[1] ?? 0),
+          pivot[2] - (parent[2] ?? 0),
+        ]}
+        rotation={spin}
+      >
+        {node}
       </group>
     );
-  }
-  return (
-    <mesh geometry={geometry} position={position} rotation={shapeRotation} castShadow receiveShadow>
-      <PartMaterial part={part} glow={glow} />
-    </mesh>
-  );
+  });
+  return node;
 }
 
 /** glb를 한 번만 읽어 캐시한다. 실패하면 undefined(→ 세부 형상으로 대체). 날카로운 모서리는 살리고 곡면만 부드럽게 한다. */
@@ -543,7 +588,7 @@ export function Viewer3D({
   const followPos = useMemo(
     () =>
       boxes
-        .filter((b) => typeof signals[`${b.id}.x`] === "number")
+        .filter((b) => typeof signals[`${b.id}.heading`] === "number")
         .map((b) => poses.get(b.id)?.position)[0],
     [boxes, signals, poses],
   );

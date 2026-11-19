@@ -5,6 +5,7 @@ import { parseArgs } from "node:util";
 import { resolveProfile } from "@physisim/cad";
 import { formatIssues, parseQuantity, type Registry } from "@physisim/core";
 import { createStandardRegistry } from "@physisim/models";
+import { armDesignReport, armLines, writeArmParts } from "./arm.ts";
 import { writeCase } from "./case.ts";
 import { describeModel, searchModels } from "./catalog.ts";
 import { checkModelFile, formatReview } from "./check-model.ts";
@@ -32,6 +33,9 @@ const USAGE = `사용법:
   physisim sweep <system.json> --set r1.resistance=100,220,470 [--set …] --watch led1.brightness,r1.current [--duration 1s]   속성 값을 바꿔 가며 비교
   physisim tune <system.json> --range r1.resistance=50..2000 --maximize led1.brightness --require led1.burnt=false [--require r1.current<=0.02] [--stat final|max|min]   제약을 지키는 최적값 찾기
   physisim check <model-or-capability.json>                    새 부품 정의 검증 + 사람이 확인할 항목 (파일은 안 고침)
+  physisim arm design                                           로봇팔 링크·서보 장착 해석과 추천
+  physisim arm parts [--out out/arm] [--glb <dir>]               출력 가능한 팔 부품 STL/3MF + BOM (서보 포켓 검증)
+  physisim arm lines <script.txt>                               MOVE·GRIP 스크립트 → 실제 Uno에 보낼 Serial 줄
   physisim watch <system.json> [run 옵션]                       파일이 바뀔 때마다 다시 실행`;
 
 function seconds(text: string, name: string): number {
@@ -66,6 +70,7 @@ async function main(argv: string[]): Promise<number> {
       profile: { type: "string" },
       out: { type: "string", default: "out" },
       meshes: { type: "string", default: "apps/web/public/meshes" },
+      glb: { type: "string" },
       help: { type: "boolean", short: "h", default: false },
     },
   });
@@ -75,12 +80,42 @@ async function main(argv: string[]): Promise<number> {
     values.help ||
     !command ||
     !file ||
-    !["validate", "run", "watch", "report", "compare", "case", "sweep", "tune", "check"].includes(
-      command,
-    )
+    ![
+      "validate",
+      "run",
+      "watch",
+      "report",
+      "compare",
+      "case",
+      "sweep",
+      "tune",
+      "check",
+      "arm",
+    ].includes(command)
   ) {
     console.log(USAGE);
     return values.help ? 0 : 2;
+  }
+
+  if (command === "arm") {
+    if (file === "design") {
+      console.log(armDesignReport());
+      return 0;
+    }
+    if (file === "parts") {
+      const r = await writeArmParts(values.out === "out" ? "out/arm" : values.out, values.glb);
+      console.log(r.summary);
+      return r.files.length ? 0 : 1;
+    }
+    const script = positionals[2];
+    if (file === "lines" && script) {
+      const r = armLines(script);
+      if (r.errors.length) console.error(`✗ ${r.errors.join("\n✗ ")}`);
+      console.log(r.text);
+      return r.errors.length ? 1 : 0;
+    }
+    console.error("사용법: physisim arm design | parts | lines <script.txt>");
+    return 2;
   }
 
   const duration = seconds(values.duration, "duration");

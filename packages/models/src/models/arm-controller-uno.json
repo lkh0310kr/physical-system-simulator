@@ -1,0 +1,81 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.arm-controller-uno",
+  "name": "Arduino Uno + PCA9685 (arm firmware model)",
+  "category": "control/firmware",
+  "description": "로봇팔 Arduino Uno 펌웨어와 PCA9685 서보 드라이버를 한 블록으로 추상화한 동작 모델. I2C 버스는 시뮬레이션하지 않고, Serial 줄 명령(`J`·`G`·`S`·`HOME`·`STOP`·`STATUS`·`PING`)을 받아 5개 서보의 명령 각도를 조정 이동으로 보낸다. 실제 펌웨어 스케치는 `examples/robot-arm-firmware/robot-arm-firmware.ino`.",
+  "properties": {},
+  "ports": [
+    {
+      "name": "line",
+      "domain": "signal",
+      "direction": "in",
+      "description": "Serial 한 줄"
+    },
+    {
+      "name": "lineId",
+      "domain": "signal",
+      "direction": "in",
+      "description": "줄 번호(새 줄 감지)"
+    },
+    {
+      "name": "cmd1",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "cmd2",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "cmd3",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "cmd4",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "cmd5",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "moving",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "reply",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "replyId",
+      "domain": "signal",
+      "direction": "out"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.arm-controller"
+    }
+  ],
+  "metadata": {
+    "fidelity": "approximate",
+    "assumptions": [
+      "I2C·PCA9685 레지스터는 모델링하지 않음(명령 각도가 곧바로 서보에 간다)",
+      "펌웨어 루프 주기·Serial 지연 무시",
+      "서보 펄스폭 ↔ 각도 보정은 실제 서보에서 해야 함"
+    ],
+    "bom": {
+      "vendor": "Arduino",
+      "name": "Arduino Uno Rev3",
+      "mpn": "A000066",
+      "url": "https://store.arduino.cc/products/arduino-uno-rev3"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.pick-place",
+  "name": "Pick & Place Sequencer",
+  "description": "집을 위치와 놓을 위치로 팔 끝 목표를 순서대로 내보낸다: 위로 이동 → 내려가기 → 잡기 → 들어 올리기 → 이동 → 내려가기 → 놓기 → 올리기. 끝점이 목표에 도착해야 다음 단계로 간다.",
+  "outputs": {
+    "targetX": { "type": "number", "unit": "m" },
+    "targetY": { "type": "number", "unit": "m" },
+    "targetZ": { "type": "number", "unit": "m" },
+    "gripCommand": {
+      "type": "number",
+      "unit": "rad",
+      "description": "그리퍼 서보 명령 (0 열림, 닫힘 각도는 gripClosed)"
+    },
+    "step": { "type": "number", "description": "현재 단계 번호 (0~8, 8이면 끝)" },
+    "done": { "type": "boolean" }
+  },
+  "defaultBehavior": "behavior.pick-place"
+}

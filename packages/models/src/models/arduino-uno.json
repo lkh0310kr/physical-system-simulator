@@ -149,7 +149,11 @@
   ],
   "metadata": {
     "manufacturer": "Arduino",
-    "source": "https://docs.arduino.cc/hardware/uno-rev3/",
+    "source": "https://docs.arduino.cc/hardware/uno-rev3/ | 3D 메시: Adafruit Metro 328 STEP(adafruit/Adafruit_CAD_Parts, MIT) — Uno R3와 보드 외곽 규격이 같은 호환 보드를 대용한 것이라 커넥터 모양은 실제 Uno와 다를 수 있다(가정).",
     "fidelity": "approximate"
+  },
+  "body": {
+    "size": [71.08, 53.34, 12.14],
+    "mesh": "arduino-uno-metro328.glb"
   }
 }

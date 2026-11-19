@@ -1,0 +1,109 @@
+{
+  "$schema": "../../schemas/system.schema.json",
+  "name": "Robot arm — PC script → Arduino firmware → servos (pick & place)",
+  "description": "PC(Agent) 스크립트가 MOVE를 역기구학으로 컴파일해 Serial 줄(J·G·S·HOME)을 보내면, Arduino Uno 펌웨어 모델이 조정 이동으로 서보 5개를 돌려 큐브를 집어 옮긴다. 실제 하드웨어에서는 같은 줄을 `physisim arm lines`로 만들어 `robot-arm-firmware.ino`가 올라간 Uno에 보낸다. I2C(PCA9685)는 추상화, 링크·오프셋은 설계 해석 추천값(arm-design.ts).",
+  "instances": [
+    {
+      "id": "psu",
+      "model": "model.dc-supply",
+      "properties": {
+        "voltage": 6
+      }
+    },
+    {
+      "id": "pc",
+      "model": "model.serial-host",
+      "properties": {
+        "script": "# 집기 전 속도와 초기 자세\nS 120\nHOME\nWAIT\n# 큐브 위로 이동 → 내려가기 → 잡기\nGRIP OPEN\nMOVE 0.15 0.07 0.07\nWAIT\nMOVE 0.15 0.07 0.02\nWAIT\nGRIP CLOSE\nWAIT\nDWELL 0.3\n# 들어올려 옮기기\nMOVE 0.15 0.07 0.07\nWAIT\nMOVE 0.12 -0.08 0.07\nWAIT\nMOVE 0.12 -0.08 0.02\nWAIT\n# 놓고 물러나기\nGRIP OPEN\nWAIT\nDWELL 0.3\nMOVE 0.12 -0.08 0.07\nWAIT\nHOME\nWAIT\nSTATUS\n"
+      }
+    },
+    {
+      "id": "uno",
+      "model": "model.arm-controller-uno"
+    },
+    {
+      "id": "s1",
+      "model": "model.servo-sg92r"
+    },
+    {
+      "id": "s2",
+      "model": "model.servo-mg996r"
+    },
+    {
+      "id": "s3",
+      "model": "model.servo-mg996r"
+    },
+    {
+      "id": "s4",
+      "model": "model.servo-sg92r"
+    },
+    {
+      "id": "s5",
+      "model": "model.servo-sg92r"
+    },
+    {
+      "id": "arm",
+      "model": "model.arm-frame"
+    },
+    {
+      "id": "cube",
+      "model": "model.cube-object"
+    }
+  ],
+  "connections": [
+    ["psu:+", "s1:VCC"],
+    ["psu:-", "s1:GND"],
+    ["psu:+", "s2:VCC"],
+    ["psu:-", "s2:GND"],
+    ["psu:+", "s3:VCC"],
+    ["psu:-", "s3:GND"],
+    ["psu:+", "s4:VCC"],
+    ["psu:-", "s4:GND"],
+    ["psu:+", "s5:VCC"],
+    ["psu:-", "s5:GND"],
+    ["pc:line", "uno:line"],
+    ["pc:lineId", "uno:lineId"],
+    ["uno:moving", "pc:moving"],
+    ["uno:reply", "pc:reply"],
+    ["uno:cmd1", "s1:command"],
+    ["uno:cmd2", "s2:command"],
+    ["uno:cmd3", "s3:command"],
+    ["uno:cmd4", "s4:command"],
+    ["uno:cmd5", "s5:command"],
+    ["s1:angle", "arm:j1"],
+    ["s2:angle", "arm:j2"],
+    ["s3:angle", "arm:j3"],
+    ["s4:angle", "arm:j4"],
+    ["s5:angle", "arm:j5"],
+    ["arm:tipX", "cube:tipX"],
+    ["arm:tipY", "cube:tipY"],
+    ["arm:tipZ", "cube:tipZ"],
+    ["arm:grip", "cube:grip"]
+  ],
+  "assembly": {
+    "arm": {
+      "position": [0, 0, 150]
+    },
+    "cube": {
+      "position": [150, 70, 15]
+    },
+    "s1": {
+      "position": [-180, -220, 15]
+    },
+    "s2": {
+      "position": [-120, -220, 15]
+    },
+    "s3": {
+      "position": [-60, -220, 15]
+    },
+    "s4": {
+      "position": [0, -220, 15]
+    },
+    "s5": {
+      "position": [60, -220, 15]
+    },
+    "psu": {
+      "position": [-180, -300, 10]
+    }
+  }
+}

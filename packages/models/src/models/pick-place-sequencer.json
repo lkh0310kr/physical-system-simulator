@@ -1,0 +1,127 @@
+{
+  "$schema": "../../../../schemas/model.schema.json",
+  "id": "model.pick-place-sequencer",
+  "name": "Pick & place sequencer (block)",
+  "category": "control/logic",
+  "description": "집을 위치와 놓을 위치를 받아 팔 끝 목표(targetX/Y/Z)와 그리퍼 명령을 순서대로 내보내는 시퀀서. 끝점(tipX/Y/Z)이 도착해야 다음 단계로 간다. 위치는 팔 베이스 기준 [m].",
+  "propertySchema": {
+    "pickX": {
+      "type": "number",
+      "default": 0.15,
+      "description": "집을 곳 x [m]",
+      "unit": "m"
+    },
+    "pickY": {
+      "type": "number",
+      "default": 0.07,
+      "description": "집을 곳 y [m]",
+      "unit": "m"
+    },
+    "pickZ": {
+      "type": "number",
+      "default": 0.02,
+      "description": "집는 높이(끝점 z) [m]",
+      "unit": "m"
+    },
+    "placeX": {
+      "type": "number",
+      "default": 0.12,
+      "description": "놓을 곳 x [m]",
+      "unit": "m"
+    },
+    "placeY": {
+      "type": "number",
+      "default": -0.08,
+      "description": "놓을 곳 y [m]",
+      "unit": "m"
+    },
+    "placeZ": {
+      "type": "number",
+      "default": 0.02,
+      "description": "놓는 높이 [m]",
+      "unit": "m"
+    },
+    "hoverHeight": {
+      "type": "number",
+      "default": 0.05,
+      "description": "위로 이동할 때 올리는 높이 [m]",
+      "unit": "m"
+    },
+    "tolerance": {
+      "type": "number",
+      "default": 0.004,
+      "description": "도착으로 보는 오차 [m]",
+      "unit": "m"
+    },
+    "dwell": {
+      "type": "number",
+      "default": 0.15,
+      "description": "도착 후 머무는 시간 [s]",
+      "unit": "s"
+    },
+    "graspTime": {
+      "type": "number",
+      "default": 0.8,
+      "description": "잡기·놓기에서 기다리는 시간 [s]",
+      "unit": "s"
+    },
+    "gripClosed": {
+      "type": "number",
+      "default": 1,
+      "description": "그리퍼가 닫힐 때의 서보 명령 [rad]",
+      "unit": "rad"
+    }
+  },
+  "properties": {},
+  "ports": [
+    {
+      "name": "tipX",
+      "domain": "signal",
+      "direction": "in"
+    },
+    {
+      "name": "tipY",
+      "domain": "signal",
+      "direction": "in"
+    },
+    {
+      "name": "tipZ",
+      "domain": "signal",
+      "direction": "in"
+    },
+    {
+      "name": "targetX",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "targetY",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "targetZ",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "gripCommand",
+      "domain": "signal",
+      "direction": "out"
+    },
+    {
+      "name": "done",
+      "domain": "signal",
+      "direction": "out"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "capability.pick-place"
+    }
+  ],
+  "metadata": {
+    "fidelity": "ideal",
+    "assumptions": ["단계·허용 오차·대기 시간은 예시 값", "충돌·경로 계획 없음(직선 목표 전환)"]
+  }
+}

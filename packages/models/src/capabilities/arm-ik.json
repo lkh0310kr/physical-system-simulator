@@ -1,0 +1,25 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.arm-ik",
+  "name": "Arm Inverse Kinematics",
+  "description": "목표 끝 위치를 관절 각도 명령으로 바꾼다 (그리퍼는 수직 아래).",
+  "outputs": {
+    "base": {
+      "type": "number"
+    },
+    "shoulder": {
+      "type": "number"
+    },
+    "elbow": {
+      "type": "number"
+    },
+    "wrist": {
+      "type": "number"
+    },
+    "reachable": {
+      "type": "boolean",
+      "description": "목표에 닿고 모든 관절이 한계 안인지"
+    }
+  },
+  "defaultBehavior": "behavior.arm-ik"
+}

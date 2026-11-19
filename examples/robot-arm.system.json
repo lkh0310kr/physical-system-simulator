@@ -1,0 +1,130 @@
+{
+  "$schema": "../schemas/system.schema.json",
+  "name": "Robot arm — reach two points (IK + 5 servos)",
+  "description": "4축+그리퍼 팔이 두 목표 지점(사각파 입력)을 번갈아 찾아간다: 목표 XYZ → 역기구학 → 서보 5개(SG92R·MG996R 속도) → 팔 프레임(3D)의 순기구학 끝 위치가 목표를 따라간다. 링크 길이·서보 배치는 가정. 서보는 외부 6 V 전원(`model.dc-supply`)으로 구동한다 — Arduino 5 V 핀이 아니라 별도 전원, GND 공통.",
+  "instances": [
+    {
+      "id": "psu",
+      "model": "model.dc-supply",
+      "properties": {
+        "voltage": 6
+      }
+    },
+    {
+      "id": "tx",
+      "model": "model.signal-generator",
+      "properties": {
+        "waveform": "square",
+        "amplitude": 0,
+        "frequency": 0.25,
+        "offset": 0.15
+      }
+    },
+    {
+      "id": "ty",
+      "model": "model.signal-generator",
+      "properties": {
+        "waveform": "square",
+        "amplitude": 0.07,
+        "frequency": 0.25,
+        "offset": 0
+      }
+    },
+    {
+      "id": "tz",
+      "model": "model.signal-generator",
+      "properties": {
+        "waveform": "square",
+        "amplitude": 0.03,
+        "frequency": 0.25,
+        "offset": 0.06
+      }
+    },
+    {
+      "id": "ik",
+      "model": "model.arm-ik"
+    },
+    {
+      "id": "s1",
+      "model": "model.servo-sg92r"
+    },
+    {
+      "id": "s2",
+      "model": "model.servo-mg996r"
+    },
+    {
+      "id": "s3",
+      "model": "model.servo-mg996r"
+    },
+    {
+      "id": "s4",
+      "model": "model.servo-sg92r"
+    },
+    {
+      "id": "s5",
+      "model": "model.servo-sg92r"
+    },
+    {
+      "id": "grip",
+      "model": "model.signal-generator",
+      "properties": {
+        "waveform": "square",
+        "amplitude": 0.5,
+        "frequency": 0.25,
+        "offset": 0.5
+      }
+    },
+    {
+      "id": "arm",
+      "model": "model.arm-frame"
+    }
+  ],
+  "connections": [
+    ["psu:+", "s1:VCC"],
+    ["psu:-", "s1:GND"],
+    ["psu:+", "s2:VCC"],
+    ["psu:-", "s2:GND"],
+    ["psu:+", "s3:VCC"],
+    ["psu:-", "s3:GND"],
+    ["psu:+", "s4:VCC"],
+    ["psu:-", "s4:GND"],
+    ["psu:+", "s5:VCC"],
+    ["psu:-", "s5:GND"],
+    ["tx:out", "ik:targetX"],
+    ["ty:out", "ik:targetY"],
+    ["tz:out", "ik:targetZ"],
+    ["ik:base", "s1:command"],
+    ["ik:shoulder", "s2:command"],
+    ["ik:elbow", "s3:command"],
+    ["ik:wrist", "s4:command"],
+    ["grip:out", "s5:command"],
+    ["s1:angle", "arm:j1"],
+    ["s2:angle", "arm:j2"],
+    ["s3:angle", "arm:j3"],
+    ["s4:angle", "arm:j4"],
+    ["s5:angle", "arm:j5"]
+  ],
+  "assembly": {
+    "arm": {
+      "position": [0, 0, 150]
+    },
+    "s1": {
+      "position": [-180, -220, 15]
+    },
+    "s2": {
+      "position": [-120, -220, 15]
+    },
+    "s3": {
+      "position": [-60, -220, 15]
+    },
+    "s4": {
+      "position": [0, -220, 15]
+    },
+    "s5": {
+      "position": [60, -220, 15]
+    },
+    "psu": {
+      "position": [-180, -300, 10]
+    }
+  }
+}

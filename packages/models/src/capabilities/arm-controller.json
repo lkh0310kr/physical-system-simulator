@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../../schemas/capability.schema.json",
+  "id": "capability.arm-controller",
+  "name": "Arm Controller (firmware)",
+  "description": "Arduino 펌웨어의 동작 모델: Serial 줄 명령(PING·J·G·S·HOME·STOP·STATUS)을 받아 서보 5개의 명령 각도를 부드럽게 보낸다. 규칙은 packages/models/src/arm-protocol.ts와 펌웨어가 같다.",
+  "outputs": {
+    "cmd1": { "type": "number", "unit": "rad", "description": "베이스 서보 명령" },
+    "cmd2": { "type": "number", "unit": "rad", "description": "어깨" },
+    "cmd3": { "type": "number", "unit": "rad", "description": "팔꿈치" },
+    "cmd4": { "type": "number", "unit": "rad", "description": "손목" },
+    "cmd5": { "type": "number", "unit": "rad", "description": "그리퍼" },
+    "moving": { "type": "boolean", "description": "목표로 이동 중인지" },
+    "reply": { "type": "string", "description": "마지막 응답 줄" },
+    "replyId": { "type": "number", "description": "응답이 나올 때마다 1씩 증가" }
+  },
+  "defaultBehavior": "behavior.arm-controller"
+}
